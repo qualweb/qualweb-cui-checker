@@ -28,9 +28,9 @@
         />
         <Checkbox 
           idValue="bestPracticesCheckbox" 
-          :label="'Best Practices'" 
-          :value="bpValue" 
-          @checkBoxChanged="updateEvaluated('bp', $event)" 
+          :label="'CUI Rules'" 
+          :value="cuiValue" 
+          @checkBoxChanged="updateEvaluated('cui', $event)" 
           bgColor="#e15500" 
           checkColor="#ffffff"
         />
@@ -53,13 +53,13 @@
       return {
         actValue: false,
         htmlValue: false,
-        bpValue: false,
+        cuiValue: false,
       };
     },
     computed: {
       ...mapGetters({ evaluated: "getEvaluated" }),
       isDisabled() {
-        return !(this.evaluated && (this.evaluated.act || this.evaluated.html || this.evaluated.bp));
+        return !(this.evaluated && (this.evaluated.act || this.evaluated.html || this.evaluated.cui));
       }
     },
     methods: {
@@ -78,7 +78,7 @@
       if (this.evaluated) {
         this.actValue = this.evaluated.act || false;
         this.htmlValue = this.evaluated.html || false;
-        this.bpValue = this.evaluated.bp || false;
+        this.cuiValue = this.evaluated.cui || false;
       }
     }
   }

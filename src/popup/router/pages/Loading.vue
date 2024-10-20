@@ -11,15 +11,15 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   name: "Loading",
-  props: ["act", "html", "bp", "css"],
+  props: ["act", "html", "cui", "css"],
   methods: {
     ...mapActions([
       "setACT",
       "setChatbotACT",
       "setHTML",
       "setChatbotHTML",
-      "setBP",
-      "setChatbotBP",
+      "setCUI",
+      "setChatbotCUI",
       "setCSS",
       "setSummary",
       "setChatbotSummary",
@@ -36,7 +36,7 @@ export default {
   },
   async mounted() {
     let modules = this.getEvaluated();
-    let actResult, chatbotActResult, bpResult, chatbotBpResult, htmlResult, chatbotHtmlResult, cssResult, summary, chatbotSummary;
+    let actResult, chatbotActResult, cuiResult, chatbotCuiResult, htmlResult, chatbotHtmlResult, cssResult, summary, chatbotSummary;
     await startEvaluation();
     if (modules.act) {
       this.state = "Evaluating ACT module";
@@ -50,9 +50,10 @@ export default {
       this.setHTML(htmlResult);
       chatbotHtmlResult && this.setChatbotHTML(chatbotHtmlResult);
     }
-    if (modules.bp) {
-      this.state = "Evaluating BP module";
-      [bpResult, chatbotBpResult] = await evaluateBP();
+    if (modules.cui) {
+      this.state = "Evaluating CUI module";
+      [cuiResult, chatbotCuiResult] = await evaluateCUI();
+      
       // this.setBP(bpResult);
       // chatbotBpResult && this.setChatbotBP(chatbotBpResult);
     }
