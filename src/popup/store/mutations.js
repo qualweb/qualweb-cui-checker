@@ -7,11 +7,11 @@ export default {
   [types.SETEVAL](state, payload) {
     state.evaluated[payload.module] = payload.value;
   },
-  [types.SETBP](state, payload) {
-    state.bp = payload
+  [types.SETCUI](state, payload) {
+    state.cui = payload
   },
-  [types.SETCHATBOTBP](state, payload) {
-    state.chatbotBp = payload
+  [types.SETCHATBOTCUI](state, payload) {
+    state.chatbotCui = payload
   },
   [types.SETHTML](state, payload) {
     state.html = payload
@@ -60,10 +60,10 @@ export default {
     state.highlightActive = payload;
   },
   [types.RESET](state) {
-    state.evaluated = { act: false, bp: false, css: false, html: false };
+    state.evaluated = { act: false, cui: false, css: false, html: false };
     state.act = {};
     state.chatbotAct = {};
-    state.bp = {};
+    state.cui = {};
     state.html = {};
     state.chatbotHtml = {};
     state.css = {};

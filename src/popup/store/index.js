@@ -10,14 +10,14 @@ Vue.use(Vuex)
 export const defaultState = {
   summary: {},
   chatbotSummary: {},
-  evaluated: { act: false, bp: false, css: false, html: false },
+  evaluated: { act: false, cui: false, css: false, html: false },
   filter: {},
   act: {},
   chatbotAct: {},
   html: {},
   chatbotHtml: {},
-  bp: {},
-  chatbotBp: {},
+  cui: {},
+  chatbotCui: {},
   currentRule: {},
   highlightActive:false,
   resultFilter: { passed: false, failed: false, warning: false, inapplicable: false },
@@ -29,20 +29,20 @@ export default new Vuex.Store({
   state: {
     summary: {},
     chatbotSummary: {},
-    evaluated: { act: false, bp: false, css: false, html: false },
+    evaluated: { act: false, cui: false, css: false, html: false },
     filter: {},
     act: {},
     chatbotAct: {},
     html: {},
     chatbotHtml: {},
-    bp: {},
-    chatbotBp: {},
+    cui: {},
+    chatbotCui: {},
     currentRule: {},
     highlightActive:false,
     resultFilter: { passed: false, failed: false, warning: false, inapplicable: false },
     evaluateChatbot: false
-
   },
+  
   getters,
   mutations,
   actions

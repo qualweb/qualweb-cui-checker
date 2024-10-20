@@ -1,11 +1,11 @@
 import * as types from './mutation-types';
 
 export const setReport = (async function ({ commit }, modules) {
-  let report = await evaluate(modules.act, modules.html, modules.css, modules.bp);
+  let report = await evaluate(modules.act, modules.html, modules.css, modules.cui);
 
   commit(types.SETACT, report.act);
   commit(types.SETHTML, report.html);
-  commit(types.SETBP, report.bp);
+  commit(types.SETCUI, report.cui);
   commit(types.SETCSS, report.css);
   commit(types.SETSUMMARY, report.summary);
   commit(types.SETEVAL, modules);
@@ -35,11 +35,11 @@ export const setHTML = ({ commit }, payload) => {
 export const setChatbotHTML = ({ commit }, payload) => {
   commit(types.SETCHATBOTHTML, payload)
 }
-export const setBP = ({ commit }, payload) => {
-  commit(types.SETBP, payload)
+export const setCUI = ({ commit }, payload) => {
+  commit(types.SETCUI, payload)
 }
-export const setChatbotBP = ({ commit }, payload) => {
-  commit(types.SETCHATBOTBP, payload)
+export const setChatbotCUI = ({ commit }, payload) => {
+  commit(types.SETCHATBOTCUI, payload)
 }
 export const setCSS = ({ commit }, payload) => {
   commit(types.SETCSS, payload)

@@ -45,7 +45,7 @@ export const getAllRuleCodeAndTitle = (state) => {
         const chatbotResults = {
             act: state.chatbotAct,
             html: state.chatbotHtml,
-            bp: state.chatbotBp
+            cui: state.chatbotCui
         };
 
         const filter = state.filter;
@@ -133,8 +133,8 @@ export const getAllData = (state) => {
         chatbotSummary: state.chatbotSummary,
         act: state.act,
         chatbotAct: state.chatbotAct,
-        bp: state.bp,
-        chatbotBp: state.chatbotBp,
+        cui: state.cui,
+        chatbotCui: state.chatbotCui,
         html: state.html,
         chatbotHtml: state.chatbotHtml,
         css: state.css
