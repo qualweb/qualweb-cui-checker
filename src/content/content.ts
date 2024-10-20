@@ -54,9 +54,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const wcagResult = evaluateWCAG(chatbotElement);
       sendResponse(wcagResult);
       break;
-    case "evaluateBP":
-      const bpResult = evaluateBP(chatbotElement);
-      sendResponse(bpResult);
+    case "evaluateCUI":
+      const cuiResult = evaluateCUI(chatbotElement);
+      sendResponse(cuiResult);
       break;
     case "endingEvaluation":
       sendResponse([summary, chatbotSummary]);
@@ -105,6 +105,7 @@ function evaluateACT(chatbotElement: HTMLElement|null) {
   result = actResult.assertions;
   if (chatbotElement) {
     chatbotActResult = filterResults(actResult, chatbotElement);
+    console.log("chatbotActResult", chatbotActResult);
     addValuesToSummary(chatbotSummary, chatbotActResult);
     chatbotResult = chatbotActResult.assertions;
   };
@@ -126,6 +127,29 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
     chatbotHtmlResult = filterResults(htmlResult, chatbotElement);
     addValuesToSummary(chatbotSummary, chatbotHtmlResult);
     chatbotResult = chatbotHtmlResult.assertions;
+  };
+  return [result, chatbotResult];
+}
+
+
+function evaluateCUI(chatbotElement: HTMLElement|null) {
+  let actResult, chatbotActResult, result, chatbotResult;
+  const excludedRules = [
+    'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
+  ];
+  window.act = new ACTRules({ translate: locale_en, fallback: locale_en });
+  // window.act.configure({ exclude: excludedRules })
+  //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
+  window.act.executeAtomicRules();
+  window.act.executeCompositeRules();
+  actResult = window.act.getReport();
+  addValuesToSummary(summary, actResult);
+  //window.console.log("evaluate ACT summary:", summary);
+  result = actResult.assertions;
+  if (chatbotElement) {
+    chatbotActResult = filterResults(actResult, chatbotElement);
+    addValuesToSummary(chatbotSummary, chatbotActResult);
+    chatbotResult = chatbotActResult.assertions;
   };
   return [result, chatbotResult];
 }
