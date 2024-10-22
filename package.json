@@ -23,6 +23,7 @@
     "@qualweb/qw-page": "0.2.19",
     "@qualweb/util": "0.5.37",
     "@qualweb/wcag-techniques": "0.3.17",
+    "axios": "^1.7.7",
     "file-saver": "^2.0.2",
     "highlight.js": "^9.18.1",
     "vue": "^2.6.10",
