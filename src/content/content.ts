@@ -20,6 +20,8 @@ export function setSentMessage(message: string): void {
 
 // Main message listener
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  chrome.runtime.sendMessage({ action: 'speak', text: 'Ola boa noite'});
+
   const chatbotElement = getStoredChatbotElement();
   switch (request.action) {
     case 'typeMessages':
@@ -44,6 +46,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "startVoiceInput":
       getStoredMicrophoneButton()?.click();
+      
       sendResponse(true);
       break;
     case "evaluateACT":
@@ -100,15 +103,21 @@ function evaluateACT(chatbotElement: HTMLElement|null) {
   window.act.executeAtomicRules();
   window.act.executeCompositeRules();
   actResult = window.act.getReport();
+
   addValuesToSummary(summary, actResult);
-  //window.console.log("evaluate ACT summary:", summary);
+
+
+
   result = actResult.assertions;
+
   if (chatbotElement) {
     chatbotActResult = filterResults(actResult, chatbotElement);
     console.log("chatbotActResult", chatbotActResult);
     addValuesToSummary(chatbotSummary, chatbotActResult);
     chatbotResult = chatbotActResult.assertions;
   };
+  console.log("result:", summary);
+  console.log("chatbotResult:", chatbotResult);
   return [result, chatbotResult];
 }
 
@@ -118,11 +127,12 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
     'QW-WCAG-T14', 'QW-WCAG-T15', 'QW-WCAG-T16', 'QW-WCAG-T17', 'QW-WCAG-T18', 'QW-WCAG-T19', 'QW-WCAG-T20', 'QW-WCAG-T21', 'QW-WCAG-T22'
   ];
   window.wcag = new WCAGTechniques({ translate: locale_en, fallback: locale_en });
-  console.log(window.wcag);
+
   // window.wcag.configure({ exclude: excludedTechniques })
   htmlResult = window.wcag.execute(false);
   addValuesToSummary(summary, htmlResult);
   result = htmlResult.assertions;
+
   if (chatbotElement) {
     chatbotHtmlResult = filterResults(htmlResult, chatbotElement);
     addValuesToSummary(chatbotSummary, chatbotHtmlResult);
@@ -171,3 +181,4 @@ function evaluateBP(chatbotElement: HTMLElement|null) {
   // };
   return [result, chatbotResult];
 }
+
