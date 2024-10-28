@@ -62,8 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const activeTab = tabs[0];
         if (activeTab?.id) {
-          chrome.tabs.sendMessage(activeTab.id, { action: "startVoiceInput" });
-        }
+          chrome.tabs.sendMessage(activeTab.id!, { action: 'startVoiceInput', messages }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.error("Error sending message:", chrome.runtime.lastError.message);
+            } else {
+              console.log(response?.status);
+            }
+
+          
+        });
+    }
       });
 
       // setTimeout(() => {

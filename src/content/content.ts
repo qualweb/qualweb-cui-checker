@@ -20,7 +20,7 @@ export function setSentMessage(message: string): void {
 
 // Main message listener
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  chrome.runtime.sendMessage({ action: 'speak', text: 'Ola boa noite'});
+
 
   const chatbotElement = getStoredChatbotElement();
   switch (request.action) {
@@ -46,8 +46,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "startVoiceInput":
       getStoredMicrophoneButton()?.click();
-      
-      sendResponse(true);
+      handleVoiceInput(request, chatbotElement).then(chatResponses => {
+        console.log(chatResponses);
+        sendResponse({ status: 'Messages Audio input send and responses received', responses: chatResponses });
+      });
       break;
     case "evaluateACT":
       const actResult = evaluateACT(chatbotElement);
@@ -91,6 +93,53 @@ async function handleTypeMessages(request: { messages: string[] }, chatbotElemen
 
   return chatResponses;
 }
+
+
+//Function to hantdle Voice input with tts
+async function handleVoiceInput(request: {messages: string[]}, chatbotElement: HTMLElement | null): Promise<ChatResponse[]> {
+  let chatResponses: ChatResponse[] = [];
+
+  for(let i = 0; i < request.messages.length; i++) {
+
+    const message = request.messages[i];
+    let response: ChatResponse;
+
+    // Logic for voice input
+    await sendMessageToBackground("speakText", message);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    /*
+    if (chatbotElement) {
+      response = await sendAndReceiveMessage("", chatbotElement);
+    } else {
+      response = await sendAndReceiveMessage("");
+    }
+
+    chatResponses.push(response);
+    if (i < request.messages.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }*/
+  }
+
+  return [];
+
+}
+
+// Function to send message to background 
+function sendMessageToBackground(action: string, text: string):Promise<void> {
+  return new Promise((resolve, reject) => {
+  chrome.runtime.sendMessage({action, text}, () => {
+    if(chrome.runtime.lastError) {
+      return reject(chrome.runtime.lastError);
+    }
+    resolve();
+  
+  });
+
+});
+}
+
+
+
 
 function evaluateACT(chatbotElement: HTMLElement|null) {
   let actResult, chatbotActResult, result, chatbotResult;
@@ -164,21 +213,4 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
   return [result, chatbotResult];
 }
 
-function evaluateBP(chatbotElement: HTMLElement|null) {
-  let bpResult, chatbotBpResult, result, chatbotResult;
-  const includedRules = [
-    'QW-BP30', 'QW-BP31'
-  ];
-  window.bp = new BestPractices({ translate: locale_en, fallback: locale_en });
-  window.bp.configure({ bestPractices: includedRules });
-  bpResult = window.bp.execute();
-  addValuesToSummary(summary, bpResult);
-  result = bpResult.assertions;
-  // if (chatbotElement) {
-  //   chatbotBpResult = filterResults(bpResult, chatbotElement);
-  //   addValuesToSummary(chatbotSummary, chatbotBpResult);
-  //   chatbotResult = chatbotBpResult.assertions;
-  // };
-  return [result, chatbotResult];
-}
 
