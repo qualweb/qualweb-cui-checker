@@ -45,9 +45,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse([summary, chatbotSummary]);
       break;
     case "startVoiceInput":
-      getStoredMicrophoneButton()?.click();
+      
+      /// start tts generation
       handleVoiceInput(request, chatbotElement).then(chatResponses => {
-        console.log(chatResponses);
         sendResponse({ status: 'Messages Audio input send and responses received', responses: chatResponses });
       });
       break;
@@ -103,24 +103,27 @@ async function handleVoiceInput(request: {messages: string[]}, chatbotElement: H
 
     const message = request.messages[i];
     let response: ChatResponse;
-
+    
+    getStoredMicrophoneButton()!.click();
+    await new Promise(resolve => setTimeout(resolve, 500));
     // Logic for voice input
     await sendMessageToBackground("speakText", message);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    /*
+    await new Promise(resolve => setTimeout(resolve, 500));
+    getStoredMicrophoneButton()!.click();
+    
     if (chatbotElement) {
       response = await sendAndReceiveMessage("", chatbotElement);
+      
     } else {
       response = await sendAndReceiveMessage("");
     }
 
     chatResponses.push(response);
-    if (i < request.messages.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }*/
+    
+    
   }
 
-  return [];
+  return chatResponses;
 
 }
 
