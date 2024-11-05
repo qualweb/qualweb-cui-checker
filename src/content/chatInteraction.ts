@@ -3,20 +3,31 @@ import { ChatPlatformSelectors } from '../utils/selectors';
 import { ChatResponse } from '../utils/types';
 import { commonChatbotPhrases } from '../utils/commonPhrases';
 
-export function simulateInput(message: string, chatbotElement?: HTMLElement) {
+export function simulateInput(message: string| null , chatbotElement?: HTMLElement) {
   const container = chatbotElement || document;
   const inputField = container.querySelector('input[type="text"], textarea') as HTMLInputElement;
   const textEditor = container.querySelector('div[contenteditable="true"]') as HTMLElement;
 
   if (textEditor) {
+    if(message != null){
     setSentMessage(message);
     textEditor.innerHTML = message;
+    }else{
+      // text was voice input
+      setSentMessage(textEditor.innerText);
+    }
     textEditor.focus();
     dispatchEvents(textEditor);
   } else if (inputField) {
+    if(message != null){
     setSentMessage(message);
     inputField.focus();
     inputField.value = message;
+    }else{
+      // text was voice input
+      setSentMessage(inputField.value);
+      inputField.focus();
+    }
     dispatchEvents(inputField);
   } else {
     console.error("Input field or rich text editor not found.");
