@@ -7,6 +7,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'speakText') {
     chrome.tts.speak(request.text, { 
                                     lang: 'en-US',
+                                    pitch: 0.5,
+                                    volume: 1.0,
+                          
                                     onEvent: (event) => {
                                       if (event.type == 'end') {
                                         sendResponse("Speech complete");
