@@ -3,13 +3,13 @@ import { ChatPlatformSelectors } from '../utils/selectors';
 import { ChatResponse } from '../utils/types';
 import { commonChatbotPhrases } from '../utils/commonPhrases';
 
-export function simulateInput(message: string| null , chatbotElement?: HTMLElement) {
+export function simulateInput(message: string , chatbotElement?: HTMLElement) {
   const container = chatbotElement || document;
   const inputField = container.querySelector('input[type="text"], textarea') as HTMLInputElement;
   const textEditor = container.querySelector('div[contenteditable="true"]') as HTMLElement;
 
   if (textEditor) {
-    if(message != null){
+    if(message != ""){
     setSentMessage(message);
     textEditor.innerHTML = message;
     }else{
@@ -19,7 +19,7 @@ export function simulateInput(message: string| null , chatbotElement?: HTMLEleme
     textEditor.focus();
     dispatchEvents(textEditor);
   } else if (inputField) {
-    if(message != null){
+    if(message != ""){
     setSentMessage(message);
     inputField.focus();
     inputField.value = message;
