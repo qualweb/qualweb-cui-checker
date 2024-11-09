@@ -1,5 +1,5 @@
 import { sendAndReceiveMessage } from './chatInteraction';
-import { elementSelector, getStoredChatbotElement } from './selectChatbot';
+import { elementSelector, getStoredChatbotElement, requestElementsLLM } from './selectChatbot';
 import { ResponseStore, ChatResponse, Summary } from '../utils/types';
 import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
@@ -31,7 +31,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       return true; // Indicates that the response is sent asynchronously
     case "startSelection":
+      console.log("started normal selection");
       elementSelector.startSelection();
+      break;
+    case "requestElementLLM":
+      console.log("started Selection LLM");
+      requestElementsLLM();
       break;
     case "startMicSelection":
       microphoneSelector.startMicrophoneSelection();
