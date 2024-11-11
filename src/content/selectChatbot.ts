@@ -1,6 +1,6 @@
 import { showMessage } from '../utils/helpers';
 import { ElementSelector } from '../utils/types';
-import { sendPromptToLLM } from './selectChatbotLLM';
+
 
 let isSelecting: boolean = false;
 let highlightedElement: HTMLElement | null = null;
@@ -254,6 +254,10 @@ export function getStoredChatbotElement(): HTMLElement | null {
   return storedChatbotElement;
 }
 
+export function setStoredChatbotElement(element: HTMLElement): void {
+  storedChatbotElement = element;
+}
+
 function resetSelection(): void {
   isSelecting = false;
   document.body.style.removeProperty('cursor');
@@ -267,7 +271,7 @@ function resetSelection(): void {
   selectedElements = [];
 }
 
-function flashGreen(element: HTMLElement): void {
+export function flashGreen(element: HTMLElement): void {
   const rect = element.getBoundingClientRect();
   
   const flashOverlay = document.createElement('div');
@@ -292,38 +296,6 @@ function flashGreen(element: HTMLElement): void {
   }, 1000);
 }
 
-let isProcessing: boolean = false;
-
-interface LLMResponse {
-  model:string;
-  xpath_text: string | null;
-  xpath_send: string | null;
-  xpath_sound: string | null;
-}
-export function requestElementsLLM() {
-  // Obter window document
-  let documentBody: string = document.body.innerHTML;
-  // enviar o body para o servidor
-
- sendPromptToLLM(documentBody).then((elements: LLMResponse) => {
-  
-  if(elements.xpath_text !== null){
-  let textElement = document.evaluate(elements.xpath_text, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-  let textNode = textElement.singleNodeValue as HTMLElement;
-  textNode.innerText = "Hello, I'm a chatbot!";
-  }
-
-  showMessage("Elements identified.");
- }).catch((error) => {
-   console.error(error);
-  showMessage("Error: Couldn't identify chatbot elements. Please try again.");
-  });
-
-  // aguardar resposta
-
-
-    
-}
 
 export const elementSelector: ElementSelector = {
   startSelection,

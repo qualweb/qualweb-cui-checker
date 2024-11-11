@@ -1,5 +1,6 @@
 import { sendAndReceiveMessage } from './chatInteraction';
-import { elementSelector, getStoredChatbotElement, requestElementsLLM } from './selectChatbot';
+import { elementSelector, getStoredChatbotElement } from './selectChatbot';
+import {requestElementsLLM} from './detectChatbot';
 import { ResponseStore, ChatResponse, Summary } from '../utils/types';
 import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';

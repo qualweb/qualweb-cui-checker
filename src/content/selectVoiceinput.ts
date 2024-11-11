@@ -147,9 +147,12 @@ function flashGreen(element: HTMLElement): void {
 export function getStoredMicrophoneButton(): HTMLElement | null {
   return storedMicrophoneButton;
 }
-
+export function setStoredMicrophoneButton(button: HTMLElement | null): void {
+  storedMicrophoneButton = button;
+}
 export const microphoneSelector = {
   startMicrophoneSelection,
   resetSelection,
-  getStoredMicrophoneButton
+  getStoredMicrophoneButton,
+  setStoredMicrophoneButton
 };
