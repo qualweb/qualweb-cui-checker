@@ -1,26 +1,29 @@
-import * as types from './mutation-types'
+import * as types from "./mutation-types";
 
 export default {
   [types.SETACT](state, payload) {
-    state.act = payload
+    state.act = payload;
+  },
+  [types.SETCHATBOTACT](state, payload) {
+    state.chatbotAct = payload;
   },
   [types.SETEVAL](state, payload) {
     state.evaluated[payload.module] = payload.value;
   },
   [types.SETCUI](state, payload) {
-    state.cui = payload
+    state.cui = payload;
   },
   [types.SETCHATBOTCUI](state, payload) {
-    state.chatbotCui = payload
+    state.chatbotCui = payload;
   },
   [types.SETHTML](state, payload) {
-    state.html = payload
+    state.html = payload;
   },
   [types.SETCHATBOTHTML](state, payload) {
-    state.chatbotHtml = payload
+    state.chatbotHtml = payload;
   },
   [types.SETCSS](state, payload) {
-    state.css = payload
+    state.css = payload;
   },
   [types.SETSUMMARY](state, payload) {
     state.summary = payload;
@@ -43,7 +46,6 @@ export default {
         state.currentRule = null;
       }
     }
-
   },
   [types.SETALLRESULTFILTER](state, payload) {
     state.resultFilter = payload;
@@ -53,10 +55,11 @@ export default {
   },
   [types.SETCURRENTRULE](state, payload) {
     state.currentRule = payload;
-  }, [types.SETCURRENTRULERESULTS](state, payload) {
+  },
+  [types.SETCURRENTRULERESULTS](state, payload) {
     state.currentRuleResults = payload;
-  }, [types.SETHIGHLIGHTACTIVE](state, payload) {
-
+  },
+  [types.SETHIGHLIGHTACTIVE](state, payload) {
     state.highlightActive = payload;
   },
   [types.RESET](state) {
@@ -71,9 +74,14 @@ export default {
     state.chatbotSummary = {};
     state.filter = {};
     state.highlightActive = false;
-    state.resultFilter = { passed: false, failed: false, warning: false, inapplicable: false };
-  }, 
+    state.resultFilter = {
+      passed: false,
+      failed: false,
+      warning: false,
+      inapplicable: false,
+    };
+  },
   [types.SETEVALUATECHATBOT](state, payload) {
     state.evaluateChatbot = payload;
-  }
-}
+  },
+};
