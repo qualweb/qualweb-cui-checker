@@ -35,9 +35,10 @@ export function simulateInput(message: string , chatbotElement?: HTMLElement) {
 }
 
 function dispatchEvents(element: HTMLElement) {
+ 
   const inputEvent = new Event('input', { bubbles: true });
   element.dispatchEvent(inputEvent);
-
+  setTimeout(() => {
   const keyboardEvent = new KeyboardEvent('keydown', {
     bubbles: true,
     cancelable: true,
@@ -47,13 +48,16 @@ function dispatchEvents(element: HTMLElement) {
   });
   element.dispatchEvent(keyboardEvent);
 }
+, 100  );
+}
 
 export async function captureResponse(message: string, chatbotElement?: HTMLElement, maxWaitTime = 20000): Promise<ChatResponse> {
   const startTime = Date.now();
   const currentURL = window.location.href;
   const urlRoot = new URL(currentURL).origin;
+  console.log('URL Root:', urlRoot);
   const selector = ChatPlatformSelectors[urlRoot as keyof typeof ChatPlatformSelectors];
-
+  console.log('Selector:', selector);
   if (!chatbotElement && !selector) {
     throw new Error('Invalid website specified and no chatbot element provided');
   }
