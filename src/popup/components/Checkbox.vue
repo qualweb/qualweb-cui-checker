@@ -1,6 +1,6 @@
-<template >
+<template>
   <div>
-    <div class="md-checkbox"  :style="cssVars">
+    <div class="md-checkbox" :style="cssVars">
       <input
         @focus="focus()"
         @blur="blur()"
@@ -10,16 +10,17 @@
         :id="idValue"
         type="checkbox"
       />
-      <label v-bind:class="[{ 'focused': focusedElem }]" :for="idValue">{{label}}</label>
+      <label v-bind:class="[{ focused: focusedElem }]" :for="idValue">{{
+        label
+      }}</label>
     </div>
   </div>
 </template>
 
 <script>
-
 export default {
   name: "Checkbox",
-  props: ["idValue", "label","bgColor","checkColor","value"],
+  props: ["idValue", "label", "bgColor", "checkColor", "value"],
   data() {
     return {
       focusedElem: false,
@@ -29,22 +30,21 @@ export default {
     cssVars() {
       return {
         "--bg-color": this.bgColor,
-        "--bg-check": this.checkColor
+        "--bg-check": this.checkColor,
       };
-    }
+    },
   },
   methods: {
-    
     async onChange() {
-       this.$emit("checkBoxChanged",this.idValue,this.value);
+      this.$emit("checkBoxChanged", this.idValue, this.value);
     },
     focus() {
       this.focusedElem = true;
     },
     blur() {
       this.focusedElem = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -98,7 +98,7 @@ export default {
 .md-checkbox label:before {
   width: 1.25rem;
   height: 1.25rem;
-  background:  transparent;
+  background: transparent;
   border: 2px solid white;
   border-radius: 0.125rem;
   cursor: pointer;

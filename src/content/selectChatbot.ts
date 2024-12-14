@@ -221,6 +221,7 @@ function findCommonAncestor(el1: HTMLElement, el2: HTMLElement): HTMLElement {
   for (const parent of parents1) {
     if (parents2.includes(parent)) {
       return parent;
+
     }
   }
   
@@ -272,9 +273,10 @@ function resetSelection(): void {
 }
 
 export function flashGreen(element: HTMLElement): void {
+  const documentToOverlay = element.ownerDocument;
   const rect = element.getBoundingClientRect();
   
-  const flashOverlay = document.createElement('div');
+  const flashOverlay = documentToOverlay.createElement('div');
   flashOverlay.style.position = 'fixed';
   flashOverlay.style.pointerEvents = 'none';
   flashOverlay.style.zIndex = '10000';
@@ -286,12 +288,12 @@ export function flashGreen(element: HTMLElement): void {
   flashOverlay.style.transition = 'opacity 0.5s ease-in-out';
   flashOverlay.style.opacity = '1';
 
-  document.body.appendChild(flashOverlay);
+  documentToOverlay.body.appendChild(flashOverlay);
 
   setTimeout(() => {
     flashOverlay.style.opacity = '0';
     setTimeout(() => {
-      document.body.removeChild(flashOverlay);
+      documentToOverlay.body.removeChild(flashOverlay);
     }, 1000);
   }, 1000);
 }

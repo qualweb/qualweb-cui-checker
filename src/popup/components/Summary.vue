@@ -12,25 +12,40 @@
     </div>
     <div class="center">
       <h2 class="text">
-        {{ currentSummary.failed + currentSummary.passed + currentSummary.warning + currentSummary.inapplicable }}
+        {{
+          currentSummary.failed +
+          currentSummary.passed +
+          currentSummary.warning +
+          currentSummary.inapplicable
+        }}
         tested rules and techniques
       </h2>
     </div>
     <div class="flex-container2">
       <div>
-        <i aria-label="Passed" class="material-icons passed flexElement">check_circle_outline</i>
+        <i aria-label="Passed" class="material-icons passed flexElement"
+          >check_circle_outline</i
+        >
         <span class="flexElement">{{ currentSummary.passed }}</span>
       </div>
       <div>
-        <i aria-label="Failed" class="material-icons failed flexElement">highlight_off</i>
+        <i aria-label="Failed" class="material-icons failed flexElement"
+          >highlight_off</i
+        >
         <span class="flexElement">{{ currentSummary.failed }}</span>
       </div>
       <div>
-        <i aria-label="Warning" class="material-icons warning flexElement">warning</i>
+        <i aria-label="Warning" class="material-icons warning flexElement"
+          >warning</i
+        >
         <span class="flexElement">{{ currentSummary.warning }}</span>
       </div>
       <div>
-        <i aria-label="Inapplicable" class="material-icons inapplicable flexElement">not_interested</i>
+        <i
+          aria-label="Inapplicable"
+          class="material-icons inapplicable flexElement"
+          >not_interested</i
+        >
         <span class="flexElement">{{ currentSummary.inapplicable }}</span>
       </div>
     </div>
@@ -46,25 +61,25 @@ import HighlightAll from "./HighlightAll.vue";
 export default {
   name: "Summary",
   computed: {
-  ...mapGetters({
-    summary: "getSummary",
-    chatbotSummary: "getChatbotSummary",
-    evaluateChatbot: "getEvaluateChatbot"
-  }),
-  currentSummary() {
-    return this.evaluateChatbot ? this.chatbotSummary : this.summary;
+    ...mapGetters({
+      summary: "getSummary",
+      chatbotSummary: "getChatbotSummary",
+      evaluateChatbot: "getEvaluateChatbot",
+    }),
+    currentSummary() {
+      return this.evaluateChatbot ? this.chatbotSummary : this.summary;
+    },
+    data() {
+      return {
+        title: "failed",
+      };
+    },
+    components: {
+      RunAgain,
+      Export,
+      HighlightAll,
+    },
   },
-  data() {
-    return {
-      title: "failed"
-    };
-  },
-  components: {
-    RunAgain,
-    Export,
-    HighlightAll
-  }
-}
 };
 </script>
 

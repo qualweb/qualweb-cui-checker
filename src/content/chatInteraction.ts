@@ -1,14 +1,10 @@
 import { getSentMessage, responses, setSentMessage } from './content';
-import { ChatPlatformSelectors } from '../utils/selectors';
 import { ChatResponse } from '../utils/types';
-import { commonChatbotPhrases } from '../utils/commonPhrases';
+import { chatbotInterface, ChatBotInterface } from './detectChatbot';
 
-export function simulateInput(message: string , chatbotElement?: HTMLElement) {
-  const container = chatbotElement || document;
-  const inputField = container.querySelector('input[type="text"], textarea') as HTMLInputElement;
-  const textEditor = container.querySelector('div[contenteditable="true"]') as HTMLElement;
-
-  if (textEditor) {
+export function simulateInput(message: string , chatbotInterface: ChatBotInterface) {
+  const textEditor = chatbotInterface.inputElement;
+  if (textEditor?.tagName === 'DIV') {
     if(message != ""){
     setSentMessage(message);
     textEditor.innerHTML = message;
@@ -18,17 +14,17 @@ export function simulateInput(message: string , chatbotElement?: HTMLElement) {
     }
     textEditor.focus();
     dispatchEvents(textEditor);
-  } else if (inputField) {
+  } else if (textEditor?.tagName === 'INPUT' || textEditor?.tagName === 'TEXTAREA') {
     if(message != ""){
     setSentMessage(message);
-    inputField.focus();
-    inputField.value = message;
+    textEditor.focus();
+    (textEditor as HTMLInputElement | HTMLTextAreaElement).value = message;
     }else{
       // text was voice input
-      setSentMessage(inputField.value);
-      inputField.focus();
+      setSentMessage((textEditor as HTMLInputElement | HTMLTextAreaElement).value);
+      textEditor.focus();
     }
-    dispatchEvents(inputField);
+    dispatchEvents(textEditor);
   } else {
     console.error("Input field or rich text editor not found.");
   }
@@ -51,70 +47,73 @@ function dispatchEvents(element: HTMLElement) {
 , 100  );
 }
 
-export async function captureResponse(message: string, chatbotElement?: HTMLElement, maxWaitTime = 20000): Promise<ChatResponse> {
+export async function captureResponse(message: string, chatbotElement: ChatBotInterface, maxWaitTime = 20000): Promise<ChatResponse> {
   const startTime = Date.now();
-  const currentURL = window.location.href;
-  const urlRoot = new URL(currentURL).origin;
-  console.log('URL Root:', urlRoot);
-  const selector = ChatPlatformSelectors[urlRoot as keyof typeof ChatPlatformSelectors];
-  console.log('Selector:', selector);
-  if (!chatbotElement && !selector) {
-    throw new Error('Invalid website specified and no chatbot element provided');
-  }
-
-  const container = chatbotElement || document;
-  const oldDivs = Array.from(container.querySelectorAll(selector || '*'));
-  let finalResponse = '';
-  let lastUpdateTime = Date.now();
-
-  const checkForResponse = async (): Promise<void> => {
-    const now = Date.now();
-    const newDivs = Array.from(container.querySelectorAll(selector || '*'))
-      .filter(div => !div.textContent?.includes(getSentMessage()) && !oldDivs.includes(div));
-
-    const potentialResponses = newDivs
-      .map(div => div.textContent?.trim() || '')
-      .filter(text => isLikelyChatbotResponse(text));
-
-    if (potentialResponses.length > 0) {
-      const currentResponse = potentialResponses[potentialResponses.length - 1];
-
-      if (currentResponse.length > finalResponse.length) {
-        finalResponse = currentResponse;
-        lastUpdateTime = now;
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await checkForResponse();
-      } else if (now - lastUpdateTime < 5000) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await checkForResponse();
-      } else {
-        console.log('Final response:', finalResponse);
-        if (finalResponse) {
-          responses[message] = finalResponse;
-        }
-      }
-    } else if (now - startTime < maxWaitTime) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await checkForResponse();
-    } else {
-      console.error('Response not found within the max wait time.');
-    }
-  };
-
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  await checkForResponse();
-  return { message, response: finalResponse };
+  let response:ChatResponse = { message, response: [] };
+ return await observeNewMessages(message,chatbotElement.historyElement!);
 }
 
-export async function sendAndReceiveMessage(message: string, chatbotElement?: HTMLElement): Promise<ChatResponse> {
+let observer:MutationObserver;
+
+function observeNewMessages(messageClient:string,element:HTMLElement):Promise<ChatResponse>{
+  return new Promise((resolve, reject) => {
+
+    // Elements that could be a response
+    let PossibleResponseElements:HTMLElement[] =[];
+    let timeOutId = setTimeout(() => {
+      observer.disconnect();
+      let responseText = PossibleResponseElements.map((element) => element.textContent || element.innerText).filter((text) => text !== messageClient);
+      resolve({message: messageClient, response: responseText});
+    },5000);
+    function restartTimer(){
+      clearTimeout(timeOutId);
+      timeOutId = setTimeout(() => {
+        observer.disconnect();
+        let responseText = PossibleResponseElements.map((element) => element.textContent || element.innerText).filter((text) => text !== messageClient);
+        resolve({message: messageClient, response: responseText});
+      },5000);
+    }
+   observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      // Added Nodes  
+      
+      for(let addedNode of Array.from(mutation.addedNodes)){
+        if (addedNode.nodeType === Node.ELEMENT_NODE) {
+
+          if (Array.from(element.children).includes(addedNode as HTMLElement)) {
+          console.log("É filho direto");
+          }else{
+            console.log("Não é filho direto");
+          }
+          
+          PossibleResponseElements.push(addedNode as HTMLElement);
+          console.log('Added Node:', addedNode);
+          restartTimer();
+          
+       }
+      }
+      mutation.removedNodes.forEach((node) => {
+        PossibleResponseElements = PossibleResponseElements.filter((element) => element !== node);
+        console.log('Removed Node:', node);
+        console.log('PossibleResponseElements:', PossibleResponseElements);
+        restartTimer();
+      });
+
+
+    });
+  });
+  observer.observe(element, {
+    childList: true,
+    subtree: true,
+
+});
+
+  });
+
+}
+
+export async function sendAndReceiveMessage(message: string, chatbotElement: ChatBotInterface): Promise<ChatResponse> {
   simulateInput(message, chatbotElement);
   return await captureResponse(message, chatbotElement);
 }
 
-function isLikelyChatbotResponse(text: string): boolean {
-  // Check if the text contains any common chatbot phrases
-  return commonChatbotPhrases.some(phrase => text.includes(phrase)) ||
-    // Check for other patterns that might indicate a chatbot response
-    /^[A-Z]/.test(text) || // Starts with a capital letter
-    text.endsWith('?') || text.endsWith('.') // Ends with a question mark or period
-}

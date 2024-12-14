@@ -15,11 +15,11 @@ export default {
       let data = this.getAllData();
       let stringData = JSON.stringify(data, null, 2);
       let blob = new Blob([stringData], {
-        type: "application/json;charset=utf-8"
+        type: "application/json;charset=utf-8",
       });
       saveAs(blob, "evaluation.json");
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -34,6 +34,6 @@ export default {
   border: none;
   color: white;
   cursor: pointer;
-  border-radius:100px;
+  border-radius: 100px;
 }
 </style>

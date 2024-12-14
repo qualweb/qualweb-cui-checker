@@ -6,22 +6,22 @@
       </button>
     </div>
     <div v-if="rule" class="text" tabindex="-1">
-      <h1 class="center">{{rule.name}}</h1>
+      <h1 class="center">{{ rule.name }}</h1>
       <p v-if="rule.mapping">
         <span class="strong">Rule ID:</span>
-        <a target="_blank" :href="rule.metadata.url">{{rule.mapping}}</a>
+        <a target="_blank" :href="rule.metadata.url">{{ rule.mapping }}</a>
       </p>
       <p v-if="rule.url">
         <span class="strong">Url:</span>
-        {{rule.metadata.url}}
+        {{ rule.metadata.url }}
       </p>
       <p>
         <span class="strong">Description:</span>
-        {{rule.description}}
+        {{ rule.description }}
       </p>
       <p>
         <span class="strong">Outcome:</span>
-        {{rule.metadata.outcome}}
+        {{ rule.metadata.outcome }}
       </p>
       <p v-if="rule.results.length !== 0">
         <span class="strong">Filter:</span>
@@ -46,17 +46,17 @@ export default {
   components: {
     RuleResult,
     ElementNavigation,
-    ColapsibleResultFilter
+    ColapsibleResultFilter,
   },
-  computed: mapGetters({ 
+  computed: mapGetters({
     rule: "getCurrentRule",
-    results: "getCurrentRuleResults" 
+    results: "getCurrentRuleResults",
   }),
   methods: {
     goToEvaluation() {
-      this.$router.push({ name: 'evaluation' });
-    }
-  }
+      this.$router.push({ name: "evaluation" });
+    },
+  },
 };
 </script>
 

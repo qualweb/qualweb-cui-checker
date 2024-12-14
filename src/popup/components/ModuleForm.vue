@@ -21,7 +21,12 @@
           :value="htmlValue"
         ></Checkbox>
       </div>
-      <input :disabled="isDisabled" type="submit" value="Evaluate" class="submit button" />
+      <input
+        :disabled="isDisabled"
+        type="submit"
+        value="Evaluate"
+        class="submit button"
+      />
     </form>
   </div>
 </template>
@@ -41,14 +46,14 @@ export default {
       htmlLabel: "WCAG 2.1 Techniques",
       htmlValue: false,
       bgColor: "white",
-      checkColor: "black"
+      checkColor: "black",
     };
   },
   computed: {
     ...mapGetters({ evaluated: "getEvaluated" }),
     isDisabled() {
       return !(this.evaluated && (this.evaluated.act || this.evaluated.html));
-    }
+    },
   },
   methods: {
     ...mapActions(["setEvaluated"]),
@@ -59,11 +64,11 @@ export default {
     async updateEvaluated(idValue, value) {
       await this.setEvaluated({
         module: idValue,
-        value: value
+        value: value,
       });
-    }
+    },
   },
-  components: { Checkbox }
+  components: { Checkbox },
 };
 </script>
 

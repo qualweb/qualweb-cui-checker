@@ -15,8 +15,8 @@ export default {
     runAgain() {
       this.reset();
       this.$router.push("/");
-    }
-  }
+    },
+  },
 };
 </script>
 

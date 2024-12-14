@@ -1,5 +1,5 @@
 <template>
-  <div class="menu" v-if="results.length>0">
+  <div class="menu" v-if="results.length > 0">
     <NavigationBar
       v-on:offHighlight="offHighlightElement"
       v-on:highlight="highlightElement"
@@ -21,7 +21,7 @@ export default {
   data() {
     return {
       element: null,
-      lastHighlightElement: null
+      lastHighlightElement: null,
     };
   },
   beforeUpdate() {
@@ -33,7 +33,7 @@ export default {
       );
     }
   },
-  computed: mapGetters({ results:"getCurrentRuleResults" }),
+  computed: mapGetters({ results: "getCurrentRuleResults" }),
   methods: {
     ...mapGetters(["getCurrentRuleResults"]),
     updateResult(index) {
@@ -56,24 +56,24 @@ export default {
         "turnOffhighlightElement(" + JSON.stringify(elements) + ")",
         { useContentScriptContext: true }
       );
-    }
+    },
   },
   components: {
     NavigationBar,
-    RuleResult
+    RuleResult,
   },
   watch: {
-    results: function(newResults, oldQuestion) {
+    results: function (newResults, oldQuestion) {
       if (this.results.length > 0) {
         this.element = this.results[0];
       }
-    }
+    },
   },
   created() {
     if (this.results.length > 0) {
       this.element = this.results[0];
     }
-  }
+  },
 };
 </script>
 

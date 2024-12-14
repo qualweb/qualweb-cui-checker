@@ -23,23 +23,22 @@ export default {
     ColapsibleFilter,
     Summary,
     ListOfRules,
-    FilterByResult
+    FilterByResult,
   },
   methods: {
-    ...mapActions(['updateCurrentRule']),
+    ...mapActions(["updateCurrentRule"]),
     focusListContent(clickedElement) {
       // Update the currentRule in the Vuex store
       this.updateCurrentRule(clickedElement);
-      
+
       // Change the route to 'rule-content'
-      this.$router.push({ name: 'rule-content' });
-    }
-  }
+      this.$router.push({ name: "rule-content" });
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-
 .column-1 {
   display: flex;
   flex-direction: column;

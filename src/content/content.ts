@@ -1,10 +1,11 @@
 import { sendAndReceiveMessage } from './chatInteraction';
 import { elementSelector, getStoredChatbotElement } from './selectChatbot';
-import {requestElementsLLM} from './detectChatbot';
+import {detectChatbotSelection,chatbotInterface, requestElementsLLM, ChatBotInterface} from './detectChatbot';
 import { ResponseStore, ChatResponse, Summary } from '../utils/types';
 import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
 import { microphoneSelector, getStoredMicrophoneButton } from './selectVoiceinput';
+import { showMessage } from '../utils/helpers';
 
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
@@ -26,7 +27,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const chatbotElement = getStoredChatbotElement();
   switch (request.action) {
     case 'typeMessages':
-      handleTypeMessages(request, chatbotElement).then(chatResponses => {
+      handleTypeMessages(request, chatbotInterface).then(chatResponses => {
         console.log(chatResponses);
         sendResponse({ status: 'Messages typed and responses received', responses: chatResponses });
       });
@@ -37,7 +38,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "requestElementLLM":
       console.log("started Selection LLM");
-      requestElementsLLM();
+      showMessage("Please open the chatbot");    
+      detectChatbotSelection();
       break;
     case "startMicSelection":
       microphoneSelector.startMicrophoneSelection();
@@ -45,7 +47,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case "startEvaluation":
       summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       // only assign chatbotsummary is chatbot element is not null
-      if (chatbotElement) {
+      if (chatbotInterface?.historyElement) {
         chatbotSummary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       }
       sendResponse([summary, chatbotSummary]);
@@ -58,15 +60,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       break;
     case "evaluateACT":
-      const actResult = evaluateACT(chatbotElement);
+      const actResult = evaluateACT(chatbotInterface!.historyElement);
       sendResponse(actResult);
       break;
     case "evaluateWCAG":
-      const wcagResult = evaluateWCAG(chatbotElement);
+      const wcagResult = evaluateWCAG(chatbotInterface!.historyElement);
       sendResponse(wcagResult);
       break;
     case "evaluateCUI":
-      const cuiResult = evaluateCUI(chatbotElement);
+      const cuiResult = evaluateCUI(chatbotInterface!.historyElement);
       sendResponse(cuiResult);
       break;
     case "endingEvaluation":
@@ -78,20 +80,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Function to handle typing messages
-async function handleTypeMessages(request: { messages: string[] }, chatbotElement: HTMLElement | null): Promise<ChatResponse[]> {
+async function handleTypeMessages(request: { messages: string[] }, chatbotInterface: ChatBotInterface | null): Promise<ChatResponse[]> {
   let chatResponses: ChatResponse[] = [];
 
   for (let i = 0; i < request.messages.length; i++) {
     const message = request.messages[i];
-    let response: ChatResponse;
+    let response: ChatResponse ;
 
-    if (chatbotElement) {
-      response = await sendAndReceiveMessage(message, chatbotElement);
+    if (chatbotInterface) {
+      response = await sendAndReceiveMessage(message, chatbotInterface);
+      chatResponses.push(response);
     } else {
-      response = await sendAndReceiveMessage(message);
+     // response = await sendAndReceiveMessage(message);
     }
 
-    chatResponses.push(response);
     if (i < request.messages.length - 1) {
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
@@ -118,13 +120,13 @@ async function handleVoiceInput(request: {messages: string[]}, chatbotElement: H
     getStoredMicrophoneButton()!.click();
     
     if (chatbotElement) {
-      response = await sendAndReceiveMessage("", chatbotElement);
+     // response = await sendAndReceiveMessage("", chatbotElement);
       
     } else {
-      response = await sendAndReceiveMessage("");
+    //  response = await sendAndReceiveMessage("");
     }
 
-    chatResponses.push(response);
+    //chatResponses.push(response);
     
     
   }
@@ -151,6 +153,7 @@ function sendMessageToBackground(action: string, text: string):Promise<void> {
 
 
 function evaluateACT(chatbotElement: HTMLElement|null) {
+
   let actResult, chatbotActResult, result, chatbotResult;
   const excludedRules = [
     'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
@@ -201,25 +204,26 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
 
 
 function evaluateCUI(chatbotElement: HTMLElement|null) {
-  let actResult, chatbotActResult, result, chatbotResult;
-  const excludedRules = [
+  let cuiResult, chatbotCuiResult, result, chatbotResult;
+  /*const excludedRules = [
     'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
   ];
-  window.act = new ACTRules({ translate: locale_en, fallback: locale_en });
+  
+  window.cui = new CUI({ translate: locale_en, fallback: locale_en });
   // window.act.configure({ exclude: excludedRules })
   //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
-  window.act.executeAtomicRules();
-  window.act.executeCompositeRules();
-  actResult = window.act.getReport();
-  addValuesToSummary(summary, actResult);
+
+  //cuiResult =   window.cui.execute();
+  addValuesToSummary(summary, cuiResult);
   //window.console.log("evaluate ACT summary:", summary);
-  result = actResult.assertions;
+  result = cuiResult.assertions;
   if (chatbotElement) {
-    chatbotActResult = filterResults(actResult, chatbotElement);
-    addValuesToSummary(chatbotSummary, chatbotActResult);
-    chatbotResult = chatbotActResult.assertions;
+    chatbotCuiResult = filterResults(cuiResult, chatbotElement);
+    addValuesToSummary(chatbotSummary, chatbotCuiResult);
+    chatbotResult = chatbotCuiResult.assertions;
   };
   return [result, chatbotResult];
+  */
 }
 
 

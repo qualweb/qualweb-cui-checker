@@ -2,7 +2,7 @@
   <div class="container">
     <div>
       <div class="loader"></div>
-      <p class="state">{{state}}</p>
+      <p class="state">{{ state }}</p>
     </div>
   </div>
 </template>
@@ -25,18 +25,26 @@ export default {
       "setChatbotSummary",
       "setCurrentRule",
       "setStartingFilter",
-      "setEvaluateChatbot"
+      "setEvaluateChatbot",
     ]),
-    ...mapGetters(["getEvaluated", "getFirstRule","getResultFilter"])
+    ...mapGetters(["getEvaluated", "getFirstRule", "getResultFilter"]),
   },
   data() {
     return {
-      state: "Starting evaluation"
+      state: "Starting evaluation",
     };
   },
   async mounted() {
     let modules = this.getEvaluated();
-    let actResult, chatbotActResult, cuiResult, chatbotCuiResult, htmlResult, chatbotHtmlResult, cssResult, summary, chatbotSummary;
+    let actResult,
+      chatbotActResult,
+      cuiResult,
+      chatbotCuiResult,
+      htmlResult,
+      chatbotHtmlResult,
+      cssResult,
+      summary,
+      chatbotSummary;
     await startEvaluation();
     if (modules.act) {
       this.state = "Evaluating ACT module";
@@ -53,7 +61,7 @@ export default {
     if (modules.cui) {
       this.state = "Evaluating CUI module";
       [cuiResult, chatbotCuiResult] = await evaluateCUI();
-      
+
       // this.setBP(bpResult);
       // chatbotBpResult && this.setChatbotBP(chatbotBpResult);
     }
@@ -65,7 +73,7 @@ export default {
     this.setStartingFilter(modules);
     this.setCurrentRule(this.getFirstRule());
     this.$router.push("/evaluation");
-  }
+  },
 };
 </script>
 

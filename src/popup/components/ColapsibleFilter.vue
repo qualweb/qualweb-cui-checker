@@ -122,14 +122,14 @@ export default {
       failedColor: "#ff3535",
       warningColor: "#ffd600",
       bgColor: "white",
-      checkColor: "black"
+      checkColor: "black",
     };
   },
   computed: {
     ...mapGetters({
       filter: "getFilter",
-      evaluateChatbot: "getEvaluateChatbot"
-    })
+      evaluateChatbot: "getEvaluateChatbot",
+    }),
   },
   methods: {
     ...mapActions(["setFilter", "setEvaluateChatbot"]),
@@ -140,16 +140,16 @@ export default {
     async updateFilter(idValue, value) {
       await this.setFilter({
         key: idValue,
-        value: value
+        value: value,
       });
     },
     async updateEvalType(_, value) {
       await this.setEvaluateChatbot(value);
-    }
+    },
   },
   components: {
-    Checkbox
-  }
+    Checkbox,
+  },
 };
 </script>
 

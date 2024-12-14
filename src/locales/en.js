@@ -1397,13 +1397,12 @@ export const locale_en = {
     },
     "QW-BP31": {
       name: "Voice output is available",
-      description:
-        "Ensures that the chatbot is able to provide voice output",
+      description: "Ensures that the chatbot is able to provide voice output",
       results: {
         I1: "No test targets found.",
         P1: "There is voice output",
         F1: "There is no voice output",
       },
-    }
+    },
   },
 };

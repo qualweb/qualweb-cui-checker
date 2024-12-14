@@ -1,50 +1,50 @@
 <template>
   <div class="filter">
     <div class="content">
-        <ul class="outcome">
-          <li>
-            <Checkbox
-              :idValue="passedIdValue"
-              :label="passedLabel+resultNumber.passed+' results'"
-              :bgColor="passedColor"
-              :checkColor="checkColor"
-              @checkBoxChanged="updateFilterResults"
-              :value="filter.passed"
-            ></Checkbox>
-          </li>
-          <li>
-            <Checkbox
-              :idValue="failedIdValue"
-              :label="failedLabel+resultNumber.failed+' results'"
-              :bgColor="failedColor"
-              :checkColor="checkColor"
-              @checkBoxChanged="updateFilterResults"
-              :value="filter.failed"
-            ></Checkbox>
-          </li>
-          <li>
-            <Checkbox
-              :idValue="warningIdValue"
-              :label="warningLabel+resultNumber.warning+' results'"
-              :bgColor="warningColor"
-              :checkColor="checkColor"
-              @checkBoxChanged="updateFilterResults"
-              :value="filter.warning"
-            ></Checkbox>
-          </li>
-          <li>
-            <Checkbox
-              :idValue="inapplicableIdValue"
-              :label="inapplicableLabel+resultNumber.inapplicable+' results'"
-              :bgColor="bgColor"
-              :checkColor="checkColor"
-              @checkBoxChanged="updateFilterResults"
-              :value="filter.inapplicable"
-            ></Checkbox>
-          </li>
-        </ul>
-      </div>
+      <ul class="outcome">
+        <li>
+          <Checkbox
+            :idValue="passedIdValue"
+            :label="passedLabel + resultNumber.passed + ' results'"
+            :bgColor="passedColor"
+            :checkColor="checkColor"
+            @checkBoxChanged="updateFilterResults"
+            :value="filter.passed"
+          ></Checkbox>
+        </li>
+        <li>
+          <Checkbox
+            :idValue="failedIdValue"
+            :label="failedLabel + resultNumber.failed + ' results'"
+            :bgColor="failedColor"
+            :checkColor="checkColor"
+            @checkBoxChanged="updateFilterResults"
+            :value="filter.failed"
+          ></Checkbox>
+        </li>
+        <li>
+          <Checkbox
+            :idValue="warningIdValue"
+            :label="warningLabel + resultNumber.warning + ' results'"
+            :bgColor="warningColor"
+            :checkColor="checkColor"
+            @checkBoxChanged="updateFilterResults"
+            :value="filter.warning"
+          ></Checkbox>
+        </li>
+        <li>
+          <Checkbox
+            :idValue="inapplicableIdValue"
+            :label="inapplicableLabel + resultNumber.inapplicable + ' results'"
+            :bgColor="bgColor"
+            :checkColor="checkColor"
+            @checkBoxChanged="updateFilterResults"
+            :value="filter.inapplicable"
+          ></Checkbox>
+        </li>
+      </ul>
     </div>
+  </div>
 </template>
 
 <script>
@@ -68,12 +68,12 @@ export default {
       failedColor: "#ff3535",
       warningColor: "#ffd600",
       checkColor: "black",
-      bgColor: "white"
+      bgColor: "white",
     };
   },
   computed: mapGetters({
     filter: "getResultFilter",
-    resultNumber: "getResultNumber"
+    resultNumber: "getResultNumber",
   }),
   methods: {
     ...mapActions(["setResultFilter"]),
@@ -83,13 +83,13 @@ export default {
     async updateFilterResults(idValue, value) {
       await this.setResultFilter({
         key: idValue.toLowerCase(),
-        value: value
+        value: value,
       });
-    }
+    },
   },
   components: {
-    Checkbox
-  }
+    Checkbox,
+  },
 };
 /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) 
 .active,
@@ -107,5 +107,4 @@ export default {
 .filter {
   padding: 0rem 1rem;
 }
-
 </style>

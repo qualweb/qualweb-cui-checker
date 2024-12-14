@@ -1,6 +1,6 @@
 export interface ChatResponse {
   message: string;
-  response: string;
+  response: string[];
 }
 
 export interface ElementSelector {
@@ -8,14 +8,7 @@ export interface ElementSelector {
   resetSelection: () => void;
 }
 
-/*
-export interface LLMResponse {
-  model:string;
-  xpath_text: string | null;
-  xpath_send: string | null;
-  xpath_sound: string | null;
-}{
-*/
+
 
 export interface LLMResponse {
   xpath_chatbot: string | null;

@@ -1,7 +1,13 @@
 <template>
   <div class="container">
-    <button :disabled="highlightActive" class="highlight btn" v-on:click="highligthElement">
-      <span v-if="highligthElementAvailable" class="flexElement">Highlight Element</span>
+    <button
+      :disabled="highlightActive"
+      class="highlight btn"
+      v-on:click="highligthElement"
+    >
+      <span v-if="highligthElementAvailable" class="flexElement"
+        >Highlight Element</span
+      >
       <span v-else class="flexElement">Stop Highlight</span>
       <i class="material-icons-round flexElement">wb_iridescent</i>
     </button>
@@ -9,7 +15,7 @@
       <div>
         <button
           @click="first()"
-          :disabled="index===1"
+          :disabled="index === 1"
           class="smallBtn flexElement"
           aria-label="First page"
         >
@@ -17,18 +23,18 @@
         </button>
         <button
           @click="before()"
-          :disabled="index===1"
+          :disabled="index === 1"
           class="smallBtn flexElement"
           aria-label="Previous page"
         >
           <i class="material-icons-round">chevron_left</i>
         </button>
       </div>
-      <span class="flexElement index">{{index}}/{{size}}</span>
+      <span class="flexElement index">{{ index }}/{{ size }}</span>
       <div>
         <button
           @click="after()"
-          :disabled="index===size"
+          :disabled="index === size"
           class="smallBtn flexElement"
           aria-label="Next page"
         >
@@ -36,7 +42,7 @@
         </button>
         <button
           @click="last()"
-          :disabled="index===size"
+          :disabled="index === size"
           class="smallBtn flexElement"
           aria-label="Last page"
         >
@@ -55,28 +61,28 @@ export default {
   data() {
     return {
       index: 1,
-      highligthElementAvailable: true
+      highligthElementAvailable: true,
     };
   },
   computed: mapGetters({
-    highlightActive: "getHighlightActive"
+    highlightActive: "getHighlightActive",
   }),
   watch: {
-    size: function(newResults, oldQuestion) {
+    size: function (newResults, oldQuestion) {
       this.index = 1;
       this.highligthElementAvailable = true;
       if (this.highlightActive) {
-       this.highligthElement();
+        this.highligthElement();
       }
     },
-    highlightActive: function(newResults, oldQuestion) {
+    highlightActive: function (newResults, oldQuestion) {
       if (this.highlightActive && this.size > 0) {
         this.highligthElementAvailable = true;
         this.highligthElement();
-      }else{
+      } else {
         this.disableHighlight();
       }
-    }
+    },
   },
   methods: {
     before() {
@@ -86,7 +92,7 @@ export default {
         this.$emit("change", this.index);
       }
       if (this.highlightActive) {
-         this.highligthElement();
+        this.highligthElement();
       }
     },
     after() {
@@ -96,7 +102,7 @@ export default {
         this.$emit("change", this.index);
       }
       if (this.highlightActive) {
-         this.highligthElement();
+        this.highligthElement();
       }
     },
     last() {
@@ -106,7 +112,7 @@ export default {
         this.$emit("change", this.index);
       }
       if (this.highlightActive) {
-         this.highligthElement();
+        this.highligthElement();
       }
     },
     first() {
@@ -136,8 +142,8 @@ export default {
     clean() {
       this.disableHighlight();
       this.index = 1;
-    }
-  }
+    },
+  },
 };
 </script>
 

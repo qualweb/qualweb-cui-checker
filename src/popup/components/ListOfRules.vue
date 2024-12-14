@@ -1,21 +1,34 @@
 <template>
   <div class="container">
-    <button @click="changeRule(rule)" class="listRule" v-for="rule in rules" :key="rule.code">
-      <h2>{{rule.title}}</h2>
-      <div v-if="rule.outcome ==='passed'">
-        <i role="presentation" class="material-icons passed flexElement">check_circle_outline</i>
+    <button
+      @click="changeRule(rule)"
+      class="listRule"
+      v-for="rule in rules"
+      :key="rule.code"
+    >
+      <h2>{{ rule.title }}</h2>
+      <div v-if="rule.outcome === 'passed'">
+        <i role="presentation" class="material-icons passed flexElement"
+          >check_circle_outline</i
+        >
         <span class="flexElement">Passed</span>
       </div>
-      <div v-if="rule.outcome ==='failed'">
-        <i role="presentation" class="material-icons failed flexElement">highlight_off</i>
+      <div v-if="rule.outcome === 'failed'">
+        <i role="presentation" class="material-icons failed flexElement"
+          >highlight_off</i
+        >
         <span class="flexElement">Failed</span>
       </div>
-      <div v-if="rule.outcome ==='warning'">
-        <i role="presentation" class="material-icons warning flexElement">warning</i>
+      <div v-if="rule.outcome === 'warning'">
+        <i role="presentation" class="material-icons warning flexElement"
+          >warning</i
+        >
         <span class="flexElement">Warning</span>
       </div>
-      <div v-if="rule.outcome ==='inapplicable'">
-        <i role="presentation" class="material-icons inapplicable flexElement">not_interested</i>
+      <div v-if="rule.outcome === 'inapplicable'">
+        <i role="presentation" class="material-icons inapplicable flexElement"
+          >not_interested</i
+        >
         <span class="flexElement">Inapplicable</span>
       </div>
     </button>
@@ -32,9 +45,9 @@ export default {
     changeRule(rule) {
       this.setCurrentRule({ code: rule.code, module: rule.module });
       this.$emit("focusContent");
-    }
+    },
   },
-  computed: mapGetters({ rules: "getAllRuleCodeAndTitle" })
+  computed: mapGetters({ rules: "getAllRuleCodeAndTitle" }),
 };
 </script>
 

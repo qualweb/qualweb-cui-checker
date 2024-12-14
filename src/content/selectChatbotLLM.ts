@@ -3,8 +3,15 @@ import { ElementSelector, LLMResponse } from '../utils/types';
 import axios from 'axios';
 
 const LLM_URL = 'https://api.openai.com/v1/chat/completions';
+const LLM_LOCAL_URL = 'http://localhost:11434/api/generate';
 const API_KEY = '';
 
+interface LocalLLMResponse {
+  xpath_input: string | null;
+  xpath_history: string | null;
+  xpath_bot_selector: string | null;
+  xpath_microphone: string | null;
+}
 
 let prompt = `
 Role Context:
@@ -72,4 +79,47 @@ let promptToSend = `${prompt} \n ${body}`;
 
 }
 
-export {sendPromptToLLM}
+
+const sendPromptTLocalLLM = async (body:string): Promise<LocalLLMResponse>  => {
+
+  let promptToSend = `${body}`;
+  
+  
+    return axios.post(LLM_LOCAL_URL, 
+      {
+        model: 'HTML',
+        prompt: promptToSend,
+        format: "json",
+        stream: false,
+        
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    ).then((response) => {
+     
+      const reply = response.data.response;
+  
+      console.log(reply);
+      
+      const parsedReply: LocalLLMResponse = JSON.parse(reply);
+    
+      return parsedReply;
+    }).catch(() => {
+  
+  
+      return {
+        xpath_input: null,
+        xpath_history: null,
+        xpath_bot_selector: null,
+        xpath_microphone: null
+
+      } as LocalLLMResponse;
+  
+    });
+  
+  }
+
+export {sendPromptToLLM,sendPromptTLocalLLM}

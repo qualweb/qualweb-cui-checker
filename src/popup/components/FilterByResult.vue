@@ -2,7 +2,11 @@
   <div
     :aria-expanded="[isOpen ? 'true' : 'false']"
     :aria-owns="'lbox_' + _uid"
-    :class="['select__dropdown', isOpen ? 'select__dropdown--open' : 'select__dropdown--close',focusedElem  ? 'focused':'']"
+    :class="[
+      'select__dropdown',
+      isOpen ? 'select__dropdown--open' : 'select__dropdown--close',
+      focusedElem ? 'focused' : '',
+    ]"
     @focus="focus()"
     @blur="handleBlur"
     @click="toggle"
@@ -23,13 +27,18 @@
       <li
         v-for="(opt, idx) in items"
         :aria-selected="[isItemSelected(idx) ? 'true' : 'false']"
-        :class="['select__option', isItemSelected(idx) ? 'select__option--selected': '',
-          hoverIndex === idx ? 'select__optionlist--hover': '']"
+        :class="[
+          'select__option',
+          isItemSelected(idx) ? 'select__option--selected' : '',
+          hoverIndex === idx ? 'select__optionlist--hover' : '',
+        ]"
         :key="idx"
         role="option"
         @click="select(idx)"
         :aria-label="opt"
-      >{{ opt }}</li>
+      >
+        {{ opt }}
+      </li>
     </ul>
   </div>
 </template>
@@ -43,12 +52,12 @@ export default {
       type: Array,
       default() {
         return [];
-      }
+      },
     },
     value: {
       type: String,
-      default: "All outcomes"
-    }
+      default: "All outcomes",
+    },
   },
   data() {
     return {
@@ -56,7 +65,7 @@ export default {
       mutableValue: null,
       selectedIdx: 0,
       hoverIndex: -1,
-      focusedElem: false
+      focusedElem: false,
     };
   },
   methods: {
@@ -94,20 +103,20 @@ export default {
       if (this.isOpen) {
         this.toggle();
       }
-    }
+    },
   },
   watch: {
     value(val) {
       // when the parent changes the value, update the internal state
       this.mutableValue = val;
       this.selectedIdx = this.items.indexOf(val);
-    }
+    },
   },
   created() {
     // initialize the mutable value to what is sent from the parent
     this.mutableValue = this.value;
     this.selectedIdx = this.items.indexOf(this.value);
-  }
+  },
 };
 </script>
 

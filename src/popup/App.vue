@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-      <router-view></router-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -8,12 +8,12 @@
 export default {
   data() {
     return {};
-  }
+  },
 };
 </script>
 
 <style scoped>
-.content{
+.content {
   height: 100%;
 }
 </style>

@@ -20,10 +20,17 @@ declare global {
     execute(): BestPracticesReport;
   }
 
+  class CUI {
+    constructor(locale: any, options?: any);
+    execute(newTabWasOpen: boolean, validation?: any): any;
+    configure(options: { techniques?: string[], exclude?: string[] }): void;
+  }
+
   interface Window {
     wcag: WCAGTechniques;
     act: ACTRules;
     bp: BestPractices;
+    cui: CUI;
     webkitAudioContext: typeof AudioContext;
   }
 }
