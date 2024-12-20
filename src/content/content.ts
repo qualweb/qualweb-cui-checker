@@ -6,7 +6,11 @@ import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
 import { microphoneSelector, getStoredMicrophoneButton } from './selectVoiceinput';
 import { showMessage } from '../utils/helpers';
-
+import {
+  CUIOptions,
+  CUIChecksReport,
+  CUIChecks
+} from '@qualweb/cui-checks';
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
 let summary: Summary;
@@ -205,17 +209,14 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
 
 function evaluateCUI(chatbotElement: HTMLElement|null) {
   let cuiResult, chatbotCuiResult, result, chatbotResult;
-  /*const excludedRules = [
-    'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
-  ];
-  
-  window.cui = new CUI({ translate: locale_en, fallback: locale_en });
-  // window.act.configure({ exclude: excludedRules })
-  //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
 
-  //cuiResult =   window.cui.execute();
+  window.cui = new CUIChecks({ translate: locale_en, fallback: locale_en });
+
+
+
+  cuiResult =   window.cui.getReport();
   addValuesToSummary(summary, cuiResult);
-  //window.console.log("evaluate ACT summary:", summary);
+
   result = cuiResult.assertions;
   if (chatbotElement) {
     chatbotCuiResult = filterResults(cuiResult, chatbotElement);
@@ -223,7 +224,7 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
     chatbotResult = chatbotCuiResult.assertions;
   };
   return [result, chatbotResult];
-  */
+ 
 }
 
 

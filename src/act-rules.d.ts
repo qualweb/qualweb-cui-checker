@@ -1,4 +1,6 @@
+
 declare global {
+  
   class ACTRules {
     constructor(options: { translate: any, fallback: any });
     configure(options: { rules?: string[], exclude?: string[] }): void;
@@ -20,21 +22,31 @@ declare global {
     execute(): BestPracticesReport;
   }
 
-  class CUI {
-    constructor(locale: any, options?: any);
-    execute(newTabWasOpen: boolean, validation?: any): any;
-    configure(options: { techniques?: string[], exclude?: string[] }): void;
+  class CUIChecks  {
+    constructor(locale: Translate, options?: CUIOptions)
+    configure(options: CUIOptions): void;
+    resetConfiguration(): void;
+    getReport(): CUIChecksReport;
   }
 
   interface Window {
     wcag: WCAGTechniques;
     act: ACTRules;
     bp: BestPractices;
-    cui: CUI;
+    cui: CUIChecks;
     webkitAudioContext: typeof AudioContext;
   }
 }
+interface CUIChecksReport {
+  assertions: Record<string, CUIRule>;
+  metadata: {
+    passed: number;
+    warning: number;
+    failed: number;
+    inapplicable: number;
+  };
 
+}
 interface ACTReport {
   assertions: Record<string, ACTRule>; // Specify the type of assertions
   metadata: {

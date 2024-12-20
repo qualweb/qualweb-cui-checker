@@ -8,7 +8,7 @@ const API_KEY = '';
 
 interface LocalLLMResponse {
   xpath_input: string | null;
-  xpath_history: string | null;
+  xpath_conversation: string | null;
   xpath_bot_selector: string | null;
   xpath_microphone: string | null;
 }
@@ -87,7 +87,7 @@ const sendPromptTLocalLLM = async (body:string): Promise<LocalLLMResponse>  => {
   
     return axios.post(LLM_LOCAL_URL, 
       {
-        model: 'HTML',
+        model: 'HTML2',
         prompt: promptToSend,
         format: "json",
         stream: false,
@@ -112,7 +112,7 @@ const sendPromptTLocalLLM = async (body:string): Promise<LocalLLMResponse>  => {
   
       return {
         xpath_input: null,
-        xpath_history: null,
+        xpath_conversation: null,
         xpath_bot_selector: null,
         xpath_microphone: null
 

@@ -82,6 +82,7 @@ function observeNewMessages(messageClient:string,element:HTMLElement):Promise<Ch
 
           if (Array.from(element.children).includes(addedNode as HTMLElement)) {
           console.log("É filho direto");
+          
           }else{
             console.log("Não é filho direto");
           }

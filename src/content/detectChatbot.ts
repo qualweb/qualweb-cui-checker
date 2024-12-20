@@ -6,8 +6,6 @@ import { setStoredMicrophoneButton } from './selectVoiceinput';
 
 
 
-
-
 interface SelectorsRelevant {
   classes: string[];
   properties: string[];
@@ -26,52 +24,45 @@ export interface ChatBotInterface  {
 
 interface LocalLLMResponse {
   xpath_input: string | null;
-  xpath_history: string | null;
+  xpath_conversation: string | null;
   xpath_bot_selector: string | null;
   xpath_microphone: string | null;
 }
+
 
 export let  chatbotInterface: ChatBotInterface | null = null;
 
 let observer: MutationObserver;
 
-function cleanHTML(documentBody: Element): Element {
 
-  let clonedBody = documentBody.cloneNode(true) as Element;
-  console.log("size before sending: " + documentBody.outerHTML.length);
-  console.log("size before cleaning element attr: " + clonedBody.outerHTML.length);
+function cleanHTML(htmlTree: Element): string {
+  console.log("Size of HTML: ", htmlTree.outerHTML.length);
+  let irrelevantTags  = ['header', 'footer','img','svg',  'script', 'style', 'link', 'noscript', 'iframe', 'object', 'embed'];
+  let clonedDomTree = htmlTree.cloneNode(true) as HTMLElement;
+
+// Remove tags that are not relevant
+clonedDomTree.querySelectorAll(irrelevantTags.join(',')).forEach(element => element.remove());
+
+// Remove regular comments
+clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[\s\S]*?-->/g, '');
+
+// Remove conditional comments (IE-specific)
+clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g, '');
+
 // remove all attributes that are not "id or class"
-clonedBody.querySelectorAll('*').forEach(element => {
+clonedDomTree.querySelectorAll('*').forEach(element => {
   Array.from(element.attributes).forEach(attr => {
-    if (attr.name !== 'id' && attr.name !== 'class') {
+    if (attr.name !== 'id' && attr.name !== 'class' && attr.name !== 'contenteditable' && attr.name !== 'data-*') {
       element.removeAttribute(attr.name);
     }
   });
 });
 
-  console.log("size after cleaning element attr: " + clonedBody.outerHTML.length);
-  
-// Remove unnecessary elements
-const tagsToRemove = ['header', 'footer','img','svg',  'script', 'style', 'link', 'noscript', 'iframe', 'object', 'embed'];
-tagsToRemove.forEach(tag => {
-  clonedBody.querySelectorAll(tag).forEach(element => element.remove());
-});
+let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, '$1');
+console.log("Size of cleaned HTML: ", result.length);
+console.log("Cleaned HTML: ", result);
+return result;
 
-console.log("size after removing unnecessary elements: " + clonedBody.outerHTML.length);
-
-// Remove regular comments
-clonedBody.innerHTML = clonedBody.innerHTML.replace(/<!--[\s\S]*?-->/g, '');
-
-// Remove conditional comments (IE-specific)
-clonedBody.innerHTML = clonedBody.innerHTML.replace(/<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g, '');
-console.log("size after removing comments and conditional comments: " + clonedBody.outerHTML.length);
-// remove style and transformations
-clonedBody.querySelectorAll('*').forEach(element => {
-  element.removeAttribute('style');
-  element.removeAttribute('transform');
-});
-
-return clonedBody;
 }
 
 
@@ -87,7 +78,7 @@ export function requestElementsLLM() {
   let clonedBody = cleanHTML(documentBody);
 
 // send cleanedBody to LLM
- sendPromptToLLM(clonedBody.innerHTML).then((elements: LLMResponse) => {
+ sendPromptToLLM(clonedBody).then((elements: LLMResponse) => {
     
 
 
@@ -144,7 +135,7 @@ function identifyElementsChatbot(element:Element){
 
 let clonedBody = cleanHTML(element);
 
-sendPromptTLocalLLM(clonedBody.outerHTML).then((response: LocalLLMResponse) => {
+sendPromptTLocalLLM(clonedBody).then((response: LocalLLMResponse) => {
     chatbotInterface = {
       inputElement: null,
       messagesSelector: '',
@@ -162,11 +153,10 @@ sendPromptTLocalLLM(clonedBody.outerHTML).then((response: LocalLLMResponse) => {
         chatbotInterface.inputElement = inputElement;
       }
     }
-    if(LLMResponse.xpath_history){
-      let historyElement = getElementByXpath(LLMResponse.xpath_history,documentChatbot);
+    if(LLMResponse.xpath_conversation){
+      let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
       if(historyElement){
         flashGreen(historyElement);
-      //  observeNewMessages(historyElement);
         chatbotInterface.historyElement = historyElement;
         
       }
@@ -485,7 +475,7 @@ function scoringTreeChatbot(element:HTMLElement):number{
   }
   // Get a list of Relant keywords and add them to regex word
   let regex:RegExp = /[\s\S]*(chat|assistant|prompt|conversation)[\s\S]*/;
-  //let regex =  "[A-Za-z0-9]*(chat|assistant|prompt|conversation)[A-Za-z0-9]*";
+
 
   allElements.forEach((element) => {
 
