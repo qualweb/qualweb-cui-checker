@@ -32,14 +32,43 @@ interface LocalLLMResponse {
 
 export let  chatbotInterface: ChatBotInterface | null = null;
 
-let observer: MutationObserver;
 
+/**Function to clean HTML to reduce size of tokens sent to LLM
+ * @param htmlTree - HTML element tree to clean
+ * @returns cleaned HTML string
+ */
 
-function cleanHTML(htmlTree: Element): string {
+export function cleanHTML(htmlTree: HTMLElement): string {
+
+  let regexRellevant:RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
+
   console.log("Size of HTML: ", htmlTree.outerHTML.length);
-  let irrelevantTags  = ['header', 'footer','img','svg',  'script', 'style', 'link', 'noscript', 'iframe', 'object', 'embed'];
+  let irrelevantTags  = ['header', 'footer','img','svg', 'td', 'table','tr','td', 'script', 'style', 'link', 'noscript', 'iframe', 'object', 'embed'];
   let clonedDomTree = htmlTree.cloneNode(true) as HTMLElement;
 
+  // encurtar texto em <p> e <span> para 100 caracteres and add ... to the end
+  clonedDomTree.querySelectorAll('p, span,div').forEach(element => {
+    if (element.textContent!.length > 100) {
+      // Iterate over the child nodes and modify only the text nodes
+      let totalLength = 0;
+      const childNodes = Array.from(element.childNodes); // Convert NodeList to an array
+      
+      childNodes.forEach(child => {
+        if (child.nodeType === Node.TEXT_NODE) { // Check if it's a text node
+          const textContent = child.textContent!;
+          totalLength += textContent.length;
+  
+          // Shorten text if total length exceeds 100 characters
+          if (totalLength > 100) {
+            const excessLength = totalLength - 100;
+            child.textContent = textContent.slice(0, textContent.length - excessLength) + '...';
+          }
+        }
+      });
+    }
+  });
+
+  // remover table td e tr 
 // Remove tags that are not relevant
 clonedDomTree.querySelectorAll(irrelevantTags.join(',')).forEach(element => element.remove());
 
@@ -49,16 +78,26 @@ clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[\s\S]*?-->/g, ''
 // Remove conditional comments (IE-specific)
 clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g, '');
 
-// remove all attributes that are not "id or class"
+// remove all attributes that are not relevant
+let relevantAttributes = ['id', 'class', 'contenteditable', 'data-*', 'tabindex','role'];
+
 clonedDomTree.querySelectorAll('*').forEach(element => {
   Array.from(element.attributes).forEach(attr => {
-    if (attr.name !== 'id' && attr.name !== 'class' && attr.name !== 'contenteditable' && attr.name !== 'data-*') {
+    
+    if( !(relevantAttributes.includes(attr.name))){
+
+      if((!attr.name.match(regexRellevant) && !attr.value.match(regexRellevant)) || attr.name === 'src'){
+        
       element.removeAttribute(attr.name);
+      }
+      
     }
   });
 });
 
-let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, '$1');
+
+
+let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, ' $1 ');
 console.log("Size of cleaned HTML: ", result.length);
 console.log("Cleaned HTML: ", result);
 return result;
