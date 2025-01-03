@@ -7,6 +7,7 @@ const LLM_LOCAL_URL = 'http://localhost:11434/api/generate';
 const API_KEY = '';
 
 interface LocalLLMResponse {
+  xpath_window: string | null;
   xpath_input: string | null;
   xpath_conversation: string | null;
   xpath_bot_selector: string | null;
@@ -111,6 +112,7 @@ const sendPromptTLocalLLM = async (body:string): Promise<LocalLLMResponse>  => {
   
   
       return {
+        xpath_window: null,
         xpath_input: null,
         xpath_conversation: null,
         xpath_bot_selector: null,

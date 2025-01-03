@@ -299,6 +299,49 @@ export function flashGreen(element: HTMLElement): void {
 }
 
 
+
+export function setGreen(element: HTMLElement): void {
+  if(!element) return;
+  const documentToOverlay = element.ownerDocument;
+  const rect = element.getBoundingClientRect();
+  
+  const flashOverlay = documentToOverlay.createElement('div');
+  flashOverlay.className = 'chatbot-element-overlay';
+
+  flashOverlay.style.position = 'fixed';
+  flashOverlay.style.pointerEvents = 'none';
+  flashOverlay.style.zIndex = '10000';
+  flashOverlay.style.left = `${rect.left}px`;
+  flashOverlay.style.top = `${rect.top}px`;
+  flashOverlay.style.width = `${rect.width}px`;
+  flashOverlay.style.height = `${rect.height}px`;
+  flashOverlay.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
+  flashOverlay.style.transition = 'opacity 0.5s ease-in-out';
+  flashOverlay.style.opacity = '1';
+
+  documentToOverlay.body.appendChild(flashOverlay);
+
+
+}
+
+export function unsetGreen(element:HTMLElement | HTMLElement[]): void {
+  if(!element) return;
+  let documentOverlay:Document;
+  if (Array.isArray(element) && element.length > 0) {
+   documentOverlay = element[0].ownerDocument;
+  } else {
+    documentOverlay = (element as HTMLElement).ownerDocument;
+  }
+
+  const overlayElements = documentOverlay.querySelectorAll('.chatbot-element-overlay');
+  if (overlayElements.length > 0) {
+    const overlay: Element[] = Array.from(overlayElements);
+    overlay.forEach((element) => {
+      documentOverlay.body.removeChild(element);
+    });
+  }
+}
+
 export const elementSelector: ElementSelector = {
   startSelection,
   resetSelection,

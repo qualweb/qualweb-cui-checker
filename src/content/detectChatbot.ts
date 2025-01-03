@@ -1,33 +1,10 @@
 import { showMessage } from '../utils/helpers';
-import { LLMResponse } from '../utils/types';
+import { LocalLLMResponse, LLMResponse, ChatBotInterface } from '../utils/types';
 import { setStoredChatbotElement, flashGreen } from './selectChatbot';
 import { sendPromptTLocalLLM, sendPromptToLLM } from './selectChatbotLLM';
 import { setStoredMicrophoneButton } from './selectVoiceinput';
 
 
-
-interface SelectorsRelevant {
-  classes: string[];
-  properties: string[];
-  tags: string[];
-  dataAttributes: string[];
-}
-
-
-export interface ChatBotInterface  {
-  inputElement: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
-  messagesSelector: string ;
-  historyElement: HTMLElement | null;
-  microphoneElement: HTMLElement | null;
-}
-
-
-interface LocalLLMResponse {
-  xpath_input: string | null;
-  xpath_conversation: string | null;
-  xpath_bot_selector: string | null;
-  xpath_microphone: string | null;
-}
 
 
 export let  chatbotInterface: ChatBotInterface | null = null;
@@ -88,7 +65,7 @@ clonedDomTree.querySelectorAll('*').forEach(element => {
 
       if((!attr.name.match(regexRellevant) && !attr.value.match(regexRellevant)) || attr.name === 'src'){
         
-      element.removeAttribute(attr.name);
+        element.removeAttribute(attr.name);
       }
       
     }
@@ -104,9 +81,321 @@ return result;
 
 }
 
+function getElementByXpath(path: string, documentChatbot:Document): HTMLElement | null {
+  return documentChatbot.evaluate(path, documentChatbot, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue as HTMLElement;
+}
+
+
+
+export async function  identifyElementsChatbot(element:string,documentChatbot:Document):Promise<ChatBotInterface>{
+  return new Promise((resolve, reject) => {
+
+
+  let LLMResponse:LocalLLMResponse | null = null;
+
+
+
+sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
+    chatbotInterface = {
+      windowElement: null,
+      inputElement: null,
+      messagesSelector: '',
+      historyElement: null,
+      microphoneElement: null
+    };
+      
+
+    LLMResponse = response;
+    if(LLMResponse.xpath_window){
+
+      let windowElement = getElementByXpath(LLMResponse.xpath_window,documentChatbot);
+      if(windowElement){
+        //flashGreen(windowElement);
+        chatbotInterface.windowElement = windowElement;
+      }
+    }
+
+    if (LLMResponse.xpath_input){
+      let inputElement = getElementByXpath(LLMResponse.xpath_input,documentChatbot);
+      
+      if(inputElement){
+       // flashGreen(inputElement);
+        chatbotInterface.inputElement = inputElement;
+      }
+    }
+    if(LLMResponse.xpath_conversation){
+      let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
+      if(historyElement){
+      //  flashGreen(historyElement);
+        chatbotInterface.historyElement = historyElement;
+        
+      }
+    }
+    if(LLMResponse.xpath_bot_selector){
+
+      let chatbotElement = getElementByXpath(LLMResponse.xpath_bot_selector,documentChatbot);
+
+      if(chatbotElement){
+       // flashGreen(chatbotElement);
+        chatbotInterface.messagesSelector = LLMResponse.xpath_bot_selector;
+
+
+
+      }
+    }
+    if(LLMResponse.xpath_microphone){
+      let microphoneElement = getElementByXpath(LLMResponse.xpath_microphone,documentChatbot);
+      if(microphoneElement){
+       // flashGreen(microphoneElement);
+        chatbotInterface.microphoneElement = microphoneElement;
+      }
+    }
+   
+    resolve(chatbotInterface);
+  });
+
+});
+}
+
+export async function  correctElementChatbot(element:string,documentChatbot:Document,elementName:string):Promise<ChatBotInterface>{
+  return new Promise((resolve, reject) => {
+
+
+  let LLMResponse:LocalLLMResponse | null = null;
+
+
+
+sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
+
+      
+
+    LLMResponse = response;  
+    switch(elementName){
+      case "windowElement":
+        if(LLMResponse.xpath_window){
+
+          let windowElement = getElementByXpath(LLMResponse.xpath_window,documentChatbot);
+          if(windowElement){
+            
+            chatbotInterface!.windowElement = windowElement;
+          }
+        }
+        break;
+      case "inputElement":
+        if (LLMResponse.xpath_input){
+          let inputElement = getElementByXpath(LLMResponse.xpath_input,documentChatbot);
+          
+          if(inputElement){
+      
+            chatbotInterface!.inputElement = inputElement;
+          }
+        }
+        break;
+      case "historyElement":
+        if(LLMResponse.xpath_conversation){
+          let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
+          if(historyElement){
+          //  flashGreen(historyElement);
+            chatbotInterface!.historyElement = historyElement;
+            
+          }
+        }
+        break;
+      case "messagesSelector":
+        if(LLMResponse.xpath_bot_selector){
+
+          let chatbotElement = getElementByXpath(LLMResponse.xpath_bot_selector,documentChatbot);
+
+          if(chatbotElement){
+           // flashGreen(chatbotElement);
+            chatbotInterface!.messagesSelector = LLMResponse.xpath_bot_selector;
+          }
+        }
+        break;
+      case "microphoneElement":
+        if(LLMResponse.xpath_microphone){
+          let microphoneElement = getElementByXpath(LLMResponse.xpath_microphone,documentChatbot);
+          if(microphoneElement){
+
+            chatbotInterface!.microphoneElement = microphoneElement;
+          }
+        }
+        break;
+    }
+    resolve(chatbotInterface!);
+  });
+
+});
+}
+
+
+function waitForIframeLoad(iframe):Promise<HTMLIFrameElement> {
+  return new Promise((resolve, reject) => {
+    let iframeDoc = iframe.contentDocument || iframe.contentWindow.document ;
+    console.log("Iframe Doc",iframeDoc);
+      if (iframeDoc && iframeDoc.readyState === "complete" ) {
+          // Se já está carregado
+          console.log("Iframe was already loaded");
+          resolve(iframe);
+      } else {
+        /*       
+        console.log("Iframe was not loaded, waiting for load event");
+          iframe.addEventListener("load", function onLoad() {
+              iframe.removeEventListener("load", onLoad); 
+              resolve(iframe);
+          });
+
+          setTimeout(() => reject(new Error("Iframe load timed out.")), 100000);
+          */
+          resolve(iframe);
+      }
+  });
+}
+
+
+export async function detectChatBotPopupMutation():Promise<HTMLElement>{
+
+  return new Promise((resolve, reject) => {
+    const observer = new MutationObserver((mutations) => {
+      let stopMutationLoop = false;
+      for (const mutation of mutations) {
+        if (stopMutationLoop) {
+          break
+        }
+        if (mutation.type === "attributes" ) {
+          
+          const element = mutation.target as HTMLElement;
+
+          // Filtrar por estilo específico
+          if (getComputedStyle(element).display !== "none") {
+            if(element.querySelectorAll("iframe").length > 0){
+             
+                    let iframes = element.querySelectorAll("iframe");
+                    console.log("Iframes: ", iframes);
+
+                    let resolved = false;
+                    for(let i = 0; i < iframes.length; i++){
+                    
+                    if(resolved){
+                
+                      break;
+                    }
+                     waitForIframeLoad(iframes[i] as HTMLIFrameElement).then((iframe) => {
+
+                      let iframeContent:Document | null = (iframe as HTMLIFrameElement).contentDocument;
+                    
+                      if(iframeContent){
+                      
+                        let score = scoringTreeChatbot(iframeContent.body as HTMLElement);
+
+                        if(score> 10){
+                          resolved = true;
+                          stopMutationLoop = true;
+                          observer.disconnect();
+                          resolve(iframeContent.body);
+
+                        }
+                      }
+                    }).catch((error) => {
+                      
+                      console.log("Iframe not loaded %s",error);
+                      });
+                 
+                    }
+
+              }else{ 
+                // iF element is not a iframe       
+                let score = scoringTreeChatbot(element);
+                  
+                        if(score> 10){
+                          stopMutationLoop = true;
+                          observer.disconnect();
+                          resolve(element);        
+
+                        }
+              }
+            
+          } 
+      }
+       
+      }
+    
+  });
+    
+    
+  observer.observe(document.body, {
+    childList: true,
+    attributes: true,
+    subtree: true
+});
+
+
+    setTimeout(() => {
+      observer.disconnect();
+      reject();
+    }, 15000);
+  });
+
+}
+
+
+
+function scoringTreeChatbot(element:HTMLElement):number{
+  let score:number = 0;
+  let elementToScore = element as HTMLElement;
+  /// is element loaded a iframeDocument or shadowRoot and is loaded?
+  let allElements = elementToScore.querySelectorAll("*");
+  let hasInputArea = elementToScore.querySelectorAll("input[type='text'], textarea, div[contenteditable='true']").length > 0;
+  //console.log("Has input area: ", hasInputArea);
+  if(!hasInputArea){
+    return 0;
+  }else{
+    score=+10;
+  }
+  // Get a list of Relant keywords and add them to regex word
+  let regex:RegExp = /[\s\S]*(chat|assistant|prompt|conversation)[\s\S]*/;
+
+
+  allElements.forEach((element) => {
+
+
+    // Check if there are tags that are relevant for a chatbot
+     element.localName.match(regex) ? score++ : null;
+
+    // Check if there are classes name that are relevant for a chatbot
+     element.classList.forEach((className) => {
+
+      if(className.match(regex)){
+         score++;
+      }
+      });
+
+      // Check if there are properties that are relevant for a chatbot
+      Array.from(element.attributes).forEach((attr) => {
+        if(attr.name.match(regex)){
+          score++;
+        }
+      });
+      
+
+      // get any data-* attributes that are relevant for a chatbot
+      for (const dataAtr in (element as HTMLElement ).dataset) {
+        if (dataAtr.match(regex)) {
+          score++;
+        }
+        if ((element as HTMLElement).dataset[dataAtr]!.match(regex)) {
+          score++;
+        }
+      }
+      
+  });
+
+  return score;
+}
+
 
 /**Function to request elements from LLM after cleaning the HTML to reduce size of tokens sent to LLM
- *  
+ *  @Deprecated
  **/ 
 export function requestElementsLLM() {
   // Obter window document
@@ -157,9 +446,14 @@ export function requestElementsLLM() {
 
 }
 
-function getElementByXpath(path: string, documentChatbot:Document): HTMLElement | null {
-  return documentChatbot.evaluate(path, documentChatbot, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue as HTMLElement;
+/*
+interface SelectorsRelevant {
+  classes: string[];
+  properties: string[];
+  tags: string[];
+  dataAttributes: string[];
 }
+
 
 function camelToKebabCase(camelCaseStr) {
   return camelCaseStr
@@ -167,82 +461,6 @@ function camelToKebabCase(camelCaseStr) {
       .toLowerCase();            
 }
 
-function identifyElementsChatbot(element:Element){
-  const documentChatbot = element.ownerDocument;
-
-  let LLMResponse:LocalLLMResponse;
-
-let clonedBody = cleanHTML(element);
-
-sendPromptTLocalLLM(clonedBody).then((response: LocalLLMResponse) => {
-    chatbotInterface = {
-      inputElement: null,
-      messagesSelector: '',
-      historyElement: null,
-      microphoneElement: null
-    };
-      
-
-    LLMResponse = response;
-    if (LLMResponse.xpath_input){
-      let inputElement = getElementByXpath(LLMResponse.xpath_input,documentChatbot);
-      
-      if(inputElement){
-        flashGreen(inputElement);
-        chatbotInterface.inputElement = inputElement;
-      }
-    }
-    if(LLMResponse.xpath_conversation){
-      let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
-      if(historyElement){
-        flashGreen(historyElement);
-        chatbotInterface.historyElement = historyElement;
-        
-      }
-    }
-    if(LLMResponse.xpath_bot_selector){
-
-      let chatbotElement = getElementByXpath(LLMResponse.xpath_bot_selector,documentChatbot);
-
-      if(chatbotElement){
-        flashGreen(chatbotElement);
-        chatbotInterface.messagesSelector = LLMResponse.xpath_bot_selector;
-
-
-
-      }
-    }
-    if(LLMResponse.xpath_microphone){
-      let microphoneElement = getElementByXpath(LLMResponse.xpath_microphone,documentChatbot);
-      if(microphoneElement){
-        flashGreen(microphoneElement);
-        chatbotInterface.microphoneElement = microphoneElement;
-      }
-    }
-   
-  });
-}
-
-
-
-export function detectChatbotSelection() {
-  // add mutation Observer
-  observeForMutation().then((identify:HTMLElement) => {
-    console.log("Found probable chatbot element, and it is going to send to LLM");
-   
-    identifyElementsChatbot(identify as HTMLElement);
-
-
-   }).catch(() => {
-
-    console.log("Mutation observer disconnected");
-   });
-  // wait for identified mutation
-  
-  
-
-
-}
 
 
 function getElements(selectors:SelectorsRelevant):Set<Element>{
@@ -274,6 +492,7 @@ function getElements(selectors:SelectorsRelevant):Set<Element>{
 
 
 }
+  
 
 function getFilteredSelectors(element: HTMLElement):Set<Element>  {
 
@@ -365,193 +584,5 @@ function addMutationIframe(iframe:HTMLIFrameElement){
         console.error('Failed to access iframe document.');
     }
 });
-
-}
-
-function waitForIframeLoad(iframe):Promise<HTMLIFrameElement> {
-  return new Promise((resolve, reject) => {
-    let iframeDoc = iframe.contentDocument || iframe.contentWindow.document ;
-    console.log("Iframe Doc",iframeDoc);
-      if (iframeDoc && iframeDoc.readyState === "complete" ) {
-          // Se já está carregado
-          console.log("Iframe was already loaded");
-          resolve(iframe);
-      } else {
-        console.log("Iframe was not loaded, waiting for load event");
-          iframe.addEventListener("load", function onLoad() {
-              iframe.removeEventListener("load", onLoad); 
-              resolve(iframe);
-          });
-
-          setTimeout(() => reject(new Error("Iframe load timed out.")), 100000);
-      }
-  });
-}
-/*
-function observeNewMessages(element:HTMLElement){
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          console.log('Added Nodes:', mutation);
-          
-      }
-    });
-    });
-  });
-  observer.observe(element, {
-    childList: true,
-    attributes: true,
-    subtree: true
-});
-
 }
 */
-function observeForMutation():Promise<HTMLElement>{
-
-  return new Promise((resolve, reject) => {
-    const observer = new MutationObserver((mutations) => {
-      let stopMutationLoop = false;
-      for (const mutation of mutations) {
-        if (stopMutationLoop) {
-          break
-        }
-        if (mutation.type === "attributes" ) {
-          
-          const element = mutation.target as HTMLElement;
-
-          // Filtrar por estilo específico
-          if (getComputedStyle(element).display !== "none") {
-            if(element.querySelectorAll("iframe").length > 0){
-             
-                    let iframes = element.querySelectorAll("iframe");
-                    console.log("Iframes: ", iframes);
-
-                    let resolved = false;
-                    for(let i = 0; i < iframes.length; i++){
-                    
-                    if(resolved){
-                
-                      break;
-                    }
-                     waitForIframeLoad(iframes[i] as HTMLIFrameElement).then((iframe) => {
-
-                      let iframeContent:Document | null = (iframe as HTMLIFrameElement).contentDocument;
-                    
-                      if(iframeContent){
-                      
-                        let score = scoringTreeChatbot(iframeContent.body as HTMLElement);
-
-                        if(score> 10){
-                          resolved = true;
-                          stopMutationLoop = true;
-                          observer.disconnect();
-                          resolve(iframeContent.body);
-
-                        }
-                      }
-                    }).catch((error) => {
-                      
-                      console.log("Iframe not loaded %s",error);
-                      });
-                 
-              
-                    }
-
-
-              }else{ 
-                // iF element is not a iframe
-       
-                let score = scoringTreeChatbot(element as HTMLElement);
-                  
-                        if(score> 10){
-                          stopMutationLoop = true;
-                          observer.disconnect();
-                          resolve(element);        
-
-                        }
-              }
-            
-          } 
-      }
-       
-      }
-    
-  });
-    
-    
-  observer.observe(document.body, {
-    childList: true,
-    attributes: true,
-    subtree: true
-});
-
-
-    setTimeout(() => {
-      observer.disconnect();
-      reject();
-    }, 15000);
-  });
-
-}
-
-
-
-
-
-
-function scoringTreeChatbot(element:HTMLElement):number{
-  let score:number = 0;
-  let elementToScore = element as HTMLElement;
-  /// is element loaded a iframeDocument or shadowRoot and is loaded?
-  let allElements = elementToScore.querySelectorAll("*");
-  let hasInputArea = elementToScore.querySelectorAll("input[type='text'], textarea, div[contenteditable='true']").length > 0;
-  //console.log("Has input area: ", hasInputArea);
-  if(!hasInputArea){
-    return 0;
-  }else{
-    score=+10;
-  }
-  // Get a list of Relant keywords and add them to regex word
-  let regex:RegExp = /[\s\S]*(chat|assistant|prompt|conversation)[\s\S]*/;
-
-
-  allElements.forEach((element) => {
-
-
-    // Check if there are tags that are relevant for a chatbot
-     element.localName.match(regex) ? score++ : null;
-
-    // Check if there are classes name that are relevant for a chatbot
-     element.classList.forEach((className) => {
-
-      if(className.match(regex)){
-         score++;
-      }
-      });
-
-      // Check if there are properties that are relevant for a chatbot
-      Array.from(element.attributes).forEach((attr) => {
-        if(attr.name.match(regex)){
-          score++;
-        }
-      });
-      
-
-      // get any data-* attributes that are relevant for a chatbot
-      for (const dataAtr in (element as HTMLElement ).dataset) {
-        if (dataAtr.match(regex)) {
-          score++;
-        }
-        if ((element as HTMLElement).dataset[dataAtr]!.match(regex)) {
-          score++;
-        }
-      }
-      
-  });
-
-  return score;
-}
-
-
-

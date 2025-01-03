@@ -8,11 +8,25 @@ export interface ElementSelector {
   resetSelection: () => void;
 }
 
-
-
 export interface LLMResponse {
   xpath_chatbot: string | null;
   xpath_microphone: string | null;
+}
+
+export interface LocalLLMResponse {
+  xpath_window: string | null;
+  xpath_input: string | null;
+  xpath_conversation: string | null;
+  xpath_bot_selector: string | null;
+  xpath_microphone: string | null;
+}
+
+export interface ChatBotInterface  {
+  windowElement: HTMLElement | null;
+  inputElement: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
+  messagesSelector: string ;
+  historyElement: HTMLElement | null;
+  microphoneElement: HTMLElement | null;
 }
 
 export interface ResponseStore {

@@ -1,7 +1,7 @@
 import { sendAndReceiveMessage } from './chatInteraction';
-import { elementSelector, getStoredChatbotElement } from './selectChatbot';
-import {detectChatbotSelection,chatbotInterface, requestElementsLLM, ChatBotInterface} from './detectChatbot';
-import { ResponseStore, ChatResponse, Summary } from '../utils/types';
+import { elementSelector, getStoredChatbotElement, setGreen, unsetGreen } from './selectChatbot';
+import {chatbotInterface,detectChatBotPopupMutation,identifyElementsChatbot, correctElementChatbot,cleanHTML } from './detectChatbot';
+import { ResponseStore,ChatBotInterface, ChatResponse, Summary } from '../utils/types';
 import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
 import { microphoneSelector, getStoredMicrophoneButton } from './selectVoiceinput';
@@ -11,11 +11,14 @@ import {
   CUIChecksReport,
   CUIChecks
 } from '@qualweb/cui-checks';
+
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
 let summary: Summary;
 let chatbotSummary: Summary;
-
+let currentVerification: HTMLElement[] | HTMLElement | null = null;
+let HTMLCode: string = '';
+let documentOwner:Document;
 export function getSentMessage(): string {
   return sentMessage;
 }
@@ -28,7 +31,7 @@ export function setSentMessage(message: string): void {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
-  const chatbotElement = getStoredChatbotElement();
+
   switch (request.action) {
     case 'typeMessages':
       handleTypeMessages(request, chatbotInterface).then(chatResponses => {
@@ -42,16 +45,96 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "requestElementLLM":
       console.log("started Selection LLM");
-      showMessage("Please open the chatbot");    
-      detectChatbotSelection();
+      showMessage("Please open the chatbot");
+      (async () => {
+        
+       let htmlElement = await detectChatBotPopupMutation();
+       documentOwner = htmlElement.ownerDocument;
+       HTMLCode = cleanHTML(htmlElement);
+       
+      const chatbot = await identifyElementsChatbot(HTMLCode,documentOwner);
+      let chatBotElements = {};
+      if(chatbot){
+        chatBotElements = {
+          inputElement: Boolean(chatbot.inputElement),
+          messagesSelector: Boolean(chatbot.messagesSelector),
+          historyElement: Boolean(chatbot.historyElement),
+          microphoneElement: Boolean(chatbot.microphoneElement),
+          windowElement: Boolean(chatbot.windowElement)
+        };
+      }
+      sendResponse({ status: 'Chatbot elements identified', chatbot:chatBotElements });
+      })();
+      return true;
+    case "startVerification":
+        let elementName = request.element;
+        if (elementName === "windowElement") {
+          currentVerification = chatbotInterface!.windowElement!;
+          setGreen(chatbotInterface!.windowElement!);
+        }else if (elementName === "inputElement") {
+          currentVerification = chatbotInterface!.inputElement!;
+          setGreen(chatbotInterface!.inputElement!);
+        }else if (elementName === "historyElement") {
+          currentVerification = chatbotInterface!.historyElement!;
+          setGreen(chatbotInterface!.historyElement!);
+        }else if (elementName === "microphoneElement") {
+          currentVerification = chatbotInterface!.microphoneElement!;
+          setGreen(chatbotInterface!.microphoneElement!);
+        }else if (elementName === "messagesSelector") {
+          const result = documentOwner.evaluate(chatbotInterface!.messagesSelector, documentOwner, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+          const elements:HTMLElement[] = [];
+
+          const numNodes = result.snapshotLength;
+          for (let i = 0; i < numNodes; i++) {
+            const node = result.snapshotItem(i);
+            if (node instanceof HTMLElement) { 
+              elements.push(node);
+            }
+          }
+          currentVerification = elements;
+          currentVerification.forEach((element) => {
+            setGreen(element);
+          });
+        }
+        sendResponse({ status: 'Please confirm the selection of the chatbot window' });
       break;
+
+    case "endSucessfulVerification":
+     if(currentVerification){
+       unsetGreen(currentVerification);
+      sendResponse({ status: 'confirmed' });
+     }else{
+      sendResponse({ status: 'Nothing to confirm' });
+     }
+     
+      break;
+    case "correctElementSelection":
+      unsetGreen(currentVerification!);
+      currentVerification = null;
+      (async () => {
+      let elementToCorrect = request.element;
+      let chatbotCorrection = await correctElementChatbot(HTMLCode,documentOwner,elementToCorrect);
+      let chatBotElements = {};
+      if(chatbotCorrection){
+        chatBotElements = {
+          inputElement: Boolean(chatbotCorrection.inputElement),
+          messagesSelector: Boolean(chatbotCorrection.messagesSelector),
+          historyElement: Boolean(chatbotCorrection.historyElement),
+          microphoneElement: Boolean(chatbotCorrection.microphoneElement),
+          windowElement: Boolean(chatbotCorrection.windowElement)
+        };
+      }
+      sendResponse({ status: 'Chatbot element corrected', chatbot:chatBotElements });
+    })();
+     
+     return true;
     case "startMicSelection":
       microphoneSelector.startMicrophoneSelection();
       break;
     case "startEvaluation":
       summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       // only assign chatbotsummary is chatbot element is not null
-      if (chatbotInterface?.historyElement) {
+      if (chatbotInterface!.windowElement) {
         chatbotSummary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       }
       sendResponse([summary, chatbotSummary]);
@@ -59,7 +142,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case "startVoiceInput":
       
       /// start tts generation
-      handleVoiceInput(request, chatbotElement).then(chatResponses => {
+      handleVoiceInput(request, null).then(chatResponses => {
         sendResponse({ status: 'Messages Audio input send and responses received', responses: chatResponses });
       });
       break;
@@ -116,7 +199,7 @@ async function handleVoiceInput(request: {messages: string[]}, chatbotElement: H
     const message = request.messages[i];
     let response: ChatResponse;
     
-    getStoredMicrophoneButton()!.click();
+    chatbotInterface?.microphoneElement!.click();
     await new Promise(resolve => setTimeout(resolve, 500));
     // Logic for voice input
     await sendMessageToBackground("speakText", message);
