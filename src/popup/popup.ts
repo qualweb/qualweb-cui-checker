@@ -10,6 +10,22 @@ new Vue({
   render: h => h(App)
 }).$mount('#app');
 
+(async () => {
+  const [tab] = await chrome.tabs.query({
+    active: true,
+    lastFocusedWindow: true
+  });
+
+  const tabId = tab.id;
+      const windowId = (await chrome.windows.getCurrent()).id!;
+      await chrome.sidePanel.open({ tabId, windowId });
+      await chrome.sidePanel.setOptions({
+        tabId,
+        path: 'src/popup/popup.html',
+        enabled: true
+      });
+    })();
+
 document.addEventListener('DOMContentLoaded', () => {
   const chatButton = document.getElementById('chatButton');
   if (chatButton) {
