@@ -58,20 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const requestLLMButton = document.getElementById('requestLLMButton');
-  if (requestLLMButton) {
-    requestLLMButton.addEventListener('click', () => {
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        const activeTab = tabs[0];
-        if (activeTab.id) {
-          chrome.tabs.sendMessage(activeTab.id, {action: "requestElementLLM"});
-  
-        }
-      });
-    });
-  }
-
-
   const identifyMicButton = document.getElementById('identifyMicButton');
   if (identifyMicButton) {
     identifyMicButton.addEventListener('click', () => {

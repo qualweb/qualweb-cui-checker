@@ -5,7 +5,9 @@
       <div class="button-container">
         <button id="chatButton">Send and Receive Messages</button>
         <button id="identifyButton">Identify Chatbot</button>
-        <button id="requestLLMButton">Identify Chatbot with LLM</button>
+        <button id="requestLLMButton" @click="onRequestLLMClick">
+          Identify Chatbot with LLM
+        </button>
         <button id="identifyMicButton">Identify Voice Input Button</button>
         <button id="voiceInputButton">
           Input Voice and Listen for Response
@@ -78,6 +80,9 @@ export default {
     ...mapActions(["setEvaluated"]),
     onEvaluateClick() {
       this.$router.push("/loading");
+    },
+    onRequestLLMClick() {
+      this.$router.push("/detecting-chatbot");
     },
     async updateEvaluated(idValue, value) {
       await this.setEvaluated({

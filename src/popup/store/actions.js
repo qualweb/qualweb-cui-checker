@@ -82,6 +82,10 @@ export const setEvaluateChatbot = ({ commit }, payload) => {
   commit(types.SETEVALUATECHATBOT, payload);
 };
 
+export const setDetectingChatbot = ({ commit }, payload) => {
+  commit(types.SETDETECTINGCHATBOT, payload);
+};
+
 export const reset = ({ commit }) => {
   commit(types.RESET);
 };

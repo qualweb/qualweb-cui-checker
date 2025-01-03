@@ -84,4 +84,7 @@ export default {
   [types.SETEVALUATECHATBOT](state, payload) {
     state.evaluateChatbot = payload;
   },
+  [types.SETDETECTINGCHATBOT](state, payload) {
+    state.detectingChatbot = payload;
+  },
 };

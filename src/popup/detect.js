@@ -1,94 +1,3 @@
-async function startEvaluation() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "startEvaluation" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(response);
-            }
-          }
-        );
-      } else {
-        reject(new Error("No active tab found"));
-      }
-    });
-  });
-}
-
-async function evaluateACT() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateACT" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
-}
-
-async function evaluateWCAG() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateWCAG" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
-}
-
-async function evaluateCUI() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateCUI" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
-}
-
-function endingEvaluation() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "endingEvaluation" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
-}
-
-async function getUrl() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      resolve(tabs[0].url);
-    });
-  });
-}
-
 async function startDetectingChatbot() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -116,7 +25,7 @@ async function startDetectingChatbot() {
   });
 }
 
-async function startCorrectionChatbot(elementName) {
+async function startVerificationWindowElement() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -126,7 +35,7 @@ async function startCorrectionChatbot(elementName) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "correctElementSelection", element: elementName },
+          { action: "startVerifyElementWindow" },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
@@ -143,7 +52,7 @@ async function startCorrectionChatbot(elementName) {
   });
 }
 
-async function startVerificationElement(elementName) {
+async function startVerificationInputElement() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -153,7 +62,7 @@ async function startVerificationElement(elementName) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "startVerification", element: elementName },
+          { action: "startVerifyElementInput" },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
@@ -169,7 +78,8 @@ async function startVerificationElement(elementName) {
     });
   });
 }
-async function endVerificationElement(elementName) {
+
+async function startVerificationConversationElement() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -179,7 +89,61 @@ async function endVerificationElement(elementName) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "endSucessfulVerification", element: elementName },
+          { action: "startVerifyElementConversationWindow" },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error(chrome.runtime.lastError);
+              reject(chrome.runtime.lastError);
+            } else {
+              resolve(response);
+            }
+          }
+        );
+      } else {
+        reject(new Error("No active tab found"));
+      }
+    });
+  });
+}
+
+async function startVerificationChatMessageElements() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        reject(chrome.runtime.lastError);
+      }
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { action: "startVerifyElementMessages" },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              console.error(chrome.runtime.lastError);
+              reject(chrome.runtime.lastError);
+            } else {
+              resolve(response);
+            }
+          }
+        );
+      } else {
+        reject(new Error("No active tab found"));
+      }
+    });
+  });
+}
+
+async function startVerificationMicElement() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        reject(chrome.runtime.lastError);
+      }
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(
+          tabs[0].id,
+          { action: "startVerifyElementMicrophone" },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
