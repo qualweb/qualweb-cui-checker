@@ -5,7 +5,18 @@ chrome.sidePanel
   .catch((error) => console.error(error));
 });
 
-
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.id) {
+    chrome.sidePanel.open({ tabId: tab.id });
+     chrome.sidePanel.setOptions({
+      tabId:tab.id!,
+      path: 'src/popup/popup.html',
+      enabled: true
+    });
+  } else {
+    console.error('Tab ID not found.');
+  }
+});
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'speakText') {
@@ -23,14 +34,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                    });
 
     return true; 
-  } else if (request.action === "startEvaluation") {
-    // Perform your evaluation logic here
-    // Then send a response
-    console.log('startEvaluation received');
-    sendResponse({status: "Evaluation complete", results: 'bla'});
-    return true; // Indicates that the response is sent asynchronously
-  }
-  // ... other message handling
+  } 
 });
 
 

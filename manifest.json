@@ -6,9 +6,6 @@
   "background": {
     "service_worker": "dist/background.bundle.js"
   },
-  "side_panel": {
-    "default_path": "src/popup/popup.html"
-  },
   "action": {
     "default_title": "Click to open panel"
   },
@@ -18,6 +15,7 @@
     "activeTab",
     "scripting",
     "audioCapture",
+    "tabs",
     "tts",
     "ttsEngine"
   ],
