@@ -69,7 +69,22 @@ interface Rule {
   mapping: string;
   description: string;
   metadata: RuleMetadata;
-  results: any[];
+  results: Result[];
+}
+
+interface Result{
+  attributes: string[];
+  description: string;
+  mapping: string;
+  elements:   [];
+  resultCode: string;
+  veridict: string;
+}
+
+interface ElementTest {
+  acessibleName: string;
+  htmlCode: string;
+  pointer: string;
 }
 
 interface Report {
@@ -84,4 +99,4 @@ interface Report {
   };
 }
 
-export { Summary, Rule, RuleMetadata, Report };
+export { Summary, Rule, RuleMetadata, Report , Result ,ElementTest};

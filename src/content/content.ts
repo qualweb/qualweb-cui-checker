@@ -147,15 +147,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       break;
     case "evaluateACT":
-      const actResult = evaluateACT(chatbotInterface!.historyElement);
+      const actResult = evaluateACT(chatbotInterface!.windowElement);
       sendResponse(actResult);
       break;
     case "evaluateWCAG":
-      const wcagResult = evaluateWCAG(chatbotInterface!.historyElement);
+      const wcagResult = evaluateWCAG(chatbotInterface!.windowElement);
       sendResponse(wcagResult);
       break;
     case "evaluateCUI":
-      const cuiResult = evaluateCUI(chatbotInterface!.historyElement);
+      const cuiResult = evaluateCUI(chatbotInterface!.windowElement);
       sendResponse(cuiResult);
       break;
     case "endingEvaluation":

@@ -1,4 +1,4 @@
-import { Summary, Rule, Report } from "./types";
+import { Summary, Rule, Report, Result ,ElementTest} from "./types";
 
 function addValuesToSummary(summary: Summary, report: Report) {
   summary.passed += report.metadata.passed;
@@ -8,7 +8,7 @@ function addValuesToSummary(summary: Summary, report: Report) {
 }
 
 function filterResults(result: Report, chatbotElement: HTMLElement): Report {
-  const filteredAssertions: { [rule: string]: Rule } = {};
+  let filteredAssertions: { [rule: string]: Rule } = {};
   let newMetadata = { passed: 0, failed: 0, warning: 0, inapplicable: 0 };
 
   for (const [ruleCode, rule] of Object.entries(result.assertions)) {
@@ -18,9 +18,27 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
     const isRelevant = targetElements.some(element => 
       chatbotElement.querySelector(element) !== null
     );
-
+    
     if (isRelevant) {
+      let filteredResults: Result[] =[];
+      (rule.results as Result[]).forEach((result) => {
+        let resultFiltered = result;
+        let elements: ElementTest[];
+       
+        elements = (result.elements as ElementTest[]).filter((element) => {
+          if (chatbotElement.querySelector(element.pointer) !== null) {
+         
+            return element;
+          }
+        });
+
+        if( elements.length === 0) return;
+        resultFiltered.elements = elements as [];
+        filteredResults.push(resultFiltered);
+      });
+
       filteredAssertions[ruleCode] = rule;
+      filteredAssertions[ruleCode].results = filteredResults;
       
       // Update the new metadata
       newMetadata.passed += (rule.metadata.passed > 0) ? 1:0;
@@ -28,7 +46,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
       newMetadata.warning += (rule.metadata.warning > 0) ? 1:0;
       newMetadata.inapplicable += (rule.metadata.inapplicable > 0) ? 1:0;
       
-      // console.log(`Rule ${ruleCode} is relevant for this chatbot`);
+
     }
   }
 
