@@ -245,12 +245,14 @@ function evaluateACT(chatbotElement: HTMLElement|null) {
   const excludedRules = [
     'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
   ];
-  window.act = new ACTRules({ translate: locale_en, fallback: locale_en });
+  let sourceHtml = document.documentElement.outerHTML;
+
+  window.act = new ACTRulesRunner({ translate: locale_en, fallback: locale_en });
   // window.act.configure({ exclude: excludedRules })
   //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
-  window.act.executeAtomicRules();
-  window.act.executeCompositeRules();
-  actResult = window.act.getReport();
+  window.act.test({ sourceHtml });
+  
+  actResult =  window.act.getReport();
 
   addValuesToSummary(summary, actResult);
 
@@ -274,10 +276,10 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
   const excludedTechniques = [
     'QW-WCAG-T14', 'QW-WCAG-T15', 'QW-WCAG-T16', 'QW-WCAG-T17', 'QW-WCAG-T18', 'QW-WCAG-T19', 'QW-WCAG-T20', 'QW-WCAG-T21', 'QW-WCAG-T22'
   ];
-  window.wcag = new WCAGTechniques({ translate: locale_en, fallback: locale_en });
-
+  window.wcag = new WCAGTechniquesRunner({ translate: locale_en, fallback: locale_en });
+  let sourceHtml = document.documentElement.outerHTML;
   // window.wcag.configure({ exclude: excludedTechniques })
-  htmlResult = window.wcag.execute(false);
+  htmlResult = window.wcag.test({sourceHtml}).getReport();
   addValuesToSummary(summary, htmlResult);
   result = htmlResult.assertions;
 
