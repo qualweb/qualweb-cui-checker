@@ -1,12 +1,13 @@
-import { showMessage } from '../utils/helpers';
-import { ElementSelector, LLMResponse } from '../utils/types';
-import axios from 'axios';
+import { showMessage } from "../utils/helpers";
+import { ElementSelector, LLMResponse } from "../utils/types";
+import axios from "axios";
 
-const LLM_URL = 'https://api.openai.com/v1/chat/completions';
-const LLM_LOCAL_URL = 'http://localhost:11434/api/generate';
-const API_KEY = '';
+const LLM_URL = "https://api.openai.com/v1/chat/completions";
+const LLM_LOCAL_URL = "http://localhost:11434/api/generate";
+const API_KEY = "";
 
 interface LocalLLMResponse {
+  xpath_window: string | null;
   xpath_input: string | null;
   xpath_conversation: string | null;
   xpath_bot_selector: string | null;
@@ -33,93 +34,82 @@ Here is the structure for the response:
 
 HTML to Analyze: `;
 
-
 /** Function to send the prompt to LLM and get the response
- * 
- * @param body 
- * @returns 
+ *
+ * @param body
+ * @returns
  */
 
-const sendPromptToLLM = async (body:string): Promise<LLMResponse>  => {
+const sendPromptToLLM = async (body: string): Promise<LLMResponse> => {
+  let promptToSend = `${prompt} \n ${body}`;
 
-let promptToSend = `${prompt} \n ${body}`;
-
-
-  return axios.post(LLM_URL, 
-    {
-      model: 'gpt-4o',
-      messages: [{ role: 'user', content: promptToSend }],
-      temperature: 0.3,
-      top_p: 0.9
-      
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${API_KEY}`,
-      },
-    }
-  ).then((response) => {
-    
-    const reply = response.data.choices[0].message.content;
-
-    const parsedReply: LLMResponse = JSON.parse(reply);
-    
-    return parsedReply;
-
-  }).catch(() => {
-
-
-    return {
-      xpath_chatbot: null,
-      xpath_microphone: null
-    } as LLMResponse;
-
-  });
-
-}
-
-
-const sendPromptTLocalLLM = async (body:string): Promise<LocalLLMResponse>  => {
-
-  let promptToSend = `${body}`;
-  
-  
-    return axios.post(LLM_LOCAL_URL, 
+  return axios
+    .post(
+      LLM_URL,
       {
-        model: 'HTML2',
-        prompt: promptToSend,
-        format: "json",
-        stream: false,
-        
+        model: "gpt-4o",
+        messages: [{ role: "user", content: promptToSend }],
+        temperature: 0.3,
+        top_p: 0.9,
       },
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
         },
       }
-    ).then((response) => {
-     
-      const reply = response.data.response;
-  
-      console.log(reply);
-      
-      const parsedReply: LocalLLMResponse = JSON.parse(reply);
-    
+    )
+    .then((response) => {
+      const reply = response.data.choices[0].message.content;
+
+      const parsedReply: LLMResponse = JSON.parse(reply);
+
       return parsedReply;
-    }).catch(() => {
-  
-  
+    })
+    .catch(() => {
       return {
+        xpath_chatbot: null,
+        xpath_microphone: null,
+      } as LLMResponse;
+    });
+};
+
+const sendPromptTLocalLLM = async (body: string): Promise<LocalLLMResponse> => {
+  let promptToSend = `${body}`;
+
+  return axios
+    .post(
+      LLM_LOCAL_URL,
+      {
+        model: "HTML2",
+        prompt: promptToSend,
+        format: "json",
+        stream: false,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((response) => {
+      const reply = response.data.response;
+
+      console.log(reply);
+
+      const parsedReply: LocalLLMResponse = JSON.parse(reply);
+
+      return parsedReply;
+    })
+    .catch(() => {
+      return {
+        xpath_window: null,
         xpath_input: null,
         xpath_conversation: null,
         xpath_bot_selector: null,
-        xpath_microphone: null
-
+        xpath_microphone: null,
       } as LocalLLMResponse;
-  
     });
-  
-  }
+};
 
-export {sendPromptToLLM,sendPromptTLocalLLM}
+export { sendPromptToLLM, sendPromptTLocalLLM };

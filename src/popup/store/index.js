@@ -27,6 +27,7 @@ export const defaultState = {
     inapplicable: false,
   },
   evaluateChatbot: false,
+  detectingChatbot: false,
 };
 
 export default new Vuex.Store({
@@ -50,6 +51,7 @@ export default new Vuex.Store({
       inapplicable: false,
     },
     evaluateChatbot: false,
+    detectingChatbot: false,
   },
 
   getters,

@@ -74,6 +74,16 @@
               :value="filter.html"
             ></Checkbox>
           </li>
+          <li>
+            <Checkbox
+              :idValue="cuiIdValue"
+              :label="cuiLabel"
+              :bgColor="bgColor"
+              :checkColor="checkColor"
+              @checkBoxChanged="updateFilter"
+              :value="filter.cui"
+            ></Checkbox>
+          </li>
         </ul>
       </div>
       <div class="column">
@@ -108,6 +118,8 @@ export default {
       actLabel: "ACT Rules",
       tecniquesIdValue: "html",
       tecniquesLabel: "WCAG 2.1 Techniques",
+      cuiIdValue: "cui",
+      cuiLabel: "CUI Rules",
       chatbotIdValue: "chatbot",
       chatbotLabel: "Chatbot",
       passedIdValue: "passed",

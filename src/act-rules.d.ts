@@ -1,39 +1,39 @@
-
 declare global {
-  
-  class ACTRules {
-    constructor(options: { translate: any, fallback: any });
-    configure(options: { rules?: string[], exclude?: string[] }): void;
-    executeAtomicRules(): void;
-    executeCompositeRules(): void;
+  class CUIChecksRunner {
+    constructor(
+      moduleOptions: ModuleOptions,
+      translationOptions: { translate: any; fallback: any }
+    );
+    test(data: TestingData): any;
+    getReport(): CUIChecksReport;
+  }
+  interface QWCUI_Selectors {
+    QW_CC_WINDOW: string;
+    QW_CC_DIALOG: string;
+    QW_CC_MESSAGES: string;
+    QW_CC_MIC: string;
+    QW_CC_INPUT: string;
+  }
+
+  class ACTRulesRunner {
+    constructor(options: { translate: any; fallback: any });
+    configure(options: { rules?: string[]; exclude?: string[] }): void;
+    test(data: TestingData): any;
+    testSpecial(): any;
     getReport(): ACTReport;
   }
 
-  class WCAGTechniques {
+  class WCAGTechniquesRunner {
     constructor(locale: any, options?: any);
-    execute(newTabWasOpen: boolean, validation?: any): any;
-    configure(options: { techniques?: string[], exclude?: string[] }): void;
-  }
-
-  class BestPractices {
-    constructor(locale: Translate, options?: BPOptions);
-    configure(options: BPOptions): void;
-    resetConfiguration(): void;
-    execute(): BestPracticesReport;
-  }
-
-  class CUIChecks  {
-    constructor(locale: Translate, options?: CUIOptions)
-    configure(options: CUIOptions): void;
-    resetConfiguration(): void;
-    getReport(): CUIChecksReport;
+    configure(options: { techniques?: string[]; exclude?: string[] }): void;
+    test(data: TestingData): any;
+    getReport(): any;
   }
 
   interface Window {
-    wcag: WCAGTechniques;
-    act: ACTRules;
-    bp: BestPractices;
-    cui: CUIChecks;
+    wcag: WCAGTechniquesRunner;
+    act: ACTRulesRunner;
+    cui: CUIChecksRunner;
     webkitAudioContext: typeof AudioContext;
   }
 }
@@ -45,7 +45,6 @@ interface CUIChecksReport {
     failed: number;
     inapplicable: number;
   };
-
 }
 interface ACTReport {
   assertions: Record<string, ACTRule>; // Specify the type of assertions

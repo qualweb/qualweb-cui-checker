@@ -1,21 +1,23 @@
 import { sendAndReceiveMessage } from './chatInteraction';
-import { elementSelector, getStoredChatbotElement } from './selectChatbot';
-import {detectChatbotSelection,chatbotInterface, requestElementsLLM, ChatBotInterface} from './detectChatbot';
-import { ResponseStore, ChatResponse, Summary } from '../utils/types';
+import { elementSelector, setGreen, unsetGreen } from './selectChatbot';
+import {chatbotInterface,detectChatBotPopupMutation,identifyElementsChatbot, correctElementChatbot,cleanHTML } from './detectChatbot';
+import { ResponseStore,ChatBotInterface, ChatResponse, Summary } from '../utils/types';
 import { locale_en } from '../locales/en';
 import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
 import { microphoneSelector, getStoredMicrophoneButton } from './selectVoiceinput';
 import { showMessage } from '../utils/helpers';
-import {
-  CUIOptions,
-  CUIChecksReport,
-  CUIChecks
-} from '@qualweb/cui-checks';
+
+
+let tabRoute = null;
+
+
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
 let summary: Summary;
 let chatbotSummary: Summary;
-
+let currentVerification: HTMLElement[] | HTMLElement | null = null;
+let HTMLCode: string = '';
+let documentOwner:Document;
 export function getSentMessage(): string {
   return sentMessage;
 }
@@ -28,8 +30,17 @@ export function setSentMessage(message: string): void {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
-  const chatbotElement = getStoredChatbotElement();
+
   switch (request.action) {
+    case "saveRoute":
+      tabRoute = request.route;
+      sendResponse({ status: "route saved" });
+      console.log("Route saved:", tabRoute);
+      break;
+    case "getRoute":
+      console.log("getRoute ", tabRoute);
+      sendResponse({ route: tabRoute });
+      break;
     case 'typeMessages':
       handleTypeMessages(request, chatbotInterface).then(chatResponses => {
         console.log(chatResponses);
@@ -42,16 +53,99 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "requestElementLLM":
       console.log("started Selection LLM");
-      showMessage("Please open the chatbot");    
-      detectChatbotSelection();
+      showMessage("Please open the chatbot");
+      (async () => {
+        
+       let htmlElement = await detectChatBotPopupMutation();
+       documentOwner = htmlElement.ownerDocument;
+       HTMLCode = cleanHTML(htmlElement);
+       
+      const chatbot = await identifyElementsChatbot(HTMLCode,documentOwner);
+      let chatBotElements = {};
+      if(chatbot){
+        chatBotElements = {
+          inputElement: Boolean(chatbot.inputElement),
+          messagesSelector: Boolean(chatbot.messagesSelector),
+          dialogElement: Boolean(chatbot.dialogElement),
+          microphoneElement: Boolean(chatbot.microphoneElement),
+          windowElement: Boolean(chatbot.windowElement)
+        };
+      }
+   
+      sendResponse({ status: 'Chatbot elements identified', chatbot:chatBotElements });
+      })();
+      return true;
+    case "startVerification":
+        let elementName = request.element;
+        console.log("chatBotElements and selectors ",chatbotInterface!.selectors);
+        if (elementName === "windowElement") {
+          currentVerification = chatbotInterface!.windowElement!;
+          setGreen(chatbotInterface!.windowElement!);
+         
+        }else if (elementName === "inputElement") {
+          currentVerification = chatbotInterface!.inputElement!;
+          setGreen(chatbotInterface!.inputElement!);
+        }else if (elementName === "dialogElement") {
+          currentVerification = chatbotInterface!.dialogElement!;
+          setGreen(chatbotInterface!.dialogElement!);
+        }else if (elementName === "microphoneElement") {
+          currentVerification = chatbotInterface!.microphoneElement!;
+          setGreen(chatbotInterface!.microphoneElement!);
+        }else if (elementName === "messagesSelector") {
+          const result = documentOwner.evaluate(chatbotInterface!.messagesSelector, documentOwner, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+          const elements:HTMLElement[] = [];
+
+          const numNodes = result.snapshotLength;
+          for (let i = 0; i < numNodes; i++) {
+            const node = result.snapshotItem(i);
+            if (node instanceof HTMLElement) { 
+              elements.push(node);
+            }
+          }
+          currentVerification = elements;
+          currentVerification.forEach((element) => {
+            setGreen(element);
+          });
+        }
+        sendResponse({ status: 'Please confirm the selection of the chatbot window' });
       break;
+
+    case "endSucessfulVerification":
+     if(currentVerification){
+       unsetGreen(currentVerification);
+      sendResponse({ status: 'confirmed' });
+     }else{
+      sendResponse({ status: 'Nothing to confirm' });
+     }
+     
+      break;
+    case "correctElementSelection":
+      unsetGreen(currentVerification!);
+      currentVerification = null;
+      (async () => {
+      let elementToCorrect = request.element;
+      let chatbotCorrection = await correctElementChatbot(HTMLCode,documentOwner,elementToCorrect);
+      let chatBotElements = {};
+      if(chatbotCorrection){
+        chatBotElements = {
+          inputElement: Boolean(chatbotCorrection.inputElement),
+          messagesSelector: Boolean(chatbotCorrection.messagesSelector),
+          dialogElement: Boolean(chatbotCorrection.dialogElement),
+          microphoneElement: Boolean(chatbotCorrection.microphoneElement),
+          windowElement: Boolean(chatbotCorrection.windowElement)
+        };
+      }
+      sendResponse({ status: 'Chatbot element corrected', chatbot:chatBotElements });
+    })();
+     
+     return true;
     case "startMicSelection":
       microphoneSelector.startMicrophoneSelection();
       break;
     case "startEvaluation":
       summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       // only assign chatbotsummary is chatbot element is not null
-      if (chatbotInterface?.historyElement) {
+      if (chatbotInterface!.windowElement) {
         chatbotSummary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
       }
       sendResponse([summary, chatbotSummary]);
@@ -59,20 +153,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case "startVoiceInput":
       
       /// start tts generation
-      handleVoiceInput(request, chatbotElement).then(chatResponses => {
+      handleVoiceInput(request, null).then(chatResponses => {
         sendResponse({ status: 'Messages Audio input send and responses received', responses: chatResponses });
       });
       break;
     case "evaluateACT":
-      const actResult = evaluateACT(chatbotInterface!.historyElement);
+      const actResult = evaluateACT(chatbotInterface!.windowElement);
       sendResponse(actResult);
       break;
     case "evaluateWCAG":
-      const wcagResult = evaluateWCAG(chatbotInterface!.historyElement);
+      const wcagResult = evaluateWCAG(chatbotInterface!.windowElement);
       sendResponse(wcagResult);
       break;
     case "evaluateCUI":
-      const cuiResult = evaluateCUI(chatbotInterface!.historyElement);
+      const cuiResult = evaluateCUI(chatbotInterface!.windowElement);
       sendResponse(cuiResult);
       break;
     case "endingEvaluation":
@@ -116,7 +210,7 @@ async function handleVoiceInput(request: {messages: string[]}, chatbotElement: H
     const message = request.messages[i];
     let response: ChatResponse;
     
-    getStoredMicrophoneButton()!.click();
+    chatbotInterface?.microphoneElement!.click();
     await new Promise(resolve => setTimeout(resolve, 500));
     // Logic for voice input
     await sendMessageToBackground("speakText", message);
@@ -162,12 +256,14 @@ function evaluateACT(chatbotElement: HTMLElement|null) {
   const excludedRules = [
     'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
   ];
-  window.act = new ACTRules({ translate: locale_en, fallback: locale_en });
+  let sourceHtml = document.documentElement.outerHTML;
+
+  window.act = new ACTRulesRunner({ translate: locale_en, fallback: locale_en });
   // window.act.configure({ exclude: excludedRules })
   //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
-  window.act.executeAtomicRules();
-  window.act.executeCompositeRules();
-  actResult = window.act.getReport();
+  window.act.test({ sourceHtml });
+  
+  actResult =  window.act.getReport();
 
   addValuesToSummary(summary, actResult);
 
@@ -191,10 +287,10 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
   const excludedTechniques = [
     'QW-WCAG-T14', 'QW-WCAG-T15', 'QW-WCAG-T16', 'QW-WCAG-T17', 'QW-WCAG-T18', 'QW-WCAG-T19', 'QW-WCAG-T20', 'QW-WCAG-T21', 'QW-WCAG-T22'
   ];
-  window.wcag = new WCAGTechniques({ translate: locale_en, fallback: locale_en });
-
+  window.wcag = new WCAGTechniquesRunner({ translate: locale_en, fallback: locale_en });
+  let sourceHtml = document.documentElement.outerHTML;
   // window.wcag.configure({ exclude: excludedTechniques })
-  htmlResult = window.wcag.execute(false);
+  htmlResult = window.wcag.test({sourceHtml}).getReport();
   addValuesToSummary(summary, htmlResult);
   result = htmlResult.assertions;
 
@@ -209,12 +305,26 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
 
 function evaluateCUI(chatbotElement: HTMLElement|null) {
   let cuiResult, chatbotCuiResult, result, chatbotResult;
+  
+  // build selectors Map
+  interface QWCUI_Selectors {
+    [key: string]: string;
+  }
+  
+  let QW_Selectors: QWCUI_Selectors = {
+    QW_CC_WINDOW: chatbotInterface!.selectors.window[0],
+    QW_CC_DIALOG: chatbotInterface!.selectors.dialog[0],
+    QW_CC_MESSAGES: chatbotInterface!.messagesSelector[0],
+    QW_CC_MIC: chatbotInterface!.selectors.microphone[0],
+    QW_CC_INPUT: chatbotInterface!.selectors.input[0],
+  };
 
-  window.cui = new CUIChecks({ translate: locale_en, fallback: locale_en });
-
-
+  let sourceHtml = document.documentElement.outerHTML;
+  window.cui = new CUIChecksRunner({ selectors: QW_Selectors }, { translate: locale_en, fallback: locale_en });
+  window.cui.test({ sourceHtml });
 
   cuiResult =   window.cui.getReport();
+  console.log("cuiResult", cuiResult);
   addValuesToSummary(summary, cuiResult);
 
   result = cuiResult.assertions;
@@ -222,9 +332,10 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
     chatbotCuiResult = filterResults(cuiResult, chatbotElement);
     addValuesToSummary(chatbotSummary, chatbotCuiResult);
     chatbotResult = chatbotCuiResult.assertions;
+    console.log("chatbotResult", chatbotResult);
   };
   return [result, chatbotResult];
- 
+
 }
 
 

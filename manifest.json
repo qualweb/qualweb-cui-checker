@@ -7,13 +7,15 @@
     "service_worker": "dist/background.bundle.js"
   },
   "action": {
-    "default_popup": "src/popup/popup.html"
+    "default_title": "Click to open panel"
   },
   "permissions": [
     "storage",
+    "sidePanel",
     "activeTab",
     "scripting",
     "audioCapture",
+    "tabs",
     "tts",
     "ttsEngine"
   ],

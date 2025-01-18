@@ -61,9 +61,8 @@ export default {
     if (modules.cui) {
       this.state = "Evaluating CUI module";
       [cuiResult, chatbotCuiResult] = await evaluateCUI();
-
-      // this.setBP(bpResult);
-      // chatbotBpResult && this.setChatbotBP(chatbotBpResult);
+      this.setCUI(cuiResult);
+      chatbotCuiResult && this.setChatbotCUI(chatbotCuiResult);
     }
     this.state = "Ending evaluation";
     [summary, chatbotSummary] = await endingEvaluation();

@@ -67,6 +67,7 @@ export default {
     state.act = {};
     state.chatbotAct = {};
     state.cui = {};
+    state.chatbotCui = {};
     state.html = {};
     state.chatbotHtml = {};
     state.css = {};
@@ -83,5 +84,8 @@ export default {
   },
   [types.SETEVALUATECHATBOT](state, payload) {
     state.evaluateChatbot = payload;
+  },
+  [types.SETDETECTINGCHATBOT](state, payload) {
+    state.detectingChatbot = payload;
   },
 };

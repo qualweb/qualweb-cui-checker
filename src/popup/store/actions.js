@@ -68,6 +68,7 @@ export const setStartingFilter = ({ commit }, modules) => {
     inapplicable: false,
     act: modules.act,
     html: modules.html,
+    cui: modules.cui,
   });
 };
 
@@ -80,6 +81,10 @@ export const setStartingResultFilter = ({ commit }, payload) => {
 
 export const setEvaluateChatbot = ({ commit }, payload) => {
   commit(types.SETEVALUATECHATBOT, payload);
+};
+
+export const setDetectingChatbot = ({ commit }, payload) => {
+  commit(types.SETDETECTINGCHATBOT, payload);
 };
 
 export const reset = ({ commit }) => {
