@@ -8,11 +8,13 @@ export interface ElementSelector {
   resetSelection: () => void;
 }
 
+// @Deprecated
 export interface LLMResponse {
   xpath_chatbot: string | null;
   xpath_microphone: string | null;
 }
 
+// Interface for the response from the local LLM
 export interface LocalLLMResponse {
   xpath_window: string | null;
   xpath_input: string | null;
@@ -21,12 +23,25 @@ export interface LocalLLMResponse {
   xpath_microphone: string | null;
 }
 
-export interface ChatBotInterface  {
+// Interface for the ChatBot ELements and selector
+export interface ChatBotInterface {
   windowElement: HTMLElement | null;
   inputElement: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
-  messagesSelector: string ;
-  historyElement: HTMLElement | null;
+  messagesSelector: string;
+  dialogElement: HTMLElement | null;
   microphoneElement: HTMLElement | null;
+  selectors: ChatbotSelector;
+}
+
+// Selectors for the chatbot elements
+// first index in each array is the current selector for the chatbot element
+// more selectors are added when the makes new requests for the chatbot elements, saving possible correct selectors
+export interface ChatbotSelector {
+  window: string[];
+  dialog: string[];
+  messages: string[];
+  input: string[];
+  microphone: string[];
 }
 
 export interface ResponseStore {
