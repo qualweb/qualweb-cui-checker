@@ -1,4 +1,4 @@
-import { Summary, Rule, Report, Result ,ElementTest} from "./types";
+import { Summary, Rule, Report, Result, ElementTest } from "./types";
 
 function addValuesToSummary(summary: Summary, report: Report) {
   summary.passed += report.metadata.passed;
@@ -13,40 +13,48 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
 
   for (const [ruleCode, rule] of Object.entries(result.assertions)) {
     const targetElement = rule.metadata.target.element;
-    const targetElements = Array.isArray(targetElement) ? targetElement : [targetElement];
+    const targetElements = Array.isArray(targetElement)
+      ? targetElement
+      : [targetElement];
+    console.log(targetElements);
+    const isRelevant = targetElements.some((element) => {
+      // Check if element is a valid selector
+      try {
+        if (chatbotElement.querySelector(element) !== null) {
+          return true;
+        }
+      } catch (e) {
+        console.warn(`Invalid selector: ${element}`);
+        console.log(targetElement);
+      }
+      return false;
+    });
 
-    const isRelevant = targetElements.some(element => 
-      chatbotElement.querySelector(element) !== null
-    );
-    
     if (isRelevant) {
-      let filteredResults: Result[] =[];
+      let filteredResults: Result[] = [];
       (rule.results as Result[]).forEach((result) => {
         let resultFiltered = result;
         let elements: ElementTest[];
-       
+
         elements = (result.elements as ElementTest[]).filter((element) => {
           if (chatbotElement.querySelector(element.pointer) !== null) {
-         
             return element;
           }
         });
 
-        if( elements.length === 0) return;
+        if (elements.length === 0) return;
         resultFiltered.elements = elements as [];
         filteredResults.push(resultFiltered);
       });
 
       filteredAssertions[ruleCode] = rule;
       filteredAssertions[ruleCode].results = filteredResults;
-      
-      // Update the new metadata
-      newMetadata.passed += (rule.metadata.passed > 0) ? 1:0;
-      newMetadata.failed += (rule.metadata.failed > 0) ? 1:0;
-      newMetadata.warning += (rule.metadata.warning > 0) ? 1:0;
-      newMetadata.inapplicable += (rule.metadata.inapplicable > 0) ? 1:0;
-      
 
+      // Update the new metadata
+      newMetadata.passed += rule.metadata.passed > 0 ? 1 : 0;
+      newMetadata.failed += rule.metadata.failed > 0 ? 1 : 0;
+      newMetadata.warning += rule.metadata.warning > 0 ? 1 : 0;
+      newMetadata.inapplicable += rule.metadata.inapplicable > 0 ? 1 : 0;
     }
   }
 
@@ -54,7 +62,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
   return {
     ...result,
     assertions: filteredAssertions,
-    metadata: newMetadata
+    metadata: newMetadata,
   };
 }
 

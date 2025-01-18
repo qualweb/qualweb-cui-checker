@@ -32,6 +32,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
   switch (request.action) {
+    case "saveRoute":
+      tabRoute = request.route;
+      sendResponse({ status: "route saved" });
+      console.log("Route saved:", tabRoute);
+      break;
+    case "getRoute":
+      console.log("getRoute ", tabRoute);
+      sendResponse({ route: tabRoute });
+      break;
     case 'typeMessages':
       handleTypeMessages(request, chatbotInterface).then(chatResponses => {
         console.log(chatResponses);
@@ -296,7 +305,7 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
 
 function evaluateCUI(chatbotElement: HTMLElement|null) {
   let cuiResult, chatbotCuiResult, result, chatbotResult;
-
+  
   // build selectors Map
   interface QWCUI_Selectors {
     [key: string]: string;
@@ -326,7 +335,7 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
     console.log("chatbotResult", chatbotResult);
   };
   return [result, chatbotResult];
- 
+
 }
 
 

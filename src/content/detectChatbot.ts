@@ -1,13 +1,16 @@
-import { showMessage } from '../utils/helpers';
-import { LocalLLMResponse, LLMResponse, ChatBotInterface } from '../utils/types';
-import { setStoredChatbotElement, flashGreen } from './selectChatbot';
-import { sendPromptTLocalLLM, sendPromptToLLM } from './selectChatbotLLM';
-import { setStoredMicrophoneButton } from './selectVoiceinput';
+import { showMessage } from "../utils/helpers";
+import {
+  LocalLLMResponse,
+  LLMResponse,
+  ChatBotInterface,
+} from "../utils/types";
+import { setStoredChatbotElement, flashGreen } from "./selectChatbot";
+import { sendPromptTLocalLLM, sendPromptToLLM } from "./selectChatbotLLM";
+import { setStoredMicrophoneButton } from "./selectVoiceinput";
 
 import xPath2Selector from "xpath-to-selector";
 
-export let  chatbotInterface: ChatBotInterface | null = null;
-
+export let chatbotInterface: ChatBotInterface | null = null;
 
 /**Function to clean HTML to reduce size of tokens sent to LLM
  * @param htmlTree - HTML element tree to clean
@@ -15,76 +18,113 @@ export let  chatbotInterface: ChatBotInterface | null = null;
  */
 
 export function cleanHTML(htmlTree: HTMLElement): string {
-
-  let regexRellevant:RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
+  let regexRellevant: RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
 
   console.log("Size of HTML: ", htmlTree.outerHTML.length);
-  let irrelevantTags  = ['header', 'footer','img','svg', 'td', 'table','tr','td', 'script', 'style', 'link', 'noscript', 'iframe', 'object', 'embed'];
+  let irrelevantTags = [
+    "header",
+    "footer",
+    "img",
+    "svg",
+    "td",
+    "table",
+    "tr",
+    "td",
+    "script",
+    "style",
+    "link",
+    "noscript",
+    "iframe",
+    "object",
+    "embed",
+  ];
   let clonedDomTree = htmlTree.cloneNode(true) as HTMLElement;
 
   // encurtar texto em <p> e <span> para 100 caracteres and add ... to the end
-  clonedDomTree.querySelectorAll('p, span,div').forEach(element => {
+  clonedDomTree.querySelectorAll("p, span,div").forEach((element) => {
     if (element.textContent!.length > 100) {
       // Iterate over the child nodes and modify only the text nodes
       let totalLength = 0;
       const childNodes = Array.from(element.childNodes); // Convert NodeList to an array
-      
-      childNodes.forEach(child => {
-        if (child.nodeType === Node.TEXT_NODE) { // Check if it's a text node
+
+      childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          // Check if it's a text node
           const textContent = child.textContent!;
           totalLength += textContent.length;
-  
+
           // Shorten text if total length exceeds 100 characters
           if (totalLength > 100) {
             const excessLength = totalLength - 100;
-            child.textContent = textContent.slice(0, textContent.length - excessLength) + '...';
+            child.textContent =
+              textContent.slice(0, textContent.length - excessLength) + "...";
           }
         }
       });
     }
   });
 
-  // remover table td e tr 
-// Remove tags that are not relevant
-clonedDomTree.querySelectorAll(irrelevantTags.join(',')).forEach(element => element.remove());
+  // remover table td e tr
+  // Remove tags that are not relevant
+  clonedDomTree
+    .querySelectorAll(irrelevantTags.join(","))
+    .forEach((element) => element.remove());
 
-// Remove regular comments
-clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[\s\S]*?-->/g, '');
+  // Remove regular comments
+  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(
+    /<!--[\s\S]*?-->/g,
+    ""
+  );
 
-// Remove conditional comments (IE-specific)
-clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g, '');
+  // Remove conditional comments (IE-specific)
+  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(
+    /<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g,
+    ""
+  );
 
-// remove all attributes that are not relevant
-let relevantAttributes = ['id', 'class', 'contenteditable', 'data-*', 'tabindex','role'];
+  // remove all attributes that are not relevant
+  let relevantAttributes = [
+    "id",
+    "class",
+    "contenteditable",
+    "data-*",
+    "tabindex",
+    "role",
+  ];
 
-clonedDomTree.querySelectorAll('*').forEach(element => {
-  Array.from(element.attributes).forEach(attr => {
-    
-    if( !(relevantAttributes.includes(attr.name))){
-
-      if((!attr.name.match(regexRellevant) && !attr.value.match(regexRellevant)) || attr.name === 'src'){
-        
-        element.removeAttribute(attr.name);
+  clonedDomTree.querySelectorAll("*").forEach((element) => {
+    Array.from(element.attributes).forEach((attr) => {
+      if (!relevantAttributes.includes(attr.name)) {
+        if (
+          (!attr.name.match(regexRellevant) &&
+            !attr.value.match(regexRellevant)) ||
+          attr.name === "src"
+        ) {
+          element.removeAttribute(attr.name);
+        }
       }
-      
-    }
+    });
   });
-});
 
-
-
-let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, ' $1 ');
-console.log("Size of cleaned HTML: ", result.length);
-console.log("Cleaned HTML: ", result);
-return result;
-
+  let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, " $1 ");
+  console.log("Size of cleaned HTML: ", result.length);
+  console.log("Cleaned HTML: ", result);
+  return result;
 }
 
-function getElementByXpath(path: string, documentChatbot:Document): HTMLElement | null {
-  return documentChatbot.evaluate(path, documentChatbot, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue as HTMLElement;
+// Function to get element by Xpath
+function getElementByXpath(
+  path: string,
+  documentChatbot: Document
+): HTMLElement | null {
+  return documentChatbot.evaluate(
+    path,
+    documentChatbot,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue as HTMLElement;
 }
-
-
 
 export async function identifyElementsChatbot(
   element: string,
@@ -265,17 +305,16 @@ export async function correctElementChatbot(
   });
 }
 
-
-function waitForIframeLoad(iframe):Promise<HTMLIFrameElement> {
+function waitForIframeLoad(iframe): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
-    let iframeDoc = iframe.contentDocument || iframe.contentWindow.document ;
-    console.log("Iframe Doc",iframeDoc);
-      if (iframeDoc && iframeDoc.readyState === "complete" ) {
-          // Se já está carregado
-          console.log("Iframe was already loaded");
-          resolve(iframe);
-      } else {
-        /*       
+    let iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    console.log("Iframe Doc", iframeDoc);
+    if (iframeDoc && iframeDoc.readyState === "complete") {
+      // Se já está carregado
+      console.log("Iframe was already loaded");
+      resolve(iframe);
+    } else {
+      /*       
         console.log("Iframe was not loaded, waiting for load event");
           iframe.addEventListener("load", function onLoad() {
               iframe.removeEventListener("load", onLoad); 
@@ -284,203 +323,185 @@ function waitForIframeLoad(iframe):Promise<HTMLIFrameElement> {
 
           setTimeout(() => reject(new Error("Iframe load timed out.")), 100000);
           */
-          resolve(iframe);
-      }
+      resolve(iframe);
+    }
   });
 }
 
-
-export async function detectChatBotPopupMutation():Promise<HTMLElement>{
-
+export async function detectChatBotPopupMutation(): Promise<HTMLElement> {
   return new Promise((resolve, reject) => {
     const observer = new MutationObserver((mutations) => {
       let stopMutationLoop = false;
       for (const mutation of mutations) {
         if (stopMutationLoop) {
-          break
+          break;
         }
-        if (mutation.type === "attributes" ) {
-          
+        if (mutation.type === "attributes") {
           const element = mutation.target as HTMLElement;
 
           // Filtrar por estilo específico
           if (getComputedStyle(element).display !== "none") {
-            if(element.querySelectorAll("iframe").length > 0){
-             
-                    let iframes = element.querySelectorAll("iframe");
-                    console.log("Iframes: ", iframes);
+            if (element.querySelectorAll("iframe").length > 0) {
+              let iframes = element.querySelectorAll("iframe");
+              console.log("Iframes: ", iframes);
 
-                    let resolved = false;
-                    for(let i = 0; i < iframes.length; i++){
-                    
-                    if(resolved){
-                
-                      break;
-                    }
-                     waitForIframeLoad(iframes[i] as HTMLIFrameElement).then((iframe) => {
+              let resolved = false;
+              for (let i = 0; i < iframes.length; i++) {
+                if (resolved) {
+                  break;
+                }
+                waitForIframeLoad(iframes[i] as HTMLIFrameElement)
+                  .then((iframe) => {
+                    let iframeContent: Document | null = (
+                      iframe as HTMLIFrameElement
+                    ).contentDocument;
 
-                      let iframeContent:Document | null = (iframe as HTMLIFrameElement).contentDocument;
-                    
-                      if(iframeContent){
-                      
-                        let score = scoringTreeChatbot(iframeContent.body as HTMLElement);
+                    if (iframeContent) {
+                      let score = scoringTreeChatbot(
+                        iframeContent.body as HTMLElement
+                      );
 
-                        if(score> 10){
-                          resolved = true;
-                          stopMutationLoop = true;
-                          observer.disconnect();
-                          resolve(iframeContent.body);
-
-                        }
+                      if (score > 10) {
+                        resolved = true;
+                        stopMutationLoop = true;
+                        observer.disconnect();
+                        resolve(iframeContent.body);
                       }
-                    }).catch((error) => {
-                      
-                      console.log("Iframe not loaded %s",error);
-                      });
-                 
                     }
-
-              }else{ 
-                // iF element is not a iframe       
-                let score = scoringTreeChatbot(element);
-                  
-                        if(score> 10){
-                          stopMutationLoop = true;
-                          observer.disconnect();
-                          resolve(element);        
-
-                        }
+                  })
+                  .catch((error) => {
+                    console.log("Iframe not loaded %s", error);
+                  });
               }
-            
-          } 
-      }
-       
-      }
-    
-  });
-    
-    
-  observer.observe(document.body, {
-    childList: true,
-    attributes: true,
-    subtree: true
-});
+            } else {
+              // iF element is not a iframe
+              let score = scoringTreeChatbot(element);
 
+              if (score > 10) {
+                stopMutationLoop = true;
+                observer.disconnect();
+                resolve(element);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+    });
 
     setTimeout(() => {
       observer.disconnect();
       reject();
     }, 15000);
   });
-
 }
 
-
-
-function scoringTreeChatbot(element:HTMLElement):number{
-  let score:number = 0;
+function scoringTreeChatbot(element: HTMLElement): number {
+  let score: number = 0;
   let elementToScore = element as HTMLElement;
   /// is element loaded a iframeDocument or shadowRoot and is loaded?
   let allElements = elementToScore.querySelectorAll("*");
-  let hasInputArea = elementToScore.querySelectorAll("input[type='text'], textarea, div[contenteditable='true']").length > 0;
+  let hasInputArea =
+    elementToScore.querySelectorAll(
+      "input[type='text'], textarea, div[contenteditable='true']"
+    ).length > 0;
   //console.log("Has input area: ", hasInputArea);
-  if(!hasInputArea){
+  if (!hasInputArea) {
     return 0;
-  }else{
-    score=+10;
+  } else {
+    score = +10;
   }
   // Get a list of Relant keywords and add them to regex word
-  let regex:RegExp = /[\s\S]*(chat|assistant|prompt|conversation)[\s\S]*/;
-
+  let regex: RegExp = /[\s\S]*(chat|assistant|prompt|conversation)[\s\S]*/;
 
   allElements.forEach((element) => {
-
-
     // Check if there are tags that are relevant for a chatbot
-     element.localName.match(regex) ? score++ : null;
+    element.localName.match(regex) ? score++ : null;
 
     // Check if there are classes name that are relevant for a chatbot
-     element.classList.forEach((className) => {
-
-      if(className.match(regex)){
-         score++;
+    element.classList.forEach((className) => {
+      if (className.match(regex)) {
+        score++;
       }
-      });
+    });
 
-      // Check if there are properties that are relevant for a chatbot
-      Array.from(element.attributes).forEach((attr) => {
-        if(attr.name.match(regex)){
-          score++;
-        }
-      });
-      
-
-      // get any data-* attributes that are relevant for a chatbot
-      for (const dataAtr in (element as HTMLElement ).dataset) {
-        if (dataAtr.match(regex)) {
-          score++;
-        }
-        if ((element as HTMLElement).dataset[dataAtr]!.match(regex)) {
-          score++;
-        }
+    // Check if there are properties that are relevant for a chatbot
+    Array.from(element.attributes).forEach((attr) => {
+      if (attr.name.match(regex)) {
+        score++;
       }
-      
+    });
+
+    // get any data-* attributes that are relevant for a chatbot
+    for (const dataAtr in (element as HTMLElement).dataset) {
+      if (dataAtr.match(regex)) {
+        score++;
+      }
+      if ((element as HTMLElement).dataset[dataAtr]!.match(regex)) {
+        score++;
+      }
+    }
   });
 
   return score;
 }
 
-
 /**Function to request elements from LLM after cleaning the HTML to reduce size of tokens sent to LLM
  *  @Deprecated
- **/ 
+ **/
 export function requestElementsLLM() {
   // Obter window document
 
   let documentBody: HTMLBodyElement = document.body as HTMLBodyElement;
 
-
   let clonedBody = cleanHTML(documentBody);
 
-// send cleanedBody to LLM
- sendPromptToLLM(clonedBody).then((elements: LLMResponse) => {
-    
+  // send cleanedBody to LLM
+  sendPromptToLLM(clonedBody)
+    .then((elements: LLMResponse) => {
+      // Check if chatbot element is present
+      if (elements.xpath_chatbot !== null) {
+        let parentElement = getElementByXpath(elements.xpath_chatbot, document);
+        if (parentElement) {
+          showMessage("Elements identified.");
+          setStoredChatbotElement(parentElement);
+          flashGreen(parentElement);
+          chrome.runtime.sendMessage(
+            { action: "storeHTML", html: parentElement },
+            () => {
+              showMessage("Chatbot element identified and HTML stored!");
+            }
+          );
+        } else {
+          throw new Error(
+            "Error: Couldn't identify chatbot element. Please try again."
+          );
+        }
+      }
 
-
-    // Check if chatbot element is present
-  if(elements.xpath_chatbot !== null){
-    let parentElement = getElementByXpath(elements.xpath_chatbot,document);
-    if(parentElement){
-      
-      showMessage("Elements identified.");
-      setStoredChatbotElement(parentElement);
-      flashGreen(parentElement);
-      chrome.runtime.sendMessage({ action: "storeHTML", html: parentElement }, () => {
-        showMessage("Chatbot element identified and HTML stored!");
-        
-      });
-    }else{
-        throw new Error("Error: Couldn't identify chatbot element. Please try again.");
-    }
-  }
-
-  // Check if microphone element is present
-  if(elements.xpath_microphone !== null){
-    let microphoneElement = getElementByXpath(elements.xpath_microphone,document);
-    if(microphoneElement){
-      flashGreen(microphoneElement);
-      setStoredMicrophoneButton(microphoneElement);
-    }
-  }
-
-  
- }).catch((error) => {
-   console.error(error);
-  showMessage("Error: Couldn't identify chatbot elements. Please try again.");
-  });
-
-
-
+      // Check if microphone element is present
+      if (elements.xpath_microphone !== null) {
+        let microphoneElement = getElementByXpath(
+          elements.xpath_microphone,
+          document
+        );
+        if (microphoneElement) {
+          flashGreen(microphoneElement);
+          setStoredMicrophoneButton(microphoneElement);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      showMessage(
+        "Error: Couldn't identify chatbot elements. Please try again."
+      );
+    });
 }
 
 /*
