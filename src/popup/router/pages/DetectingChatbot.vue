@@ -81,7 +81,7 @@ export default {
             "Are individual messages on chatbot app selected correctly?",
         },
         {
-          nameElement: "historyElement",
+          nameElement: "dialogElement",
           question: "Is conversation window selected correctly?",
         },
         {

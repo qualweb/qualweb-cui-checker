@@ -68,6 +68,7 @@ export const setStartingFilter = ({ commit }, modules) => {
     inapplicable: false,
     act: modules.act,
     html: modules.html,
+    cui: modules.cui,
   });
 };
 
