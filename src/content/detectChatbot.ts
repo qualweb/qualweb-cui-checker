@@ -4,8 +4,7 @@ import { setStoredChatbotElement, flashGreen } from './selectChatbot';
 import { sendPromptTLocalLLM, sendPromptToLLM } from './selectChatbotLLM';
 import { setStoredMicrophoneButton } from './selectVoiceinput';
 
-
-
+import xPath2Selector from "xpath-to-selector";
 
 export let  chatbotInterface: ChatBotInterface | null = null;
 
@@ -87,145 +86,183 @@ function getElementByXpath(path: string, documentChatbot:Document): HTMLElement 
 
 
 
-export async function  identifyElementsChatbot(element:string,documentChatbot:Document):Promise<ChatBotInterface>{
+export async function identifyElementsChatbot(
+  element: string,
+  documentChatbot: Document
+): Promise<ChatBotInterface> {
   return new Promise((resolve, reject) => {
+    let LLMResponse: LocalLLMResponse | null = null;
 
+    sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
+      chatbotInterface = {
+        windowElement: null,
+        inputElement: null,
+        messagesSelector: "",
+        dialogElement: null,
+        microphoneElement: null,
+        selectors: {
+          window: [],
+          dialog: [],
+          messages: [],
+          input: [],
+          microphone: [],
+        },
+      };
 
-  let LLMResponse:LocalLLMResponse | null = null;
-
-
-
-sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
-    chatbotInterface = {
-      windowElement: null,
-      inputElement: null,
-      messagesSelector: '',
-      historyElement: null,
-      microphoneElement: null
-    };
-      
-
-    LLMResponse = response;
-    if(LLMResponse.xpath_window){
-
-      let windowElement = getElementByXpath(LLMResponse.xpath_window,documentChatbot);
-      if(windowElement){
-        //flashGreen(windowElement);
-        chatbotInterface.windowElement = windowElement;
+      LLMResponse = response;
+      if (LLMResponse.xpath_window) {
+        let windowElement = getElementByXpath(
+          LLMResponse.xpath_window,
+          documentChatbot
+        );
+        if (windowElement) {
+          chatbotInterface.windowElement = windowElement;
+          let selector = xPath2Selector(LLMResponse.xpath_window);
+          chatbotInterface.selectors.window.push(selector);
+        }
       }
-    }
 
-    if (LLMResponse.xpath_input){
-      let inputElement = getElementByXpath(LLMResponse.xpath_input,documentChatbot);
-      
-      if(inputElement){
-       // flashGreen(inputElement);
-        chatbotInterface.inputElement = inputElement;
+      if (LLMResponse.xpath_input) {
+        let inputElement = getElementByXpath(
+          LLMResponse.xpath_input,
+          documentChatbot
+        );
+
+        if (inputElement) {
+          chatbotInterface.inputElement = inputElement;
+          let selector = xPath2Selector(LLMResponse.xpath_input);
+          chatbotInterface.selectors.input.push(selector);
+        }
       }
-    }
-    if(LLMResponse.xpath_conversation){
-      let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
-      if(historyElement){
-      //  flashGreen(historyElement);
-        chatbotInterface.historyElement = historyElement;
-        
+      if (LLMResponse.xpath_conversation) {
+        let dialogElement = getElementByXpath(
+          LLMResponse.xpath_conversation,
+          documentChatbot
+        );
+        if (dialogElement) {
+          chatbotInterface.dialogElement = dialogElement;
+
+          let selector = xPath2Selector(LLMResponse.xpath_conversation);
+          chatbotInterface.selectors.dialog.push(selector);
+        }
       }
-    }
-    if(LLMResponse.xpath_bot_selector){
-
-      let chatbotElement = getElementByXpath(LLMResponse.xpath_bot_selector,documentChatbot);
-
-      if(chatbotElement){
-       // flashGreen(chatbotElement);
-        chatbotInterface.messagesSelector = LLMResponse.xpath_bot_selector;
-
-
-
+      if (LLMResponse.xpath_bot_selector) {
+        let chatbotElement = getElementByXpath(
+          LLMResponse.xpath_bot_selector,
+          documentChatbot
+        );
+        if (chatbotElement) {
+          let selector = xPath2Selector(LLMResponse.xpath_bot_selector);
+          chatbotInterface.messagesSelector = LLMResponse.xpath_bot_selector;
+          chatbotInterface.selectors.messages.push(selector);
+        }
       }
-    }
-    if(LLMResponse.xpath_microphone){
-      let microphoneElement = getElementByXpath(LLMResponse.xpath_microphone,documentChatbot);
-      if(microphoneElement){
-       // flashGreen(microphoneElement);
-        chatbotInterface.microphoneElement = microphoneElement;
+      if (LLMResponse.xpath_microphone) {
+        let microphoneElement = getElementByXpath(
+          LLMResponse.xpath_microphone,
+          documentChatbot
+        );
+        if (microphoneElement) {
+          chatbotInterface.microphoneElement = microphoneElement;
+          let selector = xPath2Selector(LLMResponse.xpath_microphone);
+          chatbotInterface.selectors.microphone.push(selector);
+        }
       }
-    }
-   
-    resolve(chatbotInterface);
+
+      resolve(chatbotInterface);
+    });
   });
-
-});
 }
 
-export async function  correctElementChatbot(element:string,documentChatbot:Document,elementName:string):Promise<ChatBotInterface>{
+export async function correctElementChatbot(
+  element: string,
+  documentChatbot: Document,
+  elementName: string
+): Promise<ChatBotInterface> {
   return new Promise((resolve, reject) => {
+    let LLMResponse: LocalLLMResponse | null = null;
 
+    sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
+      LLMResponse = response;
+      switch (elementName) {
+        case "windowElement":
+          if (LLMResponse.xpath_window) {
+            let windowElement = getElementByXpath(
+              LLMResponse.xpath_window,
+              documentChatbot
+            );
 
-  let LLMResponse:LocalLLMResponse | null = null;
+            if (windowElement) {
+              chatbotInterface!.windowElement = windowElement;
+              chatbotInterface!.selectors.window[0] = LLMResponse.xpath_window;
 
-
-
-sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
-
-      
-
-    LLMResponse = response;  
-    switch(elementName){
-      case "windowElement":
-        if(LLMResponse.xpath_window){
-
-          let windowElement = getElementByXpath(LLMResponse.xpath_window,documentChatbot);
-          if(windowElement){
-            
-            chatbotInterface!.windowElement = windowElement;
+              chatbotInterface!.selectors.dialog.push(
+                xPath2Selector(LLMResponse.xpath_conversation!)
+              );
+              chatbotInterface!.selectors.messages.push(
+                xPath2Selector(LLMResponse.xpath_bot_selector!)
+              );
+              chatbotInterface!.selectors.input.push(
+                xPath2Selector(LLMResponse.xpath_input!)
+              );
+              chatbotInterface!.selectors.microphone.push(
+                xPath2Selector(LLMResponse.xpath_microphone || "")
+              );
+            }
           }
-        }
-        break;
-      case "inputElement":
-        if (LLMResponse.xpath_input){
-          let inputElement = getElementByXpath(LLMResponse.xpath_input,documentChatbot);
-          
-          if(inputElement){
-      
-            chatbotInterface!.inputElement = inputElement;
-          }
-        }
-        break;
-      case "historyElement":
-        if(LLMResponse.xpath_conversation){
-          let historyElement = getElementByXpath(LLMResponse.xpath_conversation,documentChatbot);
-          if(historyElement){
-          //  flashGreen(historyElement);
-            chatbotInterface!.historyElement = historyElement;
-            
-          }
-        }
-        break;
-      case "messagesSelector":
-        if(LLMResponse.xpath_bot_selector){
+          break;
+        case "inputElement":
+          if (LLMResponse.xpath_input) {
+            let inputElement = getElementByXpath(
+              LLMResponse.xpath_input,
+              documentChatbot
+            );
 
-          let chatbotElement = getElementByXpath(LLMResponse.xpath_bot_selector,documentChatbot);
-
-          if(chatbotElement){
-           // flashGreen(chatbotElement);
-            chatbotInterface!.messagesSelector = LLMResponse.xpath_bot_selector;
+            if (inputElement) {
+              chatbotInterface!.inputElement = inputElement;
+            }
           }
-        }
-        break;
-      case "microphoneElement":
-        if(LLMResponse.xpath_microphone){
-          let microphoneElement = getElementByXpath(LLMResponse.xpath_microphone,documentChatbot);
-          if(microphoneElement){
-
-            chatbotInterface!.microphoneElement = microphoneElement;
+          break;
+        case "dialogElement":
+          if (LLMResponse.xpath_conversation) {
+            let dialogElement = getElementByXpath(
+              LLMResponse.xpath_conversation,
+              documentChatbot
+            );
+            if (dialogElement) {
+              chatbotInterface!.dialogElement = dialogElement;
+            }
           }
-        }
-        break;
-    }
-    resolve(chatbotInterface!);
+
+          break;
+        case "messagesSelector":
+          if (LLMResponse.xpath_bot_selector) {
+            let chatbotElement = getElementByXpath(
+              LLMResponse.xpath_bot_selector,
+              documentChatbot
+            );
+
+            if (chatbotElement) {
+              chatbotInterface!.messagesSelector =
+                LLMResponse.xpath_bot_selector;
+            }
+          }
+          break;
+        case "microphoneElement":
+          if (LLMResponse.xpath_microphone) {
+            let microphoneElement = getElementByXpath(
+              LLMResponse.xpath_microphone,
+              documentChatbot
+            );
+            if (microphoneElement) {
+              chatbotInterface!.microphoneElement = microphoneElement;
+            }
+          }
+          break;
+      }
+      resolve(chatbotInterface!);
+    });
   });
-
-});
 }
 
 
