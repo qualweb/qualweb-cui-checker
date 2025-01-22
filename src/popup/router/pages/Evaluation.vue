@@ -1,5 +1,6 @@
 <template>
   <div class="bigContainer">
+    <button @click="returnToMain()">Back</button>
     <Summary></Summary>
     <ColapsibleFilter></ColapsibleFilter>
     <div class="container-1">
@@ -26,13 +27,17 @@ export default {
     FilterByResult,
   },
   methods: {
-    ...mapActions(["updateCurrentRule"]),
+    ...mapActions(["updateCurrentRule","reset"]),
     focusListContent(clickedElement) {
       // Update the currentRule in the Vuex store
       this.updateCurrentRule(clickedElement);
 
       // Change the route to 'rule-content'
       this.$router.push({ name: "rule-content" });
+    },
+    returnToMain() {
+      this.reset();
+      this.$router.push({ path: "/" });
     },
   },
 };
