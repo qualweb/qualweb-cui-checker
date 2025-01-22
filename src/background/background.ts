@@ -7,12 +7,12 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
-    chrome.sidePanel.open({ tabId: tab.id });
     chrome.sidePanel.setOptions({
       tabId: tab.id!,
       path: "src/popup/popup.html",
       enabled: true,
     });
+    chrome.sidePanel.open({ tabId: tab.id });
   } else {
     console.error("Tab ID not found.");
   }
