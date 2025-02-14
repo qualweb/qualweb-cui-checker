@@ -39,7 +39,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["audio/chatbotClip1.mp3"],
+      "resources": ["audio/chatbotClip1.mp3",
+      "dist/common-words.txt"],
       "matches": ["<all_urls>"]
     }
   ]

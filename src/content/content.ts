@@ -1,4 +1,6 @@
 import { sendAndReceiveMessage } from './chatInteraction';
+
+
 import { elementSelector, setGreen, unsetGreen } from './selectChatbot';
 import {chatbotInterface,detectChatBotPopupMutation,identifyElementsChatbot, correctElementChatbot,cleanHTML } from './detectChatbot';
 import { ResponseStore,ChatBotInterface, ChatResponse, Summary } from '../utils/types';
@@ -7,6 +9,7 @@ import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
 import { microphoneSelector, getStoredMicrophoneButton } from './selectVoiceinput';
 import { showMessage } from '../utils/helpers';
 
+const urlCommonWords = chrome.runtime.getURL("dist/common-words.txt");
 
 let tabRoute = null;
 
@@ -48,11 +51,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       return true; // Indicates that the response is sent asynchronously
     case "startSelection":
-      console.log("started normal selection");
+    
       elementSelector.startSelection();
       break;
     case "requestElementLLM":
-      console.log("started Selection LLM");
+ 
       showMessage("Please open the chatbot");
       (async () => {
         
@@ -70,14 +73,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           microphoneElement: Boolean(chatbot.microphoneElement),
           windowElement: Boolean(chatbot.windowElement)
         };
-      }
+      } 
    
       sendResponse({ status: 'Chatbot elements identified', chatbot:chatBotElements });
       })();
       return true;
     case "startVerification":
         let elementName = request.element;
-        console.log("chatBotElements and selectors ",chatbotInterface!.selectors);
+
         if (elementName === "windowElement") {
           currentVerification = chatbotInterface!.windowElement!;
           setGreen(chatbotInterface!.windowElement!);
@@ -166,9 +169,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse(wcagResult);
       break;
     case "evaluateCUI":
-      const cuiResult = evaluateCUI(chatbotInterface!.windowElement);
-      sendResponse(cuiResult);
-      break;
+      const cuiResult = evaluateCUI(chatbotInterface!.windowElement).then((cuiResult) => {
+      console.log(cuiResult);
+      sendResponse(cuiResult)});
+      return true;
     case "endingEvaluation":
       sendResponse([summary, chatbotSummary]);
       break;
@@ -248,8 +252,6 @@ function sendMessageToBackground(action: string, text: string):Promise<void> {
 }
 
 
-
-
 function evaluateACT(chatbotElement: HTMLElement|null) {
 
   let actResult, chatbotActResult, result, chatbotResult;
@@ -273,12 +275,11 @@ function evaluateACT(chatbotElement: HTMLElement|null) {
 
   if (chatbotElement) {
     chatbotActResult = filterResults(actResult, chatbotElement);
-    console.log("chatbotActResult", chatbotActResult);
+
     addValuesToSummary(chatbotSummary, chatbotActResult);
     chatbotResult = chatbotActResult.assertions;
   };
-  console.log("result:", summary);
-  console.log("chatbotResult:", chatbotResult);
+
   return [result, chatbotResult];
 }
 
@@ -303,7 +304,7 @@ function evaluateWCAG(chatbotElement: HTMLElement|null) {
 }
 
 
-function evaluateCUI(chatbotElement: HTMLElement|null) {
+async function  evaluateCUI(chatbotElement: HTMLElement|null) {
   let cuiResult, chatbotCuiResult, result, chatbotResult;
   
   // build selectors Map
@@ -314,17 +315,17 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
   let QW_Selectors: QWCUI_Selectors = {
     QW_CC_WINDOW: chatbotInterface!.selectors.window[0],
     QW_CC_DIALOG: chatbotInterface!.selectors.dialog[0],
-    QW_CC_MESSAGES: chatbotInterface!.messagesSelector[0],
+    QW_CC_MESSAGES: chatbotInterface!.selectors.messages[0],
     QW_CC_MIC: chatbotInterface!.selectors.microphone[0],
     QW_CC_INPUT: chatbotInterface!.selectors.input[0],
   };
 
-  let sourceHtml = document.documentElement.outerHTML;
-  window.cui = new CUIChecksRunner({ selectors: QW_Selectors }, { translate: locale_en, fallback: locale_en });
-  window.cui.test({ sourceHtml });
-
+ // let sourceHtml = document.documentElement.outerHTML;
+  window.cui = new CUIChecksRunner({ selectors: QW_Selectors }, { translate: locale_en, fallback: locale_en },urlCommonWords);
+  //window.cui.test({ sourceHtml });
+  await window.cui.executeTests();
   cuiResult =   window.cui.getReport();
-  console.log("cuiResult", cuiResult);
+
   addValuesToSummary(summary, cuiResult);
 
   result = cuiResult.assertions;
@@ -332,7 +333,7 @@ function evaluateCUI(chatbotElement: HTMLElement|null) {
     chatbotCuiResult = filterResults(cuiResult, chatbotElement);
     addValuesToSummary(chatbotSummary, chatbotCuiResult);
     chatbotResult = chatbotCuiResult.assertions;
-    console.log("chatbotResult", chatbotResult);
+
   };
   return [result, chatbotResult];
 
