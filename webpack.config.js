@@ -12,7 +12,7 @@ const config = {
   entry: {
     background: './src/background/background.ts',
     content: './src/content/content.ts',
-    popup: './src/popup/popup.ts',
+    sidebar: './src/sidebar/sidebar.ts',
     options: './src/options/options.js',
 
   },
@@ -91,9 +91,9 @@ const config = {
       { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'cui.js' },
       { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
       { from: 'src/locales/en.js', to: 'locales/en.js' },
-      { from: 'src/popup/evaluate.js', to: 'popup/evaluate.js' },
+      { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
       { from: 'src/icons', to: 'icons', ignore: ['icon.xcf'] },
-      { from: 'src/popup/popup.html', to: 'popup/popup.html', transform: transformHtml },
+      { from: 'src/sidebar/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
       { from: 'src/options/options.html', to: 'options/options.html', transform: transformHtml },
       {
         from: 'manifest.json',
@@ -110,7 +110,7 @@ const config = {
         },
       },
     ]),
-    new ExtensionReloader({ entries: { content: 'content', background: 'background', popup: 'popup', options: 'options' } }),
+    new ExtensionReloader({ entries: { content: 'content', background: 'background', sidebar: 'sidebar', options: 'options' } }),
   ],
 };
 

@@ -38,7 +38,7 @@ export default {
       startCorrectionChatbot().then((result) => {
         if (Object.keys(result).length > 0) {
           this.state = "Chatbot Detected";
-          console.log("Chatbot Detected: ", result);
+
           this.setDetectingChatbot(false);
           startVerificationElement(this.workflow[this.currentStep].nameElement);
         } else {
@@ -72,8 +72,12 @@ export default {
       currentStep: 0,
       workflow: [
         {
-          nameElement: "inputElement",
-          question: "Is selected input of chatbot correct?",
+          nameElement: "windowElement",
+          question: "Is main window of chatbot selected correctly?",
+        },  
+        {
+          nameElement: "dialogElement",
+          question: "Is conversation window selected correctly?",
         },
         {
           nameElement: "messagesSelector",
@@ -81,27 +85,23 @@ export default {
             "Are individual messages on chatbot app selected correctly?",
         },
         {
-          nameElement: "dialogElement",
-          question: "Is conversation window selected correctly?",
+          nameElement: "inputElement",
+          question: "Is selected input of chatbot correct?",
         },
         {
           nameElement: "microphoneElement",
           question: "Is microphone window selected correctly?",
-        },
-        {
-          nameElement: "windowElement",
-          question: "Is main window of chatbot selected correctly?",
         },
       ],
     };
   },
   async mounted() {
     this.setDetectingChatbot(true);
-    console.log("Detecting Chatbot: ", this.getDetectingChatbot);
+
     startDetectingChatbot().then((result) => {
       if (Object.keys(result).length > 0) {
         this.state = "Chatbot Detected";
-        console.log("Chatbot Detected: ", result);
+
         this.setDetectingChatbot(false);
         startVerificationElement(this.workflow[this.currentStep].nameElement);
       } else {
@@ -128,7 +128,7 @@ export default {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  overflow: auto;
+  overflow: hidden;
 }
 .loader {
   border: 16px solid transparent;
