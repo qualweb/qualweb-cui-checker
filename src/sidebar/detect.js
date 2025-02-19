@@ -1,3 +1,4 @@
+
 async function startDetectingChatbot() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -25,7 +26,7 @@ async function startDetectingChatbot() {
   });
 }
 
-async function startVerificationWindowElement() {
+async function startCorrectionChatbot(elementName) {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -35,7 +36,7 @@ async function startVerificationWindowElement() {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "startVerifyElementWindow" },
+          { action: "correctElementSelection", element: elementName },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
@@ -52,7 +53,7 @@ async function startVerificationWindowElement() {
   });
 }
 
-async function startVerificationInputElement() {
+async function startVerificationElement(elementName) {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -62,7 +63,7 @@ async function startVerificationInputElement() {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "startVerifyElementInput" },
+          { action: "startVerification", element: elementName },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
@@ -78,8 +79,7 @@ async function startVerificationInputElement() {
     });
   });
 }
-
-async function startVerificationConversationElement() {
+async function endVerificationElement(elementName) {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
@@ -89,61 +89,7 @@ async function startVerificationConversationElement() {
       if (tabs[0]) {
         chrome.tabs.sendMessage(
           tabs[0].id,
-          { action: "startVerifyElementConversationWindow" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(response);
-            }
-          }
-        );
-      } else {
-        reject(new Error("No active tab found"));
-      }
-    });
-  });
-}
-
-async function startVerificationChatMessageElements() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "startVerifyElementMessages" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(response);
-            }
-          }
-        );
-      } else {
-        reject(new Error("No active tab found"));
-      }
-    });
-  });
-}
-
-async function startVerificationMicElement() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "startVerifyElementMicrophone" },
+          { action: "endSucessfulVerification", element: elementName },
           (response) => {
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
