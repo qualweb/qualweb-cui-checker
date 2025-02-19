@@ -15,8 +15,8 @@
               :label="passedLabel"
               :bgColor="passedColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.passed"
+              @toggle:check="updateFilter"
+              v-model="filter.passed"
             ></Checkbox>
           </li>
           <li>
@@ -25,8 +25,8 @@
               :label="failedLabel"
               :bgColor="failedColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.failed"
+              @toggle:check="updateFilter"
+              v-model="filter.failed"
             ></Checkbox>
           </li>
           <li>
@@ -35,8 +35,8 @@
               :label="warningLabel"
               :bgColor="warningColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.warning"
+              @toggle:check="updateFilter"
+              v-model="filter.warning"
             ></Checkbox>
           </li>
           <li>
@@ -45,8 +45,8 @@
               :label="inapplicableLabel"
               :bgColor="bgColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.inapplicable"
+              @toggle:check="updateFilter"
+              v-model="filter.inapplicable"
             ></Checkbox>
           </li>
         </ul>
@@ -60,8 +60,8 @@
               :label="actLabel"
               :bgColor="bgColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.act"
+              @toggle:check="updateFilter"
+              v-model="filter.act"
             ></Checkbox>
           </li>
           <li>
@@ -70,8 +70,8 @@
               :label="tecniquesLabel"
               :bgColor="bgColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.html"
+              @toggle:check="updateFilter"
+              v-model="filter.html"
             ></Checkbox>
           </li>
           <li>
@@ -80,8 +80,8 @@
               :label="cuiLabel"
               :bgColor="bgColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateFilter"
-              :value="filter.cui"
+              @toggle:check="updateFilter"
+              v-model="filter.cui"
             ></Checkbox>
           </li>
         </ul>
@@ -95,8 +95,8 @@
               :label="chatbotLabel"
               :bgColor="bgColor"
               :checkColor="checkColor"
-              @checkBoxChanged="updateEvalType"
-              :value="evaluateChatbot"
+              @toggle:check="updateEvalType"
+              v-model="evaluateChatbot"
             ></Checkbox>
           </li>
         </ul>
@@ -104,64 +104,54 @@
     </div>
   </div>
 </template>
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import Checkbox from './Checkbox.vue';
 
-<script>
-import Checkbox from "./Checkbox.vue";
-import { mapActions, mapGetters } from "vuex";
+const isOpen = ref(false);
+const actIdValue = 'act';
+const actLabel = 'ACT Rules';
+const tecniquesIdValue = 'html';
+const tecniquesLabel = 'WCAG 2.1 Techniques';
+const cuiIdValue = 'cui';
+const cuiLabel = 'CUI Rules';
+const chatbotIdValue = 'chatbot';
+const chatbotLabel = 'Chatbot';
+const passedIdValue = 'passed';
+const passedLabel = 'Passed';
+const failedIdValue = 'failed';
+const failedLabel = 'Failed';
+const warningIdValue = 'warning';
+const warningLabel = 'Warning';
+const inapplicableIdValue = 'inapplicable';
+const inapplicableLabel = 'Inapplicable';
+const passedColor = '#46f73f';
+const failedColor = '#ff3535';
+const warningColor = '#ffd600';
+const bgColor = 'white';
+const checkColor = 'black';
 
-export default {
-  name: "ColapsibleFilter",
-  data() {
-    return {
-      isOpen: false,
-      actIdValue: "act",
-      actLabel: "ACT Rules",
-      tecniquesIdValue: "html",
-      tecniquesLabel: "WCAG 2.1 Techniques",
-      cuiIdValue: "cui",
-      cuiLabel: "CUI Rules",
-      chatbotIdValue: "chatbot",
-      chatbotLabel: "Chatbot",
-      passedIdValue: "passed",
-      passedLabel: "Passed",
-      failedIdValue: "failed",
-      failedLabel: "Failed",
-      warningIdValue: "warning",
-      warningLabel: "Warning",
-      inapplicableIdValue: "inapplicable",
-      inapplicableLabel: " Inapplicable",
-      passedColor: "#46f73f",
-      failedColor: "#ff3535",
-      warningColor: "#ffd600",
-      bgColor: "white",
-      checkColor: "black",
-    };
-  },
-  computed: {
-    ...mapGetters({
-      filter: "getFilter",
-      evaluateChatbot: "getEvaluateChatbot",
-    }),
-  },
-  methods: {
-    ...mapActions(["setFilter", "setEvaluateChatbot"]),
+const store = useStore();
 
-    changeState() {
-      this.isOpen = !this.isOpen;
-    },
-    async updateFilter(idValue, value) {
-      await this.setFilter({
-        key: idValue,
-        value: value,
-      });
-    },
-    async updateEvalType(_, value) {
-      await this.setEvaluateChatbot(value);
-    },
-  },
-  components: {
-    Checkbox,
-  },
+const filter = computed(() => store.getters.getFilter);
+
+const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot);
+
+const changeState = () => {
+  isOpen.value = !isOpen.value;
+};
+
+const updateFilter = async (event) => {
+  await store.dispatch('setFilter', {
+    key: event.id,
+    value: event.checked,
+  });
+};
+
+const updateEvalType = async (event) => {
+
+  await store.dispatch('setEvaluateChatbot', event.checked);
 };
 </script>
 

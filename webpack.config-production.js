@@ -3,9 +3,10 @@ const webpack = require('webpack');
 const ejs = require('ejs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
-const ExtensionReloader = require('webpack-extension-reloader');
+const ExtReloader = require('webpack-ext-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const config = {
   mode: 'production',
@@ -22,11 +23,18 @@ const config = {
   },
   resolve: {
     alias: {
-      'vue$': 'vue/dist/vue.runtime.esm.js'
+   'vue': 'vue/dist/vue.esm-bundler.js'
     },
     extensions: ['.ts', '.js', '.vue'],
   },
-  devtool: 'source-map',
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        keep_classnames: true, 
+      },
+    })],
+  },
   module: {
     rules: [
       {
@@ -40,12 +48,24 @@ const config = {
       },
       {
         test: /\.js$/,
-        loader: 'babel-loader',
-        exclude: [/node_modules/, "/icons/"],
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-typescript', 
+            ],
+            
+          },
+        },
       },
       {
         test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
       },
       {
         test: /\.scss$/,
@@ -73,18 +93,15 @@ const config = {
           emitFile: false,
         },
       },
-      {
-        loader: 'source-map-loader', // Extract source maps
-      },
     ],
   },
   plugins: [
+    
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].css' }),
-    new CopyPlugin([
+    new CopyPlugin({
+      patterns: [
       // { from: 'devtools.html', to: 'devtools.html', transform: transformHtml },
-      { from: 'src/content/content.ts', to: 'content.js' },
-      { from: 'src/background/background.ts', to: 'background.js' },
       { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'qwPage.js' },
       { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'util.js' },
       { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'act.js' },
@@ -92,29 +109,28 @@ const config = {
       { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
       { from: 'src/locales/en.js', to: 'locales/en.js' },
       { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
-      { from: 'src/icons', to: 'icons', ignore: ['icon.xcf'] },
-      { from: 'src/sidebar/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
+      { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
+      { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
+      { from: 'src/sidebar/sidebar.html', to: 'sidebar/sidebar.html', transform:{ transformer:transformHtml , cache: true } },
       { from: 'src/options/options.html', to: 'options/options.html', transform: transformHtml },
+      { 
+        from: 'src/icons', 
+        to: 'icons', 
+        globOptions: { 
+          ignore: ['**/icon.xcf'] 
+        } 
+      },
+      { from: 'src/sidebar/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
+      { from: 'src/sidebar/sidebar.html', to: 'options/options.html', transform: transformHtml },
       {
         from: 'manifest.json',
         to: 'manifest.json',
-        transform: (content) => {
-          const jsonContent = JSON.parse(content);
-          jsonContent.version = version;
-
-          if (config.mode === 'development') {
-            jsonContent['content_security_policy'] = "script-src 'self' 'unsafe-eval'; object-src 'self'";
-          }
-
-          return JSON.stringify(jsonContent, null, 2);
-        },
-      },
-    ]),
-    new ExtensionReloader({ entries: { content: 'content', background: 'background', sidebar: 'sidebar', options: 'options' } }),
+      }
+    ]
+  }),
   ],
 };
 
-if (config.mode === 'production') {
   config.plugins.push(
     new webpack.DefinePlugin({
       'process.env': {
@@ -122,15 +138,6 @@ if (config.mode === 'production') {
       },
     })
   );
-}
-
-if (process.env.HMR === 'true') {
-  config.plugins.push(
-    new ExtensionReloader({
-      manifest: path.resolve(__dirname, 'src/manifest.json'),
-    })
-  );
-}
 
 function transformHtml(content) {
   return ejs.render(content.toString(), {

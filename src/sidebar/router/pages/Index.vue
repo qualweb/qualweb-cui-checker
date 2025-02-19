@@ -3,13 +3,11 @@
     <div class="container">
       <h1 class="title">Chatbot Evaluation</h1>
       <div class="button-container">
-        <button id="chatButton">Send and Receive Messages</button>
-        <button id="identifyButton">Identify Chatbot</button>
+        <button id="chatButton" @click="interactWithMessages">Send and Receive Messages</button>
         <button id="requestLLMButton" @click="onRequestLLMClick">
-          Identify Chatbot with LLM
+          Detect Chatbot
         </button>
-        <button id="identifyMicButton">Identify Voice Input Button</button>
-        <button id="voiceInputButton">
+        <button @click="startInputVoice">
           Input Voice and Listen for Response
         </button>
       </div>
@@ -18,24 +16,24 @@
         <Checkbox
           idValue="actRulesCheckbox"
           :label="'ACT Rules'"
-          :value="actValue"
-          @checkBoxChanged="updateEvaluated('act', $event)"
+          v-model="actValue" 
+            @toggle:check="updateEvaluated('act', $event)" 
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="wcagTechniquesCheckbox"
           :label="'WCAG Techniques'"
-          :value="htmlValue"
-          @checkBoxChanged="updateEvaluated('html', $event)"
+          v-model="htmlValue"  
+          @toggle:check="updateEvaluated('html', $event)" 
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="bestPracticesCheckbox"
           :label="'CUI Rules'"
-          :value="cuiValue"
-          @checkBoxChanged="updateEvaluated('cui', $event)"
+          v-model="cuiValue" 
+          @toggle:check="updateEvaluated('cui', $event)" 
           bgColor="#e15500"
           checkColor="#ffffff"
         />
@@ -50,55 +48,62 @@
     </div>
   </div>
 </template>
+<script setup>
+import { computed, ref, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import Checkbox from '../../components/Checkbox.vue';
+import { messages } from '../../../utils/messagesToSend';
 
-<script>
-import { mapActions, mapGetters } from "vuex";
-import Checkbox from "../../components/Checkbox";
+const store = useStore();
+const router = useRouter();
 
-export default {
-  name: "Index",
-  components: {
-    Checkbox,
-  },
-  data() {
-    return {
-      actValue: false,
-      htmlValue: false,
-      cuiValue: false,
-    };
-  },
-  computed: {
-    ...mapGetters({ evaluated: "getEvaluated" }),
-    isDisabled() {
-      return !(
-        this.evaluated &&
-        (this.evaluated.act || this.evaluated.html || this.evaluated.cui)
-      );
-    },
-  },
-  methods: {
-    ...mapActions(["setEvaluated"]),
-    onEvaluateClick() {
-      this.$router.push("/loading");
-    },
-    onRequestLLMClick() {
-      this.$router.push("/detecting-chatbot");
-    },
-    async updateEvaluated(idValue, value) {
-      await this.setEvaluated({
-        module: idValue,
-        value: value,
-      });
-    },
-  },
-  mounted() {
-    if (this.evaluated) {
-      this.actValue = this.evaluated.act || false;
-      this.htmlValue = this.evaluated.html || false;
-      this.cuiValue = this.evaluated.cui || false;
-    }
-  },
+const actValue = ref(false);
+const htmlValue = ref(false);
+const cuiValue = ref(false);
+
+const evaluated = computed(() => store.getters.getEvaluated);
+
+const isDisabled = computed(() => {
+  return !(evaluated.value && (evaluated.value.act || evaluated.value.html || evaluated.value.cui));
+});
+
+const setEvaluated = async (idValue, value) => {
+  
+  await store.dispatch('setEvaluated', {
+    module: idValue,
+    value: value,
+  });
 };
+
+const onEvaluateClick = () => {
+  router.push('/loading');
+};
+
+const interactWithMessages = () => {
+  typeMessages(messages);
+};
+
+const startInputVoice = () => {
+  startVoiceInput(messages);
+};
+
+const onRequestLLMClick = () => {
+  router.push('/detecting-chatbot');
+};
+
+const updateEvaluated = async (idValue, event) => {
+
+  await setEvaluated(idValue, event.checked);
+};
+
+onMounted(() => {
+  if (evaluated.value) {
+    actValue.value = evaluated.value.act || false;
+    htmlValue.value = evaluated.value.html || false;
+    cuiValue.value = evaluated.value.cui || false;
+  }
+});
 </script>
 
 <style scoped>

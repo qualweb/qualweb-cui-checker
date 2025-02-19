@@ -3,7 +3,8 @@
     "target": "es2016",  
     "lib": ["dom", "es2016"],
     "strict": true,
-    "module": "commonjs",
+"module": "commonjs",
+
     "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,9 +13,13 @@
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true
   },
+
+  "outDir": "./dist",
+  "types": ["chrome"],
   "include": [
     "src/**/*.ts",
     "src/**/*.vue",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "test/**/*.ts",
   ]
 }

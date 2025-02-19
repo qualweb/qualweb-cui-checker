@@ -2,50 +2,49 @@
   <div>
     <div class="md-checkbox" :style="cssVars">
       <input
-        @focus="focus()"
-        @blur="blur()"
+        @focus="focus"
+        @blur="blur"
         class="hidden"
-        v-model="value"
-        @change="onChange"
+        @change="toggleChecked"
+        v-model="model"
         :id="idValue"
         type="checkbox"
       />
-      <label v-bind:class="[{ focused: focusedElem }]" :for="idValue">{{
-        label
-      }}</label>
+      <label :class="{ focused: focusedElem }" :for="idValue">
+        {{ label }}
+      </label>
     </div>
   </div>
 </template>
 
-<script>
-export default {
-  name: "Checkbox",
-  props: ["idValue", "label", "bgColor", "checkColor", "value"],
-  data() {
-    return {
-      focusedElem: false,
-    };
-  },
-  computed: {
-    cssVars() {
-      return {
-        "--bg-color": this.bgColor,
-        "--bg-check": this.checkColor,
-      };
-    },
-  },
-  methods: {
-    async onChange() {
-      this.$emit("checkBoxChanged", this.idValue, this.value);
-    },
-    focus() {
-      this.focusedElem = true;
-    },
-    blur() {
-      this.focusedElem = false;
-    },
-  },
+<script setup>
+import { ref, computed } from 'vue';
+const model = defineModel()
+const props = defineProps({
+  idValue: String,
+  label: String,
+  bgColor: String,
+  checkColor: String,
+});
+
+const toggleChecked = (event) => {
+  emit("toggle:check",event.target); 
 };
+
+const focusedElem = ref(false);
+const emit = defineEmits(['toggle:check']);
+const cssVars = computed(() => ({
+  "--bg-color": props.bgColor,
+  "--bg-check": props.checkColor,
+}));
+
+function focus() {
+  focusedElem.value = true;
+}
+
+function blur() {
+  focusedElem.value = false;
+}
 </script>
 
 <style scoped>

@@ -8,8 +8,8 @@
             :label="passedLabel + resultNumber.passed + ' results'"
             :bgColor="passedColor"
             :checkColor="checkColor"
-            @checkBoxChanged="updateFilterResults"
-            :value="filter.passed"
+            @toggle:check="updateFilterResults"
+            v-model="filter.passed"
           ></Checkbox>
         </li>
         <li>
@@ -18,8 +18,8 @@
             :label="failedLabel + resultNumber.failed + ' results'"
             :bgColor="failedColor"
             :checkColor="checkColor"
-            @checkBoxChanged="updateFilterResults"
-            :value="filter.failed"
+            @toggle:check="updateFilterResults"
+            v-model="filter.failed"
           ></Checkbox>
         </li>
         <li>
@@ -28,8 +28,8 @@
             :label="warningLabel + resultNumber.warning + ' results'"
             :bgColor="warningColor"
             :checkColor="checkColor"
-            @checkBoxChanged="updateFilterResults"
-            :value="filter.warning"
+            @toggle:check="updateFilterResults"
+            v-model="filter.warning"
           ></Checkbox>
         </li>
         <li>
@@ -38,8 +38,8 @@
             :label="inapplicableLabel + resultNumber.inapplicable + ' results'"
             :bgColor="bgColor"
             :checkColor="checkColor"
-            @checkBoxChanged="updateFilterResults"
-            :value="filter.inapplicable"
+            @toggle:check="updateFilterResults"
+            v-model="filter.inapplicable"
           ></Checkbox>
         </li>
       </ul>
@@ -80,10 +80,10 @@ export default {
     changeState() {
       this.isOpen = !this.isOpen;
     },
-    async updateFilterResults(idValue, value) {
+    async updateFilterResults(event) {
       await this.setResultFilter({
-        key: idValue.toLowerCase(),
-        value: value,
+        key: event.id.toLowerCase(),
+        value: event.checked,
       });
     },
   },
