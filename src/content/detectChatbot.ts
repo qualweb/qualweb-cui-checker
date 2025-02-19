@@ -4,13 +4,12 @@ import {
   LLMResponse,
   ChatBotInterface,
 } from "../utils/types";
+import { chatbotInterface } from "./Detection";
 import { setStoredChatbotElement, flashGreen } from "./selectChatbot";
 import { sendPromptTLocalLLM, sendPromptToLLM } from "./selectChatbotLLM";
 import { setStoredMicrophoneButton } from "./selectVoiceinput";
 
 import xPath2Selector from "xpath-to-selector";
-
-export let chatbotInterface: ChatBotInterface | null = null;
 
 /**Function to clean HTML to reduce size of tokens sent to LLM
  * @param htmlTree - HTML element tree to clean
@@ -20,7 +19,7 @@ export let chatbotInterface: ChatBotInterface | null = null;
 export function cleanHTML(htmlTree: HTMLElement): string {
   let regexRellevant: RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
 
-  console.log("Size of HTML: ", htmlTree.outerHTML.length);
+
   let irrelevantTags = [
     "header",
     "footer",
@@ -107,8 +106,7 @@ export function cleanHTML(htmlTree: HTMLElement): string {
   });
 
   let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, " $1 ");
-  console.log("Size of cleaned HTML: ", result.length);
-  console.log("Cleaned HTML: ", result);
+
   return result;
 }
 
@@ -134,7 +132,7 @@ export async function identifyElementsChatbot(
     let LLMResponse: LocalLLMResponse | null = null;
 
     sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
-      chatbotInterface = {
+      let chatbotInterface:ChatBotInterface = {
         windowElement: null,
         inputElement: null,
         messagesSelector: "",
@@ -308,10 +306,10 @@ export async function correctElementChatbot(
 function waitForIframeLoad(iframe): Promise<HTMLIFrameElement> {
   return new Promise((resolve, reject) => {
     let iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    console.log("Iframe Doc", iframeDoc);
+
     if (iframeDoc && iframeDoc.readyState === "complete") {
       // Se já está carregado
-      console.log("Iframe was already loaded");
+
       resolve(iframe);
     } else {
       /*       
@@ -343,7 +341,7 @@ export async function detectChatBotPopupMutation(): Promise<HTMLElement> {
           if (getComputedStyle(element).display !== "none") {
             if (element.querySelectorAll("iframe").length > 0) {
               let iframes = element.querySelectorAll("iframe");
-              console.log("Iframes: ", iframes);
+        
 
               let resolved = false;
               for (let i = 0; i < iframes.length; i++) {
@@ -503,144 +501,3 @@ export function requestElementsLLM() {
       );
     });
 }
-
-/*
-interface SelectorsRelevant {
-  classes: string[];
-  properties: string[];
-  tags: string[];
-  dataAttributes: string[];
-}
-
-
-function camelToKebabCase(camelCaseStr) {
-  return camelCaseStr
-      .replace(/([A-Z])/g, '-$1') 
-      .toLowerCase();            
-}
-
-
-
-function getElements(selectors:SelectorsRelevant):Set<Element>{
-  let elements:Set<Element> = new Set();
-
-  selectors.classes.forEach((className) => {
-    let elementsWithClass = document.getElementsByClassName(className);
-    Array.from(elementsWithClass).forEach(element => elements.add(element));
-  });
-
-  selectors.properties.forEach((property) => {
-    let elementsWithProperty = document.querySelectorAll(`[${property}]`);
-    Array.from(elementsWithProperty).forEach(element => elements.add(element));
-  });
-
-  selectors.tags.forEach((tag) => {
-    let elementsWithTag = document.getElementsByTagName(tag);
-    Array.from(elementsWithTag).forEach(element => elements.add(element));
-  });
-
-  selectors.dataAttributes.forEach((dataAtr) => {
-    let elementsWithDataAtr = document.querySelectorAll(`[data-${dataAtr}]`);
-    Array.from(elementsWithDataAtr).forEach(element => elements.add(element));
-  });
-
-
-
-  return elements;
-
-
-}
-  
-
-function getFilteredSelectors(element: HTMLElement):Set<Element>  {
-
-  let elements:Set<Element> = new Set();
-
-  let allElements = element.querySelectorAll("*");
-  // Get a list of Relant keywords and add them to regex word
-  let regex =  "[A-Za-z0-9]*(chat|assistant|prompt|conversation)[A-Za-z0-9]*";
-  allElements.forEach((element) => {
-    let isRelevant = false;
-    // Check if there are tags that are relevant for a chatbot
-     isRelevant = isRelevant || element.localName.match(regex) ? true : false;
-
-     if (isRelevant) {
-       elements.add(element);
-       return;
-     }
-
-     // Check if there are classes name that are relevant for a chatbot
-     element.classList.forEach((className) => {
-      if(className.match(regex)){
-        elements.add(element);
-        return;
-      }
-      });
-
-      // relevant title or aria
-      if((element as HTMLElement).title && (element as HTMLElement).title.match(regex)){
-        elements.add(element);
-        return;
-      }
-     
-
-      // Check if there are properties that are relevant for a chatbot
-      Array.from(element.attributes).forEach((attr: Attr) => {
-        if(attr.name.match(regex)){
-          elements.add(element);
-          return;
-        }
-      });
-      
-
-      // get any data-* attributes that are relevant for a chatbot
-      for (let dataAtr in (element as HTMLElement).dataset) {
-        if (dataAtr.match(regex)) {
-          elements.add(element);
-          return;
-        }
-        //  check if value inside data-* attribute is relevant
-        if((element as HTMLElement).dataset[dataAtr]!.match(regex)){
-          elements.add(element);
-          return;
-        }
-      }
-      
-  });
- 
-
-  return elements;
-
-}
-
-function addMutationIframe(iframe:HTMLIFrameElement){
-  iframe.addEventListener('load', () => {
-    const iframeDocument = iframe.contentDocument || iframe.contentWindow?.document;
-
-    if (iframeDocument) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-              mutation.addedNodes.forEach((node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-
-                console.log('Added Nodes in iframe:', mutation);
-                
-            }
-          });
-            });
-        });
-
-        observer.observe(iframeDocument.body, {
-            childList: true,
-            attributes: true,
-            attributeFilter: ['class','style'],
-            subtree: true
-        });
-
-
-    } else {
-        console.error('Failed to access iframe document.');
-    }
-});
-}
-*/

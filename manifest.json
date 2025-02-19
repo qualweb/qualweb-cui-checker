@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "An evaluation tool to check the accessibility of the current conversational AI interface.",
   "background": {
-    "service_worker": "dist/background.bundle.js",
+    "service_worker": "dist/background.bundle.js"
 
   },
   
