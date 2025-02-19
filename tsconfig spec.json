@@ -1,0 +1,23 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+
+    "strict": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext" ,
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "forceConsistentCasingInFileNames": true
+  },
+  "typeRoots": [
+    "./node_modules/@types"
+  ],
+  "types": ["chrome","node", "mocha"],
+  "include": [
+    "test/**/*.ts"
+  ]
+}
