@@ -1,5 +1,5 @@
 import { showMessage } from "../utils/helpers";
-import { ElementSelector, LLMResponse } from "../utils/types";
+import {  LLMResponse } from "../utils/types";
 import axios from "axios";
 
 const LLM_URL = "https://api.openai.com/v1/chat/completions";
@@ -95,7 +95,7 @@ const sendPromptTLocalLLM = async (body: string): Promise<LocalLLMResponse> => {
     .then((response) => {
       const reply = response.data.response;
 
-      console.log(reply);
+
 
       const parsedReply: LocalLLMResponse = JSON.parse(reply);
 

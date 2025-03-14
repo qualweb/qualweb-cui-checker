@@ -11,7 +11,7 @@ let chatbotSummary: Summary = { passed: 0, failed: 0, warning: 0, inapplicable: 
 export function startEvaluation(sendResponse : (response: any) => void) {
   let summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
   // only assign chatbotsummary is chatbot element is not null
-  if (chatbotInterface!.windowElement) {
+  if (chatbotInterface?.windowElement) {
     chatbotSummary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
   }
   sendResponse([summary, chatbotSummary]);
@@ -21,15 +21,14 @@ export function endEvaluation(sendResponse : (response: any) => void) {
   sendResponse([summary, chatbotSummary]);
 }
 
-export function evaluateACT(chatbotElement: HTMLElement|null) {
+export function evaluateACT() {
     console.log("Evaluating ACT");
     let actResult, chatbotActResult, result, chatbotResult;
     const excludedRules = [
       'QW-ACT-R1', 'QW-ACT-R2', 'QW-ACT-R3', 'QW-ACT-R4', 'QW-ACT-R5', 'QW-ACT-R6', 'QW-ACT-R7', 'QW-ACT-R8'
     ];
     let sourceHtml = document.documentElement.outerHTML;
-    console.log(window.act);
-    console.log(sourceHtml);
+
     window.act = new ACTRulesRunner({ translate: locale_en, fallback: locale_en });
     // window.act.configure({ exclude: excludedRules })
     //window.act.validateFirstFocusableElementIsLinkToNonRepeatedContent();
@@ -44,8 +43,8 @@ export function evaluateACT(chatbotElement: HTMLElement|null) {
   
     result = actResult.assertions;
   
-    if (chatbotElement) {
-      chatbotActResult = filterResults(actResult, chatbotElement);
+    if (chatbotInterface?.windowElement) {
+      chatbotActResult = filterResults(actResult, chatbotInterface?.windowElement);
   
       addValuesToSummary(chatbotSummary, chatbotActResult);
       chatbotResult = chatbotActResult.assertions;
@@ -54,7 +53,7 @@ export function evaluateACT(chatbotElement: HTMLElement|null) {
     return [result, chatbotResult];
   }
   
-export function evaluateWCAG(chatbotElement: HTMLElement|null) {
+export function evaluateWCAG() {
     let htmlResult, chatbotHtmlResult, result, chatbotResult;
     const excludedTechniques = [
       'QW-WCAG-T14', 'QW-WCAG-T15', 'QW-WCAG-T16', 'QW-WCAG-T17', 'QW-WCAG-T18', 'QW-WCAG-T19', 'QW-WCAG-T20', 'QW-WCAG-T21', 'QW-WCAG-T22'
@@ -66,8 +65,8 @@ export function evaluateWCAG(chatbotElement: HTMLElement|null) {
     addValuesToSummary(summary, htmlResult);
     result = htmlResult.assertions;
   
-    if (chatbotElement) {
-      chatbotHtmlResult = filterResults(htmlResult, chatbotElement);
+    if (chatbotInterface?.windowElement) {
+      chatbotHtmlResult = filterResults(htmlResult, chatbotInterface?.windowElement);
       addValuesToSummary(chatbotSummary, chatbotHtmlResult);
       chatbotResult = chatbotHtmlResult.assertions;
     };
@@ -75,7 +74,7 @@ export function evaluateWCAG(chatbotElement: HTMLElement|null) {
   }
   
   
-  export async function  evaluateCUI(chatbotElement: HTMLElement|null) {
+  export async function  evaluateCUI() {
     let cuiResult, chatbotCuiResult, result, chatbotResult;
     
     // build selectors Map
@@ -100,8 +99,8 @@ export function evaluateWCAG(chatbotElement: HTMLElement|null) {
     addValuesToSummary(summary, cuiResult);
   
     result = cuiResult.assertions;
-    if (chatbotElement) {
-      chatbotCuiResult = filterResults(cuiResult, chatbotElement);
+    if (chatbotInterface?.windowElement) {
+      chatbotCuiResult = filterResults(cuiResult, chatbotInterface?.windowElement);
       addValuesToSummary(chatbotSummary, chatbotCuiResult);
       chatbotResult = chatbotCuiResult.assertions;
   

@@ -1,4 +1,3 @@
-import { chatbotInterface } from "../Detection";
 import { evaluateACT, evaluateWCAG, evaluateCUI, endEvaluation, startEvaluation } from "../Evaluation";
 import { IChromeRequest } from "./MapperActions";
 
@@ -10,16 +9,16 @@ export function actionStartEvaluation(data: IChromeRequest) {
 }
 
 export function actionEvaluateACT(data: IChromeRequest) {
-  const actResult = evaluateACT(chatbotInterface!.windowElement);
+  const actResult = evaluateACT();
   data.sendResponse(actResult);
 }
 export function actionEvaluateWCAG(data: IChromeRequest) {
-  const wcagResult = evaluateWCAG(chatbotInterface!.windowElement);
+  const wcagResult = evaluateWCAG();
   data.sendResponse(wcagResult);
 }
 export async function actionEvaluateCUI(data: IChromeRequest): Promise<Object> {
   return new Promise<Object>(async (resolve) => {
-    const response = await evaluateCUI(chatbotInterface!.windowElement);
+    const response = await evaluateCUI();
     resolve(response);
   });
 }

@@ -3,10 +3,10 @@ export interface ChatResponse {
   response: string[];
 }
 
-export interface ElementSelector {
-  startSelection: () => void;
-  resetSelection: () => void;
+export interface ResponsesSelectors {
+  [rule: string]: string[];
 }
+
 
 // @Deprecated
 export interface LLMResponse {

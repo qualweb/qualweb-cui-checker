@@ -4,6 +4,9 @@ import { setGreen, unsetGreen } from "./selectChatbot";
 
 export let chatbotInterface: ChatBotInterface | null = null;
 
+export function setChatbotInterface(chatbot: ChatBotInterface) {
+    chatbotInterface = chatbot;
+}
 
 
 export let HTMLCode: string = '';

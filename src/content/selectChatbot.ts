@@ -1,5 +1,5 @@
 import { showMessage } from "../utils/helpers";
-import { ElementSelector } from "../utils/types";
+
 
 let isSelecting: boolean = false;
 let highlightedElement: HTMLElement | null = null;
@@ -370,7 +370,4 @@ export function unsetGreen(element: HTMLElement | HTMLElement[]): void {
   }
 }
 
-export const elementSelector: ElementSelector = {
-  startSelection,
-  resetSelection,
-};
+

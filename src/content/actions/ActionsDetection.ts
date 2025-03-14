@@ -1,7 +1,7 @@
 import { showMessage } from "../../utils/helpers";
 import { currentVerification, detectChatbotPopup, requestCorrectionElement, startConfirmElement } from "../Detection";
 
-import { elementSelector, setGreen, unsetGreen } from "../selectChatbot";
+import {  setGreen, unsetGreen } from "../selectChatbot";
 import { microphoneSelector } from "../selectVoiceinput";
 import { IChromeRequest } from "./MapperActions";
 
@@ -45,6 +45,6 @@ export function actionSelectMicrophone(data: IChromeRequest) {
 }
 
 export function actionStartSelection(data: IChromeRequest) {
-  elementSelector.startSelection();
+ console.log("Not implemented yet");
 }
 
