@@ -1,10 +1,20 @@
 import { ChatResponse, ResponseStore } from "../utils/types";
-import { sendAndReceiveMessage } from "./chatInteraction";
-import { ChatBotInterface } from "../utils/types";
+import { observeNewMessages,dispatchEvents, captureResponse } from "./chatInteraction";
 import { sendMessageToBackground } from "./content";
 import { getStoredMicrophoneButton } from "./selectVoiceinput";
 import { chatbotInterface } from "./Detection";
-
+import { CHAT_HISTORY, initiateModel, InvokeModelWithMemory,  } from "../langchain/langchain";
+import { ChainValues } from "@langchain/core/utils/types";
+import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
+import { ChatMessageHistory } from "langchain/memory";
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
+import { Runnable, RunnablePassthrough } from "@langchain/core/runnables";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { initalPipeline } from "../langchain/pipelines";
 
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
@@ -18,7 +28,7 @@ export function setSentMessage(message: string): void {
 }
 
 
-export async function handleTypeMessages(request: { messages: string[] }, chatbotInterface: ChatBotInterface | null): Promise<ChatResponse[]> {
+export async function handleTypeMessages(request: { messages: string[] }): Promise<ChatResponse[]> {
   let chatResponses: ChatResponse[] = [];
   
   for (let i = 0; i < request.messages.length; i++) {
@@ -26,8 +36,8 @@ export async function handleTypeMessages(request: { messages: string[] }, chatbo
     let response: ChatResponse
 
     if (chatbotInterface) {
-      response = await sendAndReceiveMessage(message, chatbotInterface);
-      chatResponses.push(response);
+       await sendAndReceiveMessage(message);
+      //chatResponses.push(response);
     } else {
       // response = await sendAndReceiveMessage(message);
     }
@@ -73,3 +83,102 @@ export async function handleVoiceInput(request: { messages: string[] }, chatbotE
     return chatResponses;
   
   }
+
+  
+export function simulateInput(
+  message: string,
+) {
+  const textEditor = chatbotInterface!.inputElement;
+  if (textEditor?.tagName === "DIV") {
+    if (message != "") {
+      setSentMessage(message);
+      textEditor.innerHTML = message;
+    } else {
+      // text was voice input
+      setSentMessage(textEditor.innerText);
+    }
+    textEditor.focus();
+    dispatchEvents(textEditor);
+  } else if (
+    textEditor?.tagName === "INPUT" ||
+    textEditor?.tagName === "TEXTAREA"
+  ) {
+    if (message != "") {
+      setSentMessage(message);
+      textEditor.focus();
+      (textEditor as HTMLInputElement | HTMLTextAreaElement).value = message;
+    } else {
+      // text was voice input
+      setSentMessage(
+        (textEditor as HTMLInputElement | HTMLTextAreaElement).value
+      );
+      textEditor.focus();
+    }
+    dispatchEvents(textEditor);
+  } else {
+    console.error("Input field or rich text editor not found.");
+  }
+}
+
+export async function inputMessage(
+  message: string,
+) {
+  const textEditor = chatbotInterface!.inputElement;
+  if (textEditor?.tagName === "DIV") {
+    if (message != "") {
+      textEditor.innerHTML += message;
+    } 
+    } else if (
+    textEditor?.tagName === "INPUT" ||
+    textEditor?.tagName === "TEXTAREA"
+  ) {
+    if (message != "") {
+      (textEditor as HTMLInputElement | HTMLTextAreaElement).value += message;
+    }     
+  } else {
+    console.error("Input field or rich text editor not found.");
+  }
+}
+
+
+export async function sendMessage(
+) {
+  const textEditor = chatbotInterface!.inputElement;
+  if (textEditor?.tagName === "DIV") {
+    textEditor.focus();
+    dispatchEvents(textEditor);
+  } else if (
+    textEditor?.tagName === "INPUT" ||
+    textEditor?.tagName === "TEXTAREA"
+  ) {
+    
+      textEditor.focus();
+    
+    dispatchEvents(textEditor);
+  } else {
+    console.error("Input field or rich text editor not found.");
+  }
+}
+
+export async function sendAndReceiveMessage(
+  message: string,
+): Promise<HTMLElement[]> {
+  simulateInput(message);
+  return await captureResponse(message, '', 2000, chatbotInterface!);
+}
+
+export async function interactWithLLM(): Promise<void> {
+  // Obtain first messages of chatbot to build context
+  let firstMessages: HTMLElement[] = Array.from(document.querySelectorAll(chatbotInterface!.selectors.messages[0]!)) as HTMLElement[];
+  let request:string = Array.from(firstMessages).map((element) => element.textContent).join("\n");
+  if(request.length === 0) {
+    request = "Hello, i am a chatbot and i am here to help! you can ask me anything what services i offer.";
+  }
+  CHAT_HISTORY.saveContext({ input: request }, { output: "" });
+  await initalPipeline(firstMessages,inputMessage,sendMessage,captureResponse);
+
+  // Run other pipelines here
+
+
+
+} 

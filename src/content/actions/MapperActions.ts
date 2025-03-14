@@ -1,6 +1,6 @@
 import { actionCorrectElementSelection, actionDetectChatbot, actionEndSucessfulVerification, actionSelectMicrophone, actionStartSelection, actionStartVerification } from "./ActionsDetection";
 import { actionEndEvaluation, actionEvaluateACT, actionEvaluateCUI } from "./ActionsEvaluation";
-import { actionStartVoiceInput, actionTypeMessages } from "./ActionsInteraction";
+import { actionLLMInteraction, actionStartVoiceInput, actionTypeMessages } from "./ActionsInteraction";
 
 export interface IChromeRequest {
     sendResponse: (response: any) => void;
@@ -11,6 +11,7 @@ export interface IChromeRequest {
 const caseInteractionHandlers: Record<string, (data:IChromeRequest) => void | Promise<any>> = {
     typeMessages: actionTypeMessages,   
     startVoiceInput: actionStartVoiceInput,  
+    startLLMInteraction: actionLLMInteraction,
 };
 
 // handlers for the detection of chatbot actions
