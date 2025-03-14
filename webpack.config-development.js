@@ -96,14 +96,14 @@ const config = {
       },
     ],
   },
-   optimization: {
-      minimize: true,
-      minimizer: [new TerserPlugin({
-        terserOptions: {
-          ecma: 2020, // Set ECMAScript version to support new features
-        },
-      })],
-    },
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      terserOptions: {
+        keep_classnames: true, 
+      },
+    })],
+  },
   plugins: [
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].css' }),
