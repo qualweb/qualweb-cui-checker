@@ -46,3 +46,28 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 });
 });
 }
+
+
+async function startLLMInteraction(messages) {
+
+  return new Promise((resolve, reject) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs[0];
+    if (activeTab?.id) {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: "startLLMInteraction", messages },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError.message);
+            
+          } else {
+            resolve(response);
+            console.log(response?.status);
+          }
+        }
+      );
+    }
+  });
+  });
+  }

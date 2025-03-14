@@ -10,6 +10,9 @@
         <button @click="startInputVoice">
           Input Voice and Listen for Response
         </button>
+        <button @click="LLMInteraction">
+          Start LLM Interaction
+        </button>
       </div>
       <hr />
       <div class="evaluation-container">
@@ -86,6 +89,10 @@ const interactWithMessages = () => {
 
 const startInputVoice = () => {
   startVoiceInput(messages);
+};
+
+const LLMInteraction = () => {
+  startLLMInteraction();
 };
 
 const onRequestLLMClick = () => {
