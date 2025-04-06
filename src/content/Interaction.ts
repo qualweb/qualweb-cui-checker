@@ -1,20 +1,13 @@
 import { ChatResponse, ResponseStore } from "../utils/types";
-import { observeNewMessages,dispatchEvents, captureResponse } from "./chatInteraction";
+import { dispatchEvents, captureResponse, setLastMessageUser } from "./chatInteraction";
 import { sendMessageToBackground } from "./content";
 import { getStoredMicrophoneButton } from "./selectVoiceinput";
 import { chatbotInterface } from "./Detection";
-import { CHAT_HISTORY, initiateModel, InvokeModelWithMemory,  } from "../langchain/langchain";
-import { ChainValues } from "@langchain/core/utils/types";
-import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts";
-import { ChatMessageHistory } from "langchain/memory";
-import {
-  AIMessage,
-  HumanMessage,
-  SystemMessage,
-} from "@langchain/core/messages";
-import { Runnable, RunnablePassthrough } from "@langchain/core/runnables";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import { initalPipeline } from "../langchain/pipelines";
+import { CHAT_HISTORY,  } from "../assistant-interaction/models";
+import { initiateInteractionWorkflow } from "../assistant-interaction/interactionWorkflow";
+import { selectElementSafely } from "./detectChatbot";
+
+export const userMessages: string[] = [];
 
 export let responses: ResponseStore = {};
 let sentMessage: string = '';
@@ -123,17 +116,23 @@ export function simulateInput(
 export async function inputMessage(
   message: string,
 ) {
-  const textEditor = chatbotInterface!.inputElement;
+  setLastMessageUser(message);
+  // reload input field
+  const inputField = selectElementSafely(
+    chatbotInterface!.dialogElement!.ownerDocument,
+    chatbotInterface!.selectors.input[0]!
+  );
+  const textEditor = inputField;
   if (textEditor?.tagName === "DIV") {
     if (message != "") {
-      textEditor.innerHTML += message;
+      textEditor.innerHTML = message;
     } 
     } else if (
     textEditor?.tagName === "INPUT" ||
     textEditor?.tagName === "TEXTAREA"
   ) {
     if (message != "") {
-      (textEditor as HTMLInputElement | HTMLTextAreaElement).value += message;
+      (textEditor as HTMLInputElement | HTMLTextAreaElement).value = message;
     }     
   } else {
     console.error("Input field or rich text editor not found.");
@@ -143,7 +142,12 @@ export async function inputMessage(
 
 export async function sendMessage(
 ) {
-  const textEditor = chatbotInterface!.inputElement;
+  const inputField = selectElementSafely(
+    chatbotInterface!.dialogElement!.ownerDocument,
+    chatbotInterface!.selectors.input[0]!
+  );
+  const textEditor = inputField as HTMLInputElement | HTMLTextAreaElement;
+
   if (textEditor?.tagName === "DIV") {
     textEditor.focus();
     dispatchEvents(textEditor);
