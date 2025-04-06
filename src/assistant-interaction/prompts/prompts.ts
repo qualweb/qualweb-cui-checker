@@ -6,6 +6,43 @@ type dateArgs = {
     date: string;
   };
 
+
+  /**Prompt for Detection of elements in HTML
+   * 
+   */
+
+  
+export const testDetectionPrompt = PromptTemplate.fromTemplate(`
+  Task: Analyze the given HTML structure and identify the following elements using RELATIVE XPath:
+
+
+1. The input element for text to send a message to the chatbot. It should be one of the following:
+    <textarea>
+    <input type="text">
+    <div contenteditable="true">
+2. The chat conversation window that contains messages from both the chatbot and the user.
+3. The XPath for main indivisable element that represents a chatbot message.
+4. The microphone button that activates microphone input for the prompt.
+5. The main parent window that contains all the elements mentioned above.
+
+If any element is not found, return "null" for that element.
+
+Important Notes:
+
+Provide only RELATIVE XPath (not absolute).
+Pay attention to custom tags, custom attributes, and data- attributes*, as they may help you construct the XPath.
+Ensure that the XPath is optimized and avoids relying on brittle identifiers or unnecessary hierarchy levels.
+In case of multiple potential matches, choose the one that is most specific to the task.
+Priority Rules for XPath:
+
+Prefer custom tags or unique identifiers.
+If no custom tag or unique identifier is found, use more generic attributes like class or other attributes.
+With no extra comments or text, provide the following elements in JSON format:
+
+  {formatInstructions}
+
+`);
+
 export const detectionPrompt = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE XPath:
 1. The main parent window that contain items asked.
@@ -30,6 +67,7 @@ Priority Rules for  xpath:
     {formatInstructions}
 
   `);
+
 
 export const promptGetServices = PromptTemplate.fromTemplate(`
     You are an evaluator of chatbots. Your task is to ask one question at a time to determine the services provided by a given chatbot based on its input message.
@@ -160,22 +198,3 @@ Task: Based on the chatbot’s responses, generate a relevant question that alig
 - If no suitable question can be formulated, respond with a polite compliment and express gratitude.
 - Only talk in language received from the chatbot.`);
     
-type PromptFunction<T> = (args: T) => string;
-/**
-export const templates: Record<string, {f:PromptTemplate<any>,description:string}>  = {
-    dateQuestion: {
-        f: (args: dateArgs) => { 
-            PromptTemplate.fromTemplate(
-                `What is the date of the event, ${args.name}?`
-            );
-            return JSON.stringify({question: "What is the date of the event, ${args.name}?", options: null});
-        },
-        description: "date question"
-        }
-    },
-    "reasonQuestions": PromptTemplate.fromTemplate( 
-        "You are an HTML reasoning chatbot. Based on a portion of a chatbot's answer, you will determine whether it is a normal response or a button query for mouse input. Your output must be **strictly** in JSON format with no additional text, comments, or explanations. JSON SCHEMA: {question: 'question text available in html that describes the options', options: ['option 1', 'option 2', 'option 3', 'option 4']} If it is a normal text answer, output: {question: null, options: null}"
-    ),
-    
-}
-*/

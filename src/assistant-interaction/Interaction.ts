@@ -1,15 +1,9 @@
 import { BufferMemory } from "langchain/memory";
 import { ConversationChain } from "langchain/chains";
-import { initiateModel, invokeDirectMessageOllama, InvokeModelWithMemory, invokeModelWithoutMemoryOllama } from "./langchain";
+import { initiateModel, ModelOptions } from "./models";
 import { JsonOutputParser, StringOutputParser } from "@langchain/core/output_parsers";
-import { prompDetectTypeMessage } from "./prompts";
-
-import { AIMessage } from "@langchain/core/messages";
+import { prompDetectTypeMessage } from "./prompts/prompts"; 
 import { RunnableSequence } from "@langchain/core/runnables";
-interface IQuestion {
-  question: string|null;
-  options: string|null;
-}
 
 export async function avaliateMessageType(assistantPreviousMSG:string,html: string): Promise<String> {
   return new Promise(async (resolve, reject) => {
@@ -32,8 +26,12 @@ export async function avaliateMessageType(assistantPreviousMSG:string,html: stri
           return "message";
         }
   
-      };   
-      const model = await initiateModel("mistral:7b-instruct", 0);
+      }; 
+      const modelOptions:ModelOptions = {
+        model: "mistral:7b-instruct",
+        temperature: 0,
+      }  
+      const model = await initiateModel(modelOptions);
       let promptApplied = await prompDetectTypeMessage.partial({previousMessage:assistantPreviousMSG});
       const classificationChain = RunnableSequence.from([
       promptApplied,
