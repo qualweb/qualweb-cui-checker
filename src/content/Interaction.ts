@@ -169,13 +169,25 @@ export async function sendAndReceiveMessage(
 
 export async function interactWithLLM(): Promise<void> {
   // Obtain first messages of chatbot to build context
-  let firstMessages: HTMLElement[] = Array.from(document.querySelectorAll(chatbotInterface!.selectors.messages[0]!)) as HTMLElement[];
+  let documentOwner = chatbotInterface!.dialogElement!.ownerDocument;
+  let firstMessages: HTMLElement[] = Array.from(documentOwner.querySelectorAll(chatbotInterface!.selectors.messages[0]!)) as HTMLElement[];
   let request:string = Array.from(firstMessages).map((element) => element.textContent).join("\n");
-  if(request.length === 0) {
-    request = "Hello, i am a chatbot and i am here to help! you can ask me anything what services i offer.";
+  console.log("First messages: ", request);
+  
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if(metaDescription) {
+    request += metaDescription.getAttribute('content');
   }
-  CHAT_HISTORY.saveContext({ input: request }, { output: "" });
-  await initalPipeline(firstMessages,inputMessage,sendMessage,captureResponse);
+
+  // Save title of the chatbot webpage
+
+  let webpage = document.title;
+  console.log("Webpage title: ", webpage);
+  console.log("Webpage description: ", request);
+  CHAT_HISTORY.saveContext({ input: webpage }, { output: "Chatbot Webpage title Saved" });
+  CHAT_HISTORY.saveContext({ input: request }, { output: "Chatbot Webpage description Saved" });
+
+  await initiateInteractionWorkflow(firstMessages,inputMessage,sendMessage,captureResponse);
 
   // Run other pipelines here
 
