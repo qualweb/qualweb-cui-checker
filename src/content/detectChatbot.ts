@@ -1,15 +1,10 @@
-import { showMessage } from "../utils/helpers";
+
+import { LocalLLMResponse, sendPromptRequestCorrection, sendPromptTLocalLLM } from "../assistant-interaction/detection";
+
 import {
-  LocalLLMResponse,
-  LLMResponse,
   ChatBotInterface,
 } from "../utils/types";
 import { chatbotInterface } from "./Detection";
-import { setStoredChatbotElement, flashGreen } from "./selectChatbot";
-import { sendPromptTLocalLLM, sendPromptToLLM } from "./selectChatbotLLM";
-import { setStoredMicrophoneButton } from "./selectVoiceinput";
-
-import xPath2Selector from "xpath-to-selector";
 
 /**Function to clean HTML to reduce size of tokens sent to LLM
  * @param htmlTree - HTML element tree to clean
@@ -123,6 +118,58 @@ function getElementByXpath(
     null
   ).singleNodeValue as HTMLElement;
 }
+function validateMessagesSelector(documentOwner:Document,selector:string):string {
+  let elements = documentOwner.querySelectorAll(selector);
+  if(elements.length > 0){
+    return selector;
+  }else{
+    if(selector.startsWith(".")){
+      let selectorCorrected = selector.slice(1);
+      elements = documentOwner.querySelectorAll(selectorCorrected);
+      if(elements.length > 0){
+        return selectorCorrected;
+      }
+    }
+  }
+  return "";
+  
+}
+export function selectElementSafely(documentOwner:Document,selector:string) {
+  try {
+    let element = documentOwner.querySelector(selector);
+    if (element) {
+      return element;
+    } else {
+      if(selector.startsWith(".")){
+        let selectorCorrected = selector.slice(1);
+        element = documentOwner.querySelector(selectorCorrected);
+        return element;
+      }
+      console.warn(`querySelector failed: ${selector}`);
+      return null;
+    }
+  } catch (error) {
+    console.warn(`querySelector error: ${selector}`, error);
+
+    // Attempt to use document.getElementById as a fallback
+    if (selector.startsWith("#")) {
+      try {
+        const id = selector.slice(1); // Remove the '#'
+        const elementById = documentOwner.getElementById(id);
+        if (elementById) {
+          return elementById;
+        } else {
+          console.warn(`getElementById failed: ${id}`);
+          return null;
+        }
+      } catch (idError) {
+        console.warn(`getElementById error: ${selector}`, idError);
+        return null;
+      }
+    }
+    return null;
+  }
+}
 
 export async function identifyElementsChatbot(
   element: string,
@@ -146,67 +193,37 @@ export async function identifyElementsChatbot(
           microphone: [],
         },
       };
+      console.log("Response from LLM", response);
 
       LLMResponse = response;
-      if (LLMResponse.xpath_window) {
-        let windowElement = getElementByXpath(
-          LLMResponse.xpath_window,
-          documentChatbot
-        );
-        if (windowElement) {
-          chatbotInterface.windowElement = windowElement;
-          let selector = xPath2Selector(LLMResponse.xpath_window);
-          chatbotInterface.selectors.window.push(selector);
-        }
+      if (LLMResponse.main_parent_window) {
+        chatbotInterface.windowElement = selectElementSafely(documentChatbot, LLMResponse.main_parent_window) as HTMLElement;
+          chatbotInterface.selectors.window.push(LLMResponse.main_parent_window);
       }
 
-      if (LLMResponse.xpath_input) {
-        let inputElement = getElementByXpath(
-          LLMResponse.xpath_input,
-          documentChatbot
-        );
+      if (LLMResponse.text_input_element) {
+        chatbotInterface.inputElement = selectElementSafely(documentChatbot,
+          LLMResponse.text_input_element
+        ) as HTMLElement;
+        chatbotInterface.selectors.input.push(LLMResponse.text_input_element);
+      }
+      if (LLMResponse.chat_conversation_window) {
+        chatbotInterface.dialogElement = selectElementSafely(documentChatbot,
+          LLMResponse.chat_conversation_window
+        ) as HTMLElement;
+        chatbotInterface.selectors.dialog.push(LLMResponse.chat_conversation_window);
+      }
+      if (LLMResponse.chatbot_message_element) {
 
-        if (inputElement) {
-          chatbotInterface.inputElement = inputElement;
-          let selector = xPath2Selector(LLMResponse.xpath_input);
-          chatbotInterface.selectors.input.push(selector);
-        }
+        chatbotInterface.messagesSelector = validateMessagesSelector(documentChatbot,LLMResponse.chatbot_message_element);
+        chatbotInterface.selectors.messages.push(LLMResponse.chatbot_message_element);
       }
-      if (LLMResponse.xpath_conversation) {
-        let dialogElement = getElementByXpath(
-          LLMResponse.xpath_conversation,
-          documentChatbot
-        );
-        if (dialogElement) {
-          chatbotInterface.dialogElement = dialogElement;
-
-          let selector = xPath2Selector(LLMResponse.xpath_conversation);
-          chatbotInterface.selectors.dialog.push(selector);
-        }
+      if (LLMResponse.microphone_button) {
+        chatbotInterface.microphoneElement = selectElementSafely(documentChatbot,
+          LLMResponse.microphone_button
+        ) as HTMLElement;
+        chatbotInterface.selectors.microphone.push(LLMResponse.microphone_button);
       }
-      if (LLMResponse.xpath_bot_selector) {
-        let chatbotElement = getElementByXpath(
-          LLMResponse.xpath_bot_selector,
-          documentChatbot
-        );
-        if (chatbotElement) {
-          let selector = xPath2Selector(LLMResponse.xpath_bot_selector);
-          chatbotInterface.messagesSelector = LLMResponse.xpath_bot_selector;
-          chatbotInterface.selectors.messages.push(selector);
-        }
-      }
-      if (LLMResponse.xpath_microphone) {
-        let microphoneElement = getElementByXpath(
-          LLMResponse.xpath_microphone,
-          documentChatbot
-        );
-        if (microphoneElement) {
-          chatbotInterface.microphoneElement = microphoneElement;
-          let selector = xPath2Selector(LLMResponse.xpath_microphone);
-          chatbotInterface.selectors.microphone.push(selector);
-        }
-      }
-
       resolve(chatbotInterface);
     });
   });
@@ -219,85 +236,100 @@ export async function correctElementChatbot(
 ): Promise<ChatBotInterface> {
   return new Promise((resolve, reject) => {
     let LLMResponse: LocalLLMResponse | null = null;
+    let wrongSelector = "";
+    switch (elementName) {
+      case "windowElement":
+        wrongSelector ="main_parent_window is not " + chatbotInterface!.selectors.window[0];
+        break;
+      case "inputElement":
+        wrongSelector +="main_parent_window is " + chatbotInterface!.selectors.window[0];
+        wrongSelector +="\ntext_input_element is not " + chatbotInterface!.selectors.input[0];
+        break;
+      case "dialogElement":
+        wrongSelector +="main_parent_window is " +chatbotInterface!.selectors.window[0];
+        wrongSelector +="\ntext_input_element is " + chatbotInterface!.selectors.input[0];
+        wrongSelector +="\nchat_conversation_window is not " + chatbotInterface!.selectors.dialog[0];
+        break;
+      case "messagesSelector":
+        wrongSelector +="main_parent_window is "+ chatbotInterface!.selectors.window[0];
+        wrongSelector +="\ntext_input_element is " + chatbotInterface!.selectors.input[0];
+        wrongSelector +="\nchat_conversation_window is " + chatbotInterface!.selectors.dialog[0];
+        wrongSelector += "\nchatbot_message_element is not "+ chatbotInterface!.selectors.messages[0];
+        break;
+      case "microphoneElement":
+        wrongSelector +="main_parent_window is "+ chatbotInterface!.selectors.window[0];
+        wrongSelector +="\ntext_input_element is " + chatbotInterface!.selectors.input[0];
+        wrongSelector +="\nchat_conversation_window is " + chatbotInterface!.selectors.dialog[0];
+        wrongSelector += "\nchatbot_message_element is "+ chatbotInterface!.selectors.messages[0];
+        wrongSelector += "\nmicrophone_button is not "+ chatbotInterface!.selectors.microphone[0];
+        break;
+    }
 
-    sendPromptTLocalLLM(element).then((response: LocalLLMResponse) => {
+    sendPromptRequestCorrection(element,wrongSelector).then((response: LocalLLMResponse) => {
       LLMResponse = response;
+      console.log("Response from LLM", LLMResponse);
       switch (elementName) {
         case "windowElement":
-          if (LLMResponse.xpath_window) {
-            let windowElement = getElementByXpath(
-              LLMResponse.xpath_window,
-              documentChatbot
-            );
+          if (LLMResponse.main_parent_window) {
+            let windowElement = selectElementSafely(
+              documentChatbot,
+              LLMResponse.main_parent_window)
 
             if (windowElement) {
-              chatbotInterface!.windowElement = windowElement;
-              chatbotInterface!.selectors.window[0] = LLMResponse.xpath_window;
-
-              chatbotInterface!.selectors.dialog.push(
-                xPath2Selector(LLMResponse.xpath_conversation!)
-              );
-              chatbotInterface!.selectors.messages.push(
-                xPath2Selector(LLMResponse.xpath_bot_selector!)
-              );
-              chatbotInterface!.selectors.input.push(
-                xPath2Selector(LLMResponse.xpath_input!)
-              );
-              chatbotInterface!.selectors.microphone.push(
-                xPath2Selector(LLMResponse.xpath_microphone || "")
-              );
+              chatbotInterface!.windowElement = windowElement as HTMLElement;
+              chatbotInterface!.selectors.window[0] = LLMResponse.main_parent_window;
             }
           }
           break;
         case "inputElement":
-          if (LLMResponse.xpath_input) {
-            let inputElement = getElementByXpath(
-              LLMResponse.xpath_input,
-              documentChatbot
-            );
+          if (LLMResponse.text_input_element) {
+            let inputElement =selectElementSafely(
+              documentChatbot,
+              LLMResponse.text_input_element!)
 
             if (inputElement) {
-              chatbotInterface!.inputElement = inputElement;
+              chatbotInterface!.inputElement = inputElement as HTMLElement;
             }
           }
           break;
         case "dialogElement":
-          if (LLMResponse.xpath_conversation) {
-            let dialogElement = getElementByXpath(
-              LLMResponse.xpath_conversation,
-              documentChatbot
-            );
-            if (dialogElement) {
-              chatbotInterface!.dialogElement = dialogElement;
-            }
+          let dialogElement =selectElementSafely(
+            documentChatbot,
+            LLMResponse.chat_conversation_window!);
+          if (dialogElement) {
+              chatbotInterface!.dialogElement = dialogElement as HTMLElement;
           }
 
           break;
         case "messagesSelector":
-          if (LLMResponse.xpath_bot_selector) {
-            let chatbotElement = getElementByXpath(
-              LLMResponse.xpath_bot_selector,
-              documentChatbot
-            );
+          if (LLMResponse.chatbot_message_element) {
+            let chatbotElement = selectElementSafely(
+              documentChatbot,
+              LLMResponse.chatbot_message_element!);
 
             if (chatbotElement) {
-              chatbotInterface!.messagesSelector =
-                LLMResponse.xpath_bot_selector;
+              chatbotInterface!.messagesSelector = LLMResponse.chatbot_message_element;
             }
           }
           break;
         case "microphoneElement":
-          if (LLMResponse.xpath_microphone) {
-            let microphoneElement = getElementByXpath(
-              LLMResponse.xpath_microphone,
-              documentChatbot
-            );
+          if (LLMResponse.microphone_button) {
+            let microphoneElement = selectElementSafely(
+              documentChatbot,
+              LLMResponse.microphone_button!);
             if (microphoneElement) {
-              chatbotInterface!.microphoneElement = microphoneElement;
+              chatbotInterface!.microphoneElement = microphoneElement as HTMLElement;
             }
           }
           break;
       }
+
+
+      chatbotInterface!.selectors.dialog.push(LLMResponse.chat_conversation_window!);
+      chatbotInterface!.selectors.messages.push(LLMResponse.chatbot_message_element!);
+      chatbotInterface!.selectors.input.push(LLMResponse.text_input_element!);
+      
+      chatbotInterface!.selectors.microphone.push(LLMResponse!.microphone_button || "");
       resolve(chatbotInterface!);
     });
   });
@@ -447,57 +479,4 @@ function scoringTreeChatbot(element: HTMLElement): number {
   });
 
   return score;
-}
-
-/**Function to request elements from LLM after cleaning the HTML to reduce size of tokens sent to LLM
- *  @Deprecated
- **/
-export function requestElementsLLM() {
-  // Obter window document
-
-  let documentBody: HTMLBodyElement = document.body as HTMLBodyElement;
-
-  let clonedBody = cleanHTML(documentBody);
-
-  // send cleanedBody to LLM
-  sendPromptToLLM(clonedBody)
-    .then((elements: LLMResponse) => {
-      // Check if chatbot element is present
-      if (elements.xpath_chatbot !== null) {
-        let parentElement = getElementByXpath(elements.xpath_chatbot, document);
-        if (parentElement) {
-          showMessage("Elements identified.");
-          setStoredChatbotElement(parentElement);
-          flashGreen(parentElement);
-          chrome.runtime.sendMessage(
-            { action: "storeHTML", html: parentElement },
-            () => {
-              showMessage("Chatbot element identified and HTML stored!");
-            }
-          );
-        } else {
-          throw new Error(
-            "Error: Couldn't identify chatbot element. Please try again."
-          );
-        }
-      }
-
-      // Check if microphone element is present
-      if (elements.xpath_microphone !== null) {
-        let microphoneElement = getElementByXpath(
-          elements.xpath_microphone,
-          document
-        );
-        if (microphoneElement) {
-          flashGreen(microphoneElement);
-          setStoredMicrophoneButton(microphoneElement);
-        }
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      showMessage(
-        "Error: Couldn't identify chatbot elements. Please try again."
-      );
-    });
 }
