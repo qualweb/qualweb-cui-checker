@@ -1,6 +1,11 @@
 
 import { ChatBotInterface, ResponsesSelectors } from "../utils/types";
-import { responses } from "./Interaction";
+
+let lastMessageUser: string = '';
+
+export function setLastMessageUser(message:string){
+  lastMessageUser = message;
+}
 
 export const ChecksSelectors: ResponsesSelectors = {
   rules: []
@@ -10,8 +15,11 @@ export const ChecksSelectors: ResponsesSelectors = {
 export function dispatchEvents(element: HTMLElement) {
   const inputEvent = new Event("input", { bubbles: true });
   element.dispatchEvent(inputEvent);
+  element.focus();
+
   setTimeout(() => {
-    const keyboardEvent = new KeyboardEvent("keydown", {
+    ["keydown", "keypress", "keyup"].forEach((eventType) => {
+    const keyboardEvent = new KeyboardEvent(eventType, {
       bubbles: true,
       cancelable: true,
       key: "Enter",
@@ -19,7 +27,10 @@ export function dispatchEvents(element: HTMLElement) {
       keyCode: 13,
     });
     element.dispatchEvent(keyboardEvent);
+    }
+    );
   }, 100);
+
 }
 
 export async function captureResponse(
@@ -32,7 +43,7 @@ export async function captureResponse(
   let selector = chatbotInterface!.selectors.messages[0];
 
   // obter mensagens existentes  
-  let existingMessages = document.querySelectorAll(selector![0]);
+  let existingMessages = document.querySelectorAll(selector);
   let response = await observeNewMessages(message, maxWaitTime, chatbotInterface!);
 
   return response;
@@ -40,6 +51,7 @@ export async function captureResponse(
 
 function startTimeOut(maxWaitTime: number, observer: MutationObserver, callback: () => void): NodeJS.Timeout {
   return setTimeout(() => {
+    console.log("Timeout reached, disconnecting observer");
     observer.disconnect();
     callback();
   }, maxWaitTime);
@@ -65,7 +77,15 @@ function isNodeTypingInfo(node: Node): boolean {
 }
 
 export function isChatBotMessage(node:HTMLElement, selectorMessage:string):boolean {
-  return node.matches(selectorMessage) || node.querySelector(selectorMessage) !== null;
+
+  if(lastMessageUser){
+  let test = ((node.textContent)?.includes(lastMessageUser));
+  if(test){
+    
+    return false;
+  } 
+  }
+  return (node instanceof HTMLElement) && (node.matches(selectorMessage) || node.querySelector(selectorMessage) !== null);
 }
 
 
@@ -76,9 +96,11 @@ export function observeNewMessages(
   chatbotInterface: ChatBotInterface
 
 ): Promise<HTMLElement[]> {
-
+  console.log(chatbotInterface);
   // obtain window of popup
-  let element = document.querySelector(chatbotInterface!.selectors.window[0]);
+  let documentOwner = chatbotInterface!.windowElement!.ownerDocument;
+  let element = documentOwner.querySelector(chatbotInterface!.selectors.window[0]);
+  console.log(element);
 
   if (!element) {
     console.error("Windows of chatbot not found, improper selector.");
@@ -87,47 +109,58 @@ export function observeNewMessages(
 
   return new Promise(  (resolve) => {
  
-    let selectorMessage = chatbotInterface!.selectors.messages[0];
+    let selectorMessage = chatbotInterface!.messagesSelector;
     let responses: HTMLElement[] = [];
+    let timeout: NodeJS.Timeout; 
     const observer = new MutationObserver((mutations) => {
       // Inicia timeout
-      let timeout = startTimeOut(5000, observer, () => resolve(responses));
+   
 
       let isTyping = false;
       for (const mutation of mutations) {
         // Added nodes
           mutation.addedNodes.forEach((node) => {
+  
               if (node.nodeType === Node.TEXT_NODE) return;
                 
                 const element = node as HTMLElement;
               
-
+              // if detected typing
               if (isNodeTypingInfo(element)) {
                   isTyping = true;
-                  stopTimeout(timeout);
+
+                  console.log("A parar o timeout");
+                  clearTimeout(timeout);
+                  console.log("Timeout stopped" , timeout);
                   console.log("Detetado Máquina a escrever Typing:", node);
               
               } else if (isChatBotMessage(element, selectorMessage)) {
 
                   responses.push(element);
 
-                  if(!isTyping) restartTimeOut(2000, timeout, observer, () => resolve(responses));
+                  if(!isTyping){
+                    console.log("A fazer restart do timeout");
+                    restartTimeOut(5000, timeout, observer, () => resolve(responses));
+                  } 
 
                   console.log("added node with textContent:", node.textContent);
               }
           });
 
           mutation.removedNodes.forEach((node) => {
+
               if (isNodeTypingInfo(node)) {
                   console.log("Detetado Máquina deixou de escrever Typing:", node);
                   isTyping = false;
-                  timeout = startTimeOut(2000, observer, () => resolve(responses));
-                  // restartTimeOut(2000, timeout, observer, () => resolve(responses));
+                  // start timeout to detect if typing again
+                  console.log("Typing of Reiniciar timeout");
+                  timeout = startTimeOut(3000, observer, () => resolve(responses));
+                  //restartTimeOut(2000, timeout, observer, () => resolve(responses));
               }
           });
       }
   });
-
+    timeout = startTimeOut(5000, observer, () => resolve(responses));
     observer.observe(element, {
       childList: true,
       subtree: true,
