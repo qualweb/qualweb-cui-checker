@@ -1,11 +1,11 @@
 {
+  "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
-    "target": "es2016",  
-    "lib": ["dom", "es2016"],
-    "strict": true,
-"module": "commonjs",
 
-    "outDir": "./dist",
+    "strict": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext" ,
+
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
@@ -13,13 +13,11 @@
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true
   },
-
-  "outDir": "./dist",
-  "types": ["chrome"],
+  "typeRoots": [
+    "./node_modules/@types"
+  ],
+  "types": ["chrome","node", "mocha"],
   "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "src/**/*.d.ts",
-    "test/**/*.ts",
+    "test/**/*.ts"
   ]
 }

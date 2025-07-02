@@ -1,0 +1,7 @@
+{
+  "extensions": ["ts"],
+  "require": "ts-node/register",
+
+  "ignore": ["node_modules/**"],
+  "types": ["mocha", "node"]
+}

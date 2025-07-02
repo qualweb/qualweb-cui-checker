@@ -5,7 +5,9 @@
   "description": "An evaluation tool to check the accessibility of the current conversational AI interface.",
   "background": {
     "service_worker": "dist/background.bundle.js"
+
   },
+  
   "action": {
     "default_title": "Click to open panel"
   },
@@ -15,7 +17,7 @@
     "activeTab",
     "scripting",
     "audioCapture",
-    "tabs",
+    "debugger",
     "tts",
     "ttsEngine"
   ],
@@ -39,7 +41,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["audio/chatbotClip1.mp3"],
+      "resources": ["audio/chatbotClip1.mp3",
+      "dist/common-words.txt"],
       "matches": ["<all_urls>"]
     }
   ]

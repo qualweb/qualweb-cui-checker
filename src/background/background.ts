@@ -1,5 +1,7 @@
-chrome.runtime.onInstalled.addListener(() => {
+
+chrome.runtime.onInstalled.addListener( () => {
   console.log("Extension installed");
+
   chrome.sidePanel
     .setPanelBehavior({ openPanelOnActionClick: true })
     .catch((error) => console.error(error));
@@ -7,12 +9,12 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
-    chrome.sidePanel.open({ tabId: tab.id });
     chrome.sidePanel.setOptions({
       tabId: tab.id!,
-      path: "src/popup/popup.html",
+      path: "src/sidebar/sidebar.html",
       enabled: true,
     });
+    chrome.sidePanel.open({ tabId: tab.id });
   } else {
     console.error("Tab ID not found.");
   }
