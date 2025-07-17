@@ -29,162 +29,112 @@ export const prompAnalyseFirstMessage = PromptTemplate.fromTemplate(`
     Now, generate output based on next Message:
     "{input}"
     `);
+
+    export const promptSubjectAnalysisChatbot = PromptTemplate.fromTemplate(`
+      You are a chatbot analyst. Based only on the title of the chatbot, return the services it most likely offers **without requiring login or personal information**.
+                   
+               Chatbot Title: {chatbot_title}
+              Answer should come in the language and terms of the country and region of the chatbot, that you can identify by the title, use also known acronyms if needed.
+              Your output must be comma separated values with no additional text, comments, or explanations.
+              `);
+   
   
-
-
-    export const confidenceLevelEvaluatorWithExamples = PromptTemplate.fromTemplate(`
-          You are a Goal Completion Evaluator and your role is to determine if the given objective is complete based on the provided answer.
-          
-          Objective:
-          {objectiveLLM}
-          
-          Input:
-          {answer}
-          
-          If the input meets the objective with a confidence level of 80 or higher, you should return:
-          confidence should be a number between 0 and 100, with 0 being the lowest and 100 being the highest.
-           No extra information or comments should be included in the answer.
-
-          Examples:
-          {examples}
+      export const confidenceLevelEvaluatorWithExamples = PromptTemplate.fromTemplate(`
+        You are a Goal Completion Evaluator and your role is to determine if the given objective is complete based on the provided answer.
         
-          Format instructions:
-          {formatInstructions}
-           
-          `);
-
-
-/*
-export const confidenceLevelMemoryEvaluator = PromptTemplate.fromTemplate(`
-    You are an AI agent that interacts with another chatbot to determine if the objective given was reached:
-
-    Given Objective:
-    {objectiveLLM}
-
-    The summary of the conversation:
-    {answer}
-
-    Analyze the summary carefully. If it directly or clearly implies the objective is met, assign a high confidence level (above 80). If it's ambiguous but somewhat related, assign 50-79. If it's irrelevant, assign below 50.
-
-    Confidence should be a number between 0 and 100:
-
-    {examples}
+        Objective:
+        {objectiveLLM}
+        
+        Answer:
+        {answer}
       
-    \`\`\`json
-      {{
-        "status": "completed",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    - Otherwise, return:
-      \`\`\`json
-      {{
-        "status": "incomplete",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    
-  
-     Format instructions:
-     {formatInstructions}
+        Rules:  
+        If the input meets the objective with a confidence level of 80 or higher, you should return:
+        confidence should be a number between 0 and 100, with 0 being the lowest and 100 being the highest.
+        No extra information or comments should be included in the answer.
+        If the input is empty or does not meet the objective, return 0.
+        Also from text return parts of the text that are relevant to the objective.
 
-`);
-export const confidenceLevelEvaluator = PromptTemplate.fromTemplate(`
-    You are an AI agent that interacts with another chatbot to determine if the objective given was reached:
-  
-    
-    Your Objective:
-    {objectiveLLM}
 
-    The answer of the chatbot:
-    {answer}
-  
-        Analyze the answer carefully. If it directly or clearly implies the objective is met, assign a high confidence level (above 80). If it's ambiguous but somewhat related, assign 50-79. If it's irrelevant, assign below 50.
+      
+        Few-shot examples:
+        {examples}
 
-    Confidence should be a number between 0 and 100:
-
-    
-    \`\`\`json
-      {{
-        "status": "completed",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    - Otherwise, return:
-      \`\`\`json
-      {{
-        "status": "incomplete",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    
+        Format instructions:
+        {formatInstructions}
+        
+        `);
+export const confidenceLevelEvaluatorWithExamplesB = PromptTemplate.fromTemplate(`
+  You are a Goal Completion Evaluator and your role is to determine if the given objective is complete based on the provided answer.
   
-     Format instructions:
-     {formatInstructions}
-  `);
-
-  /*
-  export const confidenceLevelEvaluatorWithExamples = PromptTemplate.fromTemplate(`
-    You are an AI agent that interacts with another chatbot to determine if the objective given was reached:
+  Objective:
+  {objectiveLLM}
   
-    
-    Your Objective:
-    {objectiveLLM}
-  
+  Answer:
+  {answer}
  
-  
-    The answer of the chatbot:
-    {answer}
-  
-    if the answer of chatbot contains the objective with a confidence level of 80 or higher you should.
-    confidence should be a number between 0 and 100. Being 0 the lowest and 100 the highest.
-    
-    {examples}
+  Rules:  
+  If the input meets the objective with a confidence level of 80 or higher, you should return:
+  confidence should be a number between 0 and 100, with 0 being the lowest and 100 being the highest.
+  No extra information or comments should be included in the answer.
+  If the input is empty or does not meet the objective, return 0.
 
-    \`\`\`json
-      {{
-        "status": "completed",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    - Otherwise, return:
-      \`\`\`json
-      {{
-        "status": "incomplete",
-        "confidence": <confidence_level>
-      }}
-      \`\`\`
-    
-  
-     Format instructions:
-     {formatInstructions}
+
+ 
+  Few-shot examples:
+  {examples}
+
+  Format instructions:
+  {formatInstructions}
+   
   `);
 
-  */
-  
 
-export const promptGetQuestion = PromptTemplate.fromTemplate(`
-    You are an AI agent that interacts with another chatbot, Your role is to ask one concise question at a time to reach the objective:
-  
-    The objective of your question is:
-  
-    {objective}
-  
-    Task:
-    Ask a question to achieve objective, you should not repeat question based on history of chat and you should used question based on the summary in your memory.
-    To help you should use the knowledge you build of chatbot from the previous conversation.
-  
-    Guidelines:
-    Avoid long questions and keep them concise, clear, and relevant.
-    Reason with chat history and ask questions that will help you achieve the objective.
-    Ask only one short, clear question at a time.
-    Focus on the most relevant question based on the assistant's previous response.
-    If needed, reformulate or move to a different question without repeating previous ones.
-    No extra information or comments should be included in the question.
-    Ask in the same language the chatbot is using.
-  `);
-  
   export const promptGetQuestionWithExamples = PromptTemplate.fromTemplate(`
+    You are an AI agent responsible for assessing the accessibility and clarity of another chatbot's responses.
+    
+    **Objective:**  
+    Your task is to ask one concise, question at a time to help you obtain specific, clear, and actionable information following Objective:
+    
+    {objective}
+    
+    ---
+    
+    **Instructions:**
+    
+    1. **Memory and Reasoning:**
+       - Before asking a new question, review the full chat history and assess:
+         - Did the last question achieve progress toward the objective?
+         - Was the last response clear, useful, or did it ignore/misunderstand the request?
+    
+    2. **Adaptation Strategy:**
+       - If the last response did not clearly advance the objective, **change your questioning strategy** immediately.
+       - Avoid repeating similar types of questions (e.g., don't just reword the same idea).
+       - Choose a new angle, structure, or approach that may work better.
+    
+    3. **Question Generation:**
+       - Ask only one clear, concise question at a time.
+       - Prioritize directness and relevance to the objective.
+       - Never include explanations, comments, or multiple questions at once.
+    
+    4. **Language Matching:**
+       - Always ask your questions in the same language that the chatbot is using.
+    
+    5. **Example Handling:**
+       - Use the knowledge accumulated from previous conversation turns to fine-tune your next question.
+    
+    ---
+    
+    **Important Rules:**
+    
+    - Never repeat a previously asked question (even if phrased differently).
+    - Be proactive: if multiple attempts fail, radically change questioning style (e.g., from open-ended to yes/no, or from direct to indirect approaches).
+    - Your ultimate goal is to **achieve the objective quickly** by intelligent questioning.
+    
+    {examples}
+    `);
+
+  export const promptGetQuestionWithExamplesB = PromptTemplate.fromTemplate(`
     You are an AI agent that interacts with another chatbot, Your role is to ask one concise question at a time to reach the objective:
   
     The objective of your question is:
@@ -192,7 +142,8 @@ export const promptGetQuestion = PromptTemplate.fromTemplate(`
     {objective}
   
     Task:
-    Ask a question to achieve objective, you should not repeat question based on history of chat and you should used question based on the summary in your memory.
+    Ask a question to achieve objective, you should not repeat question based on history of chat.
+    You should change the strategy and type of question if previous strategies dont work for more than 1 times.
     To help you should use the knowledge you build of chatbot from the previous conversation.
   
     Guidelines:
@@ -206,6 +157,8 @@ export const promptGetQuestion = PromptTemplate.fromTemplate(`
 
     {examples}
   `);
+  
+  
   
 
 /** Prompt to detect the type of message in HTML
