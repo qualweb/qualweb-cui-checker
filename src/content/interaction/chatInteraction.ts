@@ -1,5 +1,5 @@
 
-import { ChatBotInterface, ResponsesSelectors } from "../utils/types";
+import { ChatBotInterface, ResponsesSelectors } from "../../utils/types";
 
 let lastMessageUser: string = '';
 
@@ -98,6 +98,7 @@ export function observeNewMessages(
 ): Promise<HTMLElement[]> {
   console.log(chatbotInterface);
   // obtain window of popup
+
   let documentOwner = chatbotInterface!.windowElement!.ownerDocument;
   let element = documentOwner.querySelector(chatbotInterface!.selectors.window[0]);
   console.log(element);

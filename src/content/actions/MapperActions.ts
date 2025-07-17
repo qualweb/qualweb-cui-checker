@@ -1,4 +1,4 @@
-import { actionCorrectElementSelection, actionDetectChatbot, actionEndSucessfulVerification, actionSelectMicrophone, actionStartSelection, actionStartVerification } from "./ActionsDetection";
+import { actionCorrectElementSelection, actionDetectChatbot, actionEndSucessfulVerification, actionIdentifyChatbotSelectors, actionSelectMicrophone, actionSetStoredSelectors, actionStartSelection, actionStartVerification, startPageChatbotProcedure } from "./ActionsDetection";
 import { actionEndEvaluation, actionEvaluateACT, actionEvaluateCUI } from "./ActionsEvaluation";
 import { actionLLMInteraction, actionStartVoiceInput, actionTypeMessages } from "./ActionsInteraction";
 
@@ -17,11 +17,14 @@ const caseInteractionHandlers: Record<string, (data:IChromeRequest) => void | Pr
 // handlers for the detection of chatbot actions
 const caseDetectionHandlers: Record<string, (data:IChromeRequest) => void | Promise<any>> = {
     startSelection: actionStartSelection,  
-    requestElementLLM: actionDetectChatbot, 
+    detectChatbot: actionDetectChatbot,
+    pageChatbotProcedure: startPageChatbotProcedure,
+    identifySelectors: actionIdentifyChatbotSelectors, 
     startVerification: actionStartVerification,  
     endSucessfulVerification: actionEndSucessfulVerification , 
     correctElementSelection: actionCorrectElementSelection, 
     startMicSelection: actionSelectMicrophone,
+    setStoredSelectors: actionSetStoredSelectors,
 }
 
 // handlers for the evaluation actions

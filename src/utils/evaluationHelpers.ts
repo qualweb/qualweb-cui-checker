@@ -16,7 +16,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
     const targetElements = Array.isArray(targetElement)
       ? targetElement
       : [targetElement];
-    console.log(targetElements);
+
     const isRelevant = targetElements.some((element) => {
       // Check if element is a valid selector
       try {
@@ -25,7 +25,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         }
       } catch (e) {
         console.warn(`Invalid selector: ${element}`);
-        console.log(targetElement);
+        
       }
       return false;
     });

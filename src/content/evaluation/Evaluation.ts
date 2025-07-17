@@ -1,11 +1,12 @@
-import { locale_en } from '../locales/en';
-import { addValuesToSummary, filterResults } from '../utils/evaluationHelpers';
-import { Summary } from '../utils/types';
-import { chatbotInterface } from './Detection';
+import { locale_en } from '../../locales/en';
+import { addValuesToSummary, filterResults } from '../../utils/evaluationHelpers';
+import { Summary } from '../../utils/types';
+import { chatbotInterface } from '../detection/Detection';
 
 const urlCommonWords = chrome.runtime.getURL("dist/common-words.txt");
 let summary: Summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
 let chatbotSummary: Summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
+
 
 
 export function startEvaluation(sendResponse : (response: any) => void) {
@@ -72,26 +73,44 @@ export function evaluateWCAG() {
     };
     return [result, chatbotResult];
   }
-  
-  
-  export async function  evaluateCUI() {
+  const QWCUI_Selectors:QWCUI_Selectors = { };
+
+  interface QWCUI_Selectors {
+    [key: string]: string;
+  }
+
+  export function addSelectors(selectors: QWCUI_Selectors) {
+    Object.keys(selectors).forEach((key) => {
+      QWCUI_Selectors[key] = selectors[key];
+    });
+  }
+  interface QWCUI_Settings {
+    [key: string]: string;
+  }
+  export async function evaluateCUI(qualweb_settings: QWCUI_Settings) {
     let cuiResult, chatbotCuiResult, result, chatbotResult;
-    
+    let settingsQualweb:QWCUI_Settings = {};
+
+
+        
+          settingsQualweb["locale"] = qualweb_settings.locale;
+         console.log("CUI Settings to sent to evaluation", settingsQualweb);
+        
+ 
     // build selectors Map
-    interface QWCUI_Selectors {
-      [key: string]: string;
-    }
-    
-    let QW_Selectors: QWCUI_Selectors = {
-      QW_CC_WINDOW: chatbotInterface!.selectors.window[0],
-      QW_CC_DIALOG: chatbotInterface!.selectors.dialog[0],
-      QW_CC_MESSAGES: chatbotInterface!.selectors.messages[0],
-      QW_CC_MIC: chatbotInterface!.selectors.microphone[0],
-      QW_CC_INPUT: chatbotInterface!.selectors.input[0],
-    };
+    QWCUI_Selectors["QW_CC_WINDOW"] = chatbotInterface!.selectors.window[0];
+    QWCUI_Selectors["QW_CC_DIALOG"] = chatbotInterface!.selectors.dialog[0];
+    QWCUI_Selectors["QW_CC_MESSAGES"] = chatbotInterface!.messagesSelector;
+    QWCUI_Selectors["QW_CC_INPUT"] = chatbotInterface!.selectors.input[0];
+
+    if (chatbotInterface?.selectors.microphone) {
+      QWCUI_Selectors["QW_CC_MIC"] = chatbotInterface!.selectors.microphone[0];
+    } 
+  
+  
   
    // let sourceHtml = document.documentElement.outerHTML;
-    window.cui = new CUIChecksRunner({ selectors: QW_Selectors }, { translate: locale_en, fallback: locale_en },urlCommonWords);
+    window.cui = new CUIChecksRunner({ selectors: QWCUI_Selectors, settings:settingsQualweb}, { translate: locale_en, fallback: locale_en },urlCommonWords);
     //window.cui.test({ sourceHtml });
     await window.cui.executeTests();
     cuiResult =   window.cui.getReport();

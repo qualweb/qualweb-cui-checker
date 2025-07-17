@@ -1,5 +1,6 @@
 import { showMessage } from "../../utils/helpers";
-import { currentVerification, detectChatbotPopup, requestCorrectionElement, startConfirmElement } from "../Detection";
+import { currentVerification, detectPopupChatbot,  obtainSelectorsPopupChatbot, detectAndGetSelectorsPageChatbot, requestCorrectionElement, startConfirmElement, } from "../detection/Detection";
+import { initiateStoredSelectors } from "../detection/StorageRetriever";
 
 import {  setGreen, unsetGreen } from "../selectChatbot";
 import { microphoneSelector } from "../selectVoiceinput";
@@ -7,13 +8,29 @@ import { IChromeRequest } from "./MapperActions";
 
 
 
+
 export async function actionDetectChatbot(data: IChromeRequest):Promise<object> {
 return new Promise(async (resolve, reject) => {
   showMessage("Please open the chatbot");
-  const response = await detectChatbotPopup();
+  const response = await detectPopupChatbot();
   resolve(response);
   });
 
+}
+
+export async function startPageChatbotProcedure(data: IChromeRequest):Promise<object> {
+return new Promise(async (resolve, reject) => {
+  const response = await detectAndGetSelectorsPageChatbot();
+  resolve(response);
+  });
+
+}
+
+export async function actionIdentifyChatbotSelectors(data: IChromeRequest):Promise<object> {
+return new Promise(async (resolve, reject) => {
+  const response = await obtainSelectorsPopupChatbot();
+  resolve(response);
+  });
 
 }
 
@@ -33,11 +50,25 @@ export function actionEndSucessfulVerification(data: IChromeRequest) {
   }
 }
 
+export function cancelDetection(data: IChromeRequest) {
+  if (currentVerification) {
+    unsetGreen(currentVerification);
+    data.sendResponse({ status: 'Detection cancelled' });
+  } else {
+    data.sendResponse({ status: 'Nothing to cancel' });
+  }
+}
+export async function actionSetStoredSelectors(data: IChromeRequest) {
+  console.log("actionSetStoredSelectors", data.request.element);
+  initiateStoredSelectors(data.request.element);
+  data.sendResponse({ status: 'Stored selectors set' });
+}
+
 export async function actionCorrectElementSelection(data: IChromeRequest): Promise<object> {
   return new Promise(async (resolve) => {
   let response  = requestCorrectionElement(data.request.element);
   resolve(response);
-  });
+  }); 
 }
 
 export function actionSelectMicrophone(data: IChromeRequest) {

@@ -1,4 +1,4 @@
-import { evaluateACT, evaluateWCAG, evaluateCUI, endEvaluation, startEvaluation } from "../Evaluation";
+import { evaluateACT, evaluateWCAG, evaluateCUI, endEvaluation, startEvaluation } from "../evaluation/Evaluation";
 import { IChromeRequest } from "./MapperActions";
 
 
@@ -17,8 +17,10 @@ export function actionEvaluateWCAG(data: IChromeRequest) {
   data.sendResponse(wcagResult);
 }
 export async function actionEvaluateCUI(data: IChromeRequest): Promise<Object> {
+    
   return new Promise<Object>(async (resolve) => {
-    const response = await evaluateCUI();
+
+    const response = await evaluateCUI(data.request.settings);
     resolve(response);
   });
 }
