@@ -3,6 +3,7 @@
     <div v-if="getDetectingChatbot">
       <div class="loader"></div>
       <p class="state">{{ state }}</p>
+
     </div>
     <div v-else>
       <p class="state">{{ state }}</p>
@@ -17,6 +18,12 @@
         "
       />
     </div>
+    <button
+      id="cancelButton"
+      class="button-cancel"
+      @click="() => {
+        this.$router.go(-1);
+      }">Cancel</button>
   </div>
 </template>
 
@@ -25,13 +32,16 @@ import { mapActions, mapGetters } from "vuex";
 import ActionPrompt from "../../components/ActionPrompt.vue";
 
 export default {
-  name: "detectingChatbot",
+  name: "detectingPageChatbot",
   props: [],
   components: {
     ActionPrompt,
   },
   methods: {
-    ...mapActions(["setDetectingChatbot"]),
+    ...mapActions(["setDetectingChatbot","setSelectors"]),
+    cancel() {
+      this.$router.go(-1);
+    },
     requestCorrectionElementLLM(functionCode) {
       this.state = "Requesting Correction";
       this.setDetectingChatbot(true);
@@ -45,7 +55,7 @@ export default {
           this.state = "Chatbot Not Detected";
           this.setDetectingChatbot(false);
           setTimeout(() => {
-            this.$router.push("/");
+            this.$router.push("/failed-detection");
           }, 2000);
         }
       });
@@ -58,8 +68,10 @@ export default {
           startVerificationElement(this.workflow[this.currentStep].nameElement);
         }, 800);
       } else {
+  
+        this.setSelectors(this.resultLLM);
         endVerificationElement(this.workflow[this.currentStep].nameElement);
-        this.$router.push("/");
+        this.$router.push("/ready");
       }
     },
   },
@@ -70,26 +82,23 @@ export default {
     return {
       state: "Identifying Chatbot",
       currentStep: 0,
+      resultLLM: {},
       workflow: [
         {
-          nameElement: "windowElement",
+          nameElement: "windowSelector",
           question: "Is main window of chatbot selected correctly?",
         },  
-        {
-          nameElement: "dialogElement",
-          question: "Is conversation window selected correctly?",
-        },
         {
           nameElement: "messagesSelector",
           question:
             "Are individual messages on chatbot app selected correctly?",
         },
         {
-          nameElement: "inputElement",
+          nameElement: "inputSelector",
           question: "Is selected input of chatbot correct?",
         },
         {
-          nameElement: "microphoneElement",
+          nameElement: "microphoneSelector",
           question: "Is microphone window selected correctly?",
         },
       ],
@@ -97,9 +106,15 @@ export default {
   },
   async mounted() {
     this.setDetectingChatbot(true);
-
-    startDetectingChatbot().then((result) => {
+    this.state = "Detecting Chatbot";
+    console.log("Starting chatbot detection...");
+    // Send message to input of chatbot if exists
+  
+    // if not exists stop
+    const result = await startPageChatbotProcedure().then((result) => {
+      console.log("Chatbot detection result:", result);
       if (Object.keys(result).length > 0) {
+        this.resultLLM = result.chatbot;
         this.state = "Chatbot Detected";
 
         this.setDetectingChatbot(false);
@@ -108,15 +123,36 @@ export default {
         this.state = "Chatbot Not Detected";
         this.setDetectingChatbot(false);
         setTimeout(() => {
-          this.$router.push("/");
+          this.$router.push("/failed-detection");
         }, 2000);
       }
-    });
+    })
+      .catch((error) => {
+        console.error("Error during chatbot detection:", error);
+        this.state = "Chatbot Not Detected";
+        this.setDetectingChatbot(false);
+        setTimeout(() => {
+          this.$router.push("/failed-detection");
+        }, 2000);
+      });
   },
 };
 </script>
 
 <style scoped>
+.button-cancel {
+  background-color: #75706c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+}
 .state {
   text-align: center;
 }

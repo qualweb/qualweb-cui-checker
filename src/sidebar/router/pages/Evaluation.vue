@@ -37,7 +37,7 @@ export default {
     },
     returnToMain() {
       this.reset();
-      this.$router.push({ path: "/" });
+      this.$router.push({ path: "/ready" });
     },
   },
 };

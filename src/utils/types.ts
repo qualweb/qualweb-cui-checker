@@ -3,6 +3,18 @@ export interface ChatResponse {
   response: string[];
 }
 
+export  interface QWCUI_Settings {
+    [key: string]: string;
+  }
+
+export  interface LLM_Settings {
+    LLMService: string;
+    model: string;
+    apiURL: string| null;
+    apiKey: string| null; 
+  }
+
+
 export interface ResponsesSelectors {
   [rule: string]: string[];
 }
