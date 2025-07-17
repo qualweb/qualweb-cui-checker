@@ -7,12 +7,14 @@
     "service_worker": "dist/background.bundle.js"
 
   },
+  "options_page": "dist/options/options.html",
   
   "action": {
     "default_title": "Click to open panel"
   },
   "permissions": [
     "storage",
+    "tabs",
     "sidePanel",
     "activeTab",
     "scripting",
@@ -22,8 +24,8 @@
     "ttsEngine"
   ],
   "content_security_policy": {
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
-  },
+    "extension_pages": "script-src 'self'; object-src 'self'"
+},
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
@@ -42,7 +44,8 @@
   "web_accessible_resources": [
     {
       "resources": ["audio/chatbotClip1.mp3",
-      "dist/common-words.txt"],
+      "dist/common-words.txt",
+      "dist/icons/icon_settings.svg"],
       "matches": ["<all_urls>"]
     }
   ]

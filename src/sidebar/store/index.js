@@ -7,6 +7,16 @@ import * as actions from "./actions";
 
 
 export const defaultState = {
+  storage: {
+    url: '',
+    selectors:{
+      windowsSelector: '',
+      dialogSelector: '',
+      inputSelector: '',
+      messagesSelector: '',
+      microphoneSelector: '',
+    }
+  },
   summary: {},
   chatbotSummary: {},
   evaluated: { act: false, cui: false, css: false, html: false },
@@ -31,6 +41,16 @@ export const defaultState = {
 
 export default new createStore({
   state: {
+   storage: {
+    url: '',
+    selectors:{
+      windowsSelector: '',
+      dialogSelector: '',
+      inputSelector: '',
+      messagesSelector: '',
+      microphoneSelector: '',
+    }
+    },
     summary: {},
     chatbotSummary: {},
     evaluated: { act: false, cui: false, css: false, html: false },

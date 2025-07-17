@@ -1,26 +1,12 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-      <span @click="onSettingsClick" class="material-symbols-outlined position-icon">
+           <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
       settings
-      </span>
-      <h1 class="title">Chatbot Evaluation</h1>
-      
-      <div class="button-container">
-        <button id="chatButton" @click="interactWithMessages">Send and Receive Messages</button>
-        <button id="requestLLMButton" @click="onRequestLLMClick">
-          Detect Chatbot
-        </button>
-
-        <button @click="startInputVoice">
-          Input Voice and Listen for Response
-        </button>
-        <button @click="LLMInteraction">
-          Start LLM Interaction
-        </button>
-      </div>
-      <hr />
-      <div class="evaluation-container">
+    </span>
+        <h1 class="title">QUALWEB CUI CHECK</h1>
+         <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+ <div class="evaluation-container">
         <Checkbox
           idValue="actRulesCheckbox"
           :label="'ACT Rules'"
@@ -41,18 +27,30 @@
           idValue="bestPracticesCheckbox"
           :label="'CUI Rules'"
           v-model="cuiValue" 
-          @toggle:check="updateEvaluated('cui', $event)" 
+          @toggle:check="updateEvaluatedCui('cui', $event)" 
           bgColor="#e15500"
           checkColor="#ffffff"
         />
-        <button
+    </div>
+            <hr />
+
+      <div class="button-container">
+                 <button
           id="evaluateButton"
           @click="onEvaluateClick"
           :disabled="isDisabled"
         >
           Evaluate Chatbot
         </button>
+
+        <button @click="LLMInteraction" :disabled="generateResponsesActive">
+          Generate Responses for Evaluation
+        </button>
+     
+     
       </div>
+
+    
     </div>
   </div>
 </template>
@@ -61,10 +59,15 @@ import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
-import { messages } from '../../../utils/messagesToSend';
+
 
 const store = useStore();
 const router = useRouter();
+
+const generateResponsesActive = ref(true);
+
+
+
 
 const actValue = ref(false);
 const htmlValue = ref(false);
@@ -84,34 +87,28 @@ const setEvaluated = async (idValue, value) => {
   });
 };
 
-const onEvaluateClick = () => {
-  router.push('/loading');
-};
-
 const onSettingsClick = () => {
   chrome.runtime.openOptionsPage();
 };
-
-const interactWithMessages = () => {
-  typeMessages(messages);
-};
-
-const startInputVoice = () => {
-  startVoiceInput(messages);
+const onEvaluateClick = () => {
+  router.push('/loading');
 };
 
 const LLMInteraction = () => {
   startLLMInteraction();
 };
 
-const onRequestLLMClick = () => {
-  router.push('/detecting-chatbot');
-};
 
 const updateEvaluated = async (idValue, event) => {
 
   await setEvaluated(idValue, event.checked);
 };
+
+const updateEvaluatedCui = async (idValue, event) => {
+  generateResponsesActive.value = !event.checked;
+  await setEvaluated(idValue, event.checked);
+};
+
 
 onMounted(() => {
   if (evaluated.value) {
@@ -120,17 +117,23 @@ onMounted(() => {
     cuiValue.value = evaluated.value.cui || false;
   }
 });
+
 </script>
 
 <style scoped>
 
-.position-icon{
+
+.logo {
+  width: auto;
+  height: 200px;
+  margin-bottom: 20px;
+}
+.position-icon-settings{
   position: absolute;
   top: 12px;
   right: 20px;
   cursor: pointer;
 }
-
 .material-symbols-outlined {
   font-variation-settings:
   'FILL' 0,

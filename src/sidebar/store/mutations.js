@@ -88,4 +88,10 @@ export default {
   [types.SETDETECTINGCHATBOT](state, payload) {
     state.detectingChatbot = payload;
   },
+  [types.SETURL](state, payload) {
+    state.storage.url = payload;
+  },
+  [types.SETSELECTORS](state, payload) {
+    state.storage.selectors = payload;
+  },
 };

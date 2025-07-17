@@ -1,17 +1,43 @@
 <template>
-  <div>
-    <p>Hello world!</p>
+  <div class="content">
+    <div v-if="firstRun" >
+      <Welcome />
+    </div>
+    <div v-else>
+        <router-view></router-view>
+    </div>
   </div>
 </template>
 
 <script>
+import { computed, onMounted } from 'vue';
+import Welcome from './router/pages/Welcome.vue';
+import { useStore } from 'vuex';
+
+
+
 export default {
-  name: "App",
+  components: {
+    Welcome,
+  },
+  name: 'App',
+  setup() {
+    const store = useStore();
+    const firstRun = computed(() => store.getters.getFirstRun);
+    onMounted(() => {
+      store.dispatch('loadOptions');
+    });
+    return {
+      firstRun,
+    };
+  },
 };
+
+
 </script>
 
 <style scoped>
-p {
-  font-size: 20px;
+.content {
+  height: 100%;
 }
 </style>

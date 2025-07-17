@@ -147,3 +147,6 @@ export const getAllData = (state) => {
 export const getEvaluateChatbot = (state) => state.evaluateChatbot;
 
 export const getDetectingChatbot = (state) => state.detectingChatbot;
+
+export const getStorage = (state) => state.storage;
+export const getSelectors = (state) => state.storage.selectors;
