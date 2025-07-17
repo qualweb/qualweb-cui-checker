@@ -18,21 +18,29 @@ const config = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].bundle.js'
+    filename: '[name].bundle.js',
+    publicPath:'dist/',
   },
   resolve: {
     alias: {
-   'vue': 'vue/dist/vue.esm-bundler.js'
+   'vue': 'vue/dist/vue.esm-bundler.js',
+     "@microsoft/recognizers-text-number-with-unit": path.resolve(
+        __dirname,
+        "node_modules/@microsoft/recognizers-text-number-with-unit/dist/recognizers-text-number-with-unit.es5.js"
+      ),
     },
     extensions: ['.ts', '.js', '.vue'],
   },
-  devtool: 'source-map',
+  devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
         enforce: 'pre',
         test: /\.js$/,
         loader: 'source-map-loader',
+          exclude: [
+          /node_modules\/@microsoft\/recognizers-text-number-with-unit/,
+        ],
       },
       {
         test: /\.ts$/,
@@ -97,12 +105,8 @@ const config = {
     ],
   },
   optimization: {
-    minimize: true,
-    minimizer: [new TerserPlugin({
-      terserOptions: {
-        keep_classnames: true, 
-      },
-    })],
+    minimize: false
+   
   },
   plugins: [
     new VueLoaderPlugin(),
