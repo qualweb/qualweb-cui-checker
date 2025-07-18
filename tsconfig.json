@@ -3,7 +3,7 @@
     "target": "es2016",  
     "lib": ["dom", "es2016"],
     "strict": true,
-"module": "commonjs",
+    "module": "commonjs",
 
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -13,8 +13,6 @@
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true
   },
-
-  "outDir": "./dist",
   "types": ["chrome"],
   "include": [
     "src/**/*.ts",
