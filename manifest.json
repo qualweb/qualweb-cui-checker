@@ -43,8 +43,8 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["audio/chatbotClip1.mp3",
-      "dist/common-words.txt",
+      "resources": [
+      "dist/common-words-pt.txt",
       "dist/icons/icon_settings.svg"],
       "matches": ["<all_urls>"]
     }

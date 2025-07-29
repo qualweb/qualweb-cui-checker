@@ -3,7 +3,8 @@ import { addValuesToSummary, filterResults } from '../../utils/evaluationHelpers
 import { Summary } from '../../utils/types';
 import { chatbotInterface } from '../detection/Detection';
 
-const urlCommonWords = chrome.runtime.getURL("dist/common-words.txt");
+// TODO: url CommonWords should not be hardcoded
+const urlCommonWords = chrome.runtime.getURL("dist/common-words-pt.txt");
 let summary: Summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
 let chatbotSummary: Summary = { passed: 0, failed: 0, warning: 0, inapplicable: 0, title: document.title };
 

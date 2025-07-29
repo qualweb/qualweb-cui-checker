@@ -106,7 +106,9 @@ const config = {
       { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'util.js' },
       { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'act.js' },
       { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'cui.js' },
+      { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'common-words-pt.txt' },
       { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
+      
       { from: 'src/locales/en.js', to: 'locales/en.js' },
       { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
       { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
