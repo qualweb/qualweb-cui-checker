@@ -30,6 +30,84 @@ export const getCurrentRuleResults = (state) => {
   return newResults;
 };
 
+export const getAllRulesAndResults = (state) => {
+  // Check evaluateChatbot state if true or false
+  const evaluateChatbot = state.evaluateChatbot;
+
+  let rules = [];
+
+  if (evaluateChatbot) {
+    const chatbotResults = {
+      act: state.chatbotAct,
+      html: state.chatbotHtml,
+      cui: state.chatbotCui,
+    };
+
+    const filter = state.filter;
+    for (const [module, results] of Object.entries(chatbotResults)) {
+      if (filter[module]) {
+        for (const [key, value] of Object.entries(results)) {
+          const ruleOutcome = value.metadata.outcome;
+          if (filter[ruleOutcome]) {
+            
+              let results = value.results;
+              let newResults = [];
+              for (let result of results) {
+                if (filter[result.verdict]) {
+                  newResults.push(result);
+                }
+              }
+            rules.push({
+              title: value.name,
+              code: value.code,
+              outcome: ruleOutcome,
+              module: module,
+              results: newResults
+            });
+          }
+        }
+      }
+    }
+  } else {
+    // If false, continue as before
+    let modules = Object.keys(state.evaluated);
+    let evaluated = state.evaluated; // act/wcag modules
+    let filter = state.filter;
+    let keys, ruleOutcome;
+    let value, moduleState;
+
+    for (let module of modules) {
+      if (evaluated[module] && filter[module]) {
+        keys = Object.keys(state[module]);
+        moduleState = state[module];
+        for (let key of keys) {
+          value = moduleState[key];
+          ruleOutcome = value.metadata.outcome;
+          if (filter[ruleOutcome]) {
+            let results = value.results;
+            let newResults = [];
+            for (let result of results) {
+              if (filter[result.verdict]) {
+                newResults.push(result);
+              }
+            }
+            rules.push({
+              title: value.name,
+              code: value.code,
+              outcome: value.metadata.outcome,
+              module: module,
+              results: newResults
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return rules;
+};
+
+
 export const getResultNumber = (state) => {
   let currentRule = state.currentRule;
   let results = state[currentRule.module][currentRule.code].results;

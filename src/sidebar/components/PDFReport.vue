@@ -1,0 +1,245 @@
+<template>
+  <div>
+    <button  @click="generateReport">Download PDF</button>
+
+    <iframe
+     :id="'pdfFrame'"
+      ref="pdfFrame"
+      hidden
+      style="display: none;"
+      sandbox="allow-same-origin allow-scripts"
+    ></iframe>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
+import html2pdf from 'html2pdf.js'
+
+// Referência ao iframe
+const pdfFrame = ref(null)
+
+const store = useStore()
+const storage = computed(() => store.getters.getStorage)
+const rules = computed(() => store.getters.getAllRulesAndResults)
+const chatbotSummary = computed(() => store.getters.getChatbotSummary)
+const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot)
+const filters = computed(() => store.getters.getFilters)
+
+const currentSummary = computed(() => {
+  return evaluateChatbot.value ? chatbotSummary.value : null
+})
+
+// Função para gerar o HTML completo do relatório
+function getHtmlContent() {
+  const today = new Date().toLocaleDateString()
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset='UTF-8'>
+ 
+        <style>
+        
+          * {
+            break-inside: avoid;
+ 
+            page-break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+          }
+          .pdf-report {
+            background-color: white;
+
+            font-family: Arial, sans-serif;
+            color: black;
+
+          }
+          h1, h4 {
+            text-align: center;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+          th {
+            background-color: #f2f2f2;
+            text-align: center;
+          }
+          td, th {
+            padding: 8px;
+            font-size: 14px;
+          }
+            table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #dee2e6;
+  font-size: 14px;
+  text-align: center;
+}
+
+thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.table-bordered {
+  border: 1px solid #dee2e6;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+        </style>
+      </head>
+      <body class="pdf-report">
+        <h1>Relatório de Acessibilidade</h1>
+        <h4>${currentSummary.value?.title || ''}</h4>
+        <br/>
+        <table class="table">
+          <thead><tr><td>URL:</td><td>${storage.url}</td></tr></thead>
+        </table>
+        <table class="table">
+          <thead><tr><td>Data Avaliação: ${today}</td><td>Estado: estado</td></tr></thead>
+        </table>
+        <h4>Resultados</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Passed</th>
+              <th scope="col">Failed</th>
+              <th scope="col">Warning</th>
+              <th scope="col">Inapplicable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr  style="text-align: center;">
+              <td>${currentSummary.value.passed}</td>
+              <td>${currentSummary.value.failed}</td>
+              <td>${currentSummary.value.warning}</td>
+              <td>${currentSummary.value.inapplicable}</td>
+            </tr>
+          </tbody>
+
+        </table>
+        <br/><br/>
+            ${rules.value.map(rule => `
+              <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Regra</th>
+              <th scope="col">Titulo</th>
+              <th scope="col">Nível</th>
+              <th scope="col">Resultado</th>
+            </tr>
+          </thead>
+          <tbody>  
+            <tr>
+                <td>${rule.code}</td>
+                <td>${rule.title}</td>
+                <td>${rule.levels}</td>
+                <td>${rule.outcome}</td>
+              </tr>
+              
+            </tbody>
+        
+      ${
+        (rule.results && rule.results.length > 0)
+          ? `<table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Descrição</th>
+                  <th scope="col">Veridict</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rule.results.map(result => `
+                  <tr>
+                    <td>${result.description}</td>
+                    <td>${result.verdict}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`
+          : `<p class="text-muted">Nenhum resultado encontrado para esta regra.</p>
+           <br/>`
+         
+      }  </table>
+        <br/>
+        <br/>
+        
+            `).join('')}
+      
+    
+      </body>
+    </html>
+  `
+}
+
+// Geração do PDF
+async function generateReport() {
+  const frame = document.getElementById('pdfFrame')
+  const html = getHtmlContent()
+  frame.srcdoc  = html;
+
+
+  frame.onload = () => {
+   html2pdf()
+  .set({
+    html2canvas: {
+      scale: 1,
+      logging: false,
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: '#ffffff',
+      ignoreElements: el => {
+        // ignora scripts ou elementos fora do contexto do relatório
+        return el.tagName === 'SCRIPT'
+      }
+    },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  })
+  .from(frame.contentDocument.documentElement)
+  .save()
+  }
+}
+</script>
+
+<style scoped>
+iframe {
+  display: none;
+}
+#pdfFrame {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0;
+  height: 0;
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  border: none;
+}
+</style>

@@ -1,6 +1,7 @@
 <template>
   <div class="bigContainer">
     <button @click="returnToMain()">Back</button>
+    <PDFReport></PDFReport>
     <Summary></Summary>
     <ColapsibleFilter></ColapsibleFilter>
     <div class="container-1">
@@ -12,15 +13,19 @@
 </template>
 
 <script>
+
 // <FilterByResult :items="['All outcomes','Passed','Failed','Warning','Inapplicable']" ></FilterByResult>
 import ColapsibleFilter from "../../components/ColapsibleFilter.vue";
 import Summary from "../../components/Summary.vue";
 import ListOfRules from "../../components/ListOfRules.vue";
 import FilterByResult from "../../components/FilterByResult.vue";
+import PDFReport from "../../components/PDFReport.vue";
+
 import { mapActions } from "vuex";
 
 export default {
   components: {
+    PDFReport,
     ColapsibleFilter,
     Summary,
     ListOfRules,
