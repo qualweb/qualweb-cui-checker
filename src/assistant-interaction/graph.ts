@@ -47,31 +47,30 @@ interface Objective {
   counter: number;
 } 
 
-interface AssistantAnswer {
-  message: string;
-  selector: string;
-}
+
+export type GraphStatus = "running" | "completed" | "failed";
 
 export interface FinalOutput {
   response: string;
   lastMesssagePassedCheck: string| null;
+  status: GraphStatus;
 
 }
 
 const objectivesDefault:Record<string,Objective> = {
-  "get-date": {
+ "qw-cui-date": {
     objective: "Obtain a response from the Assistant containing a date format",
     completed: false,
     failed: false,
     counter: 0,
   },  
-  "get-unit": {
+  "qw-cui-unit": {
     objective: "Obtain a response from the Assistant containing a unit of measurement",
     completed: false,
     failed: false,
     counter: 0,
   },
-   "get-currency": {
+   "qw-cui-currency": {
     objective: "Obtain a response from the Assistant containing a currency format",
     completed: false,
     failed: false,
@@ -103,13 +102,7 @@ const GraphState = Annotation.Root({
     reducer: (prev, next) => [...prev, ...next],
     default: () => [],
   }),
-  // Analysis of the last response from the assistant
-  // This can be used to store insights or summaries of the last response
-  // to help in formulating the next question or understanding the conversation flow
-  analysisOfLastResponse: Annotation<string>({
-    reducer: (_prev, next) => next,
-    default: () => "",
-  }),
+
   // The current objective being pursued by the agent
   // This is the objective that the agent is currently working on
   currentObjective: Annotation<Objective | null>({
@@ -123,6 +116,10 @@ const GraphState = Annotation.Root({
   finalOutput: Annotation<FinalOutput|null>({
     reducer: (_prev, next) => next,
     default: () => null,
+  }),
+  status: Annotation<GraphStatus>({
+    reducer: (_prev, next) => next,
+    default: () => "running",
   }),
 });
  
@@ -192,28 +189,7 @@ const objectiveAchiever = async (state: typeof GraphState.State) => {
 
 const agentQuestion = async (state: typeof GraphState.State) => {
   const { messages } = state;
-  // if last message is from tool, then we should not send it to the LLM
-/*
-const systemMessage = {
-  role: "system",
-  content: `
-  You are an AI agent that interacts with a user that is an AI assistant of a service provider.
-  Based on the current objetive you should decide what is the next step to take to achieve the objective.
-  objective: "${state.currentObjective?.objective || ""}".
 
-  Based on the messages in the conversation history, you should:
-  - Analyze the context and information provided.
-  - decide whether to gather more information.
-  - Remember that next agent will be formulating a question based on the information you provide and it will need to indirectly ask a question 
-    so it needs context , you should provide enough context to formulate a question.
-  - If needed you can search the web for information about the service provider to gather context, but for this you need to know first the entity of the assistant.
-  - If there is no information about entity or context, you should ask the assistant for more information about the services or help offered using apropriate tool.
-  No response needed, just decide the next step to take.
-`
-}; 
-  const llmWithTools = llm.bindTools(ALL_TOOLS_LIST);
-  */
-  // only last 5 messages if more than 10
   if (messages.length > 10) {
     messages.splice(0, messages.length - 10);
   }
@@ -288,7 +264,7 @@ const getNextObjective = async (state: typeof GraphState.State) => {
     (objective): objective is Objective => typeof objective === "object" && objective !== null && "completed" in objective && !objective.completed
   );
   
-  return { currentObjective: nextObjective ?? null };
+  return { currentObjective: nextObjective ?? null , status: nextObjective ? "running" : "completed" };
 
 };
 
@@ -352,12 +328,12 @@ const prepareOutputMessage = (state: typeof GraphState.State) => {
   const finalOutputStructured = {
     response: lastMessage.text || null, 
     lastMesssagePassedCheck: objectiveAchieved,
+    status: state.status,
   }as FinalOutput;
 
   return {finalOutput:finalOutputStructured}; 
 
 };
-
 const workflow = new StateGraph(GraphState)
   .addNode("objective_achiever", objectiveAchiever)
   .addNode("objective_assigner", getNextObjective)

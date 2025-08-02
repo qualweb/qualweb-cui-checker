@@ -2,12 +2,17 @@
 import { ChatBotInterface, LLM_Settings } from "../utils/types";
 import { chatbotInterface } from "../content/detection/Detection";
 import { addSelectors } from "../content/evaluation/Evaluation";
-import {initiateLangraphSettings,FinalOutput} from "./index";
+import {initiateLangraphSettings,FinalOutput} from "./graph";
 import { cleanHTML } from "../content/lib/DomTools";
 import { AIMessage,HumanMessage, BaseMessage, isToolMessage, isHumanMessage } from "@langchain/core/messages";
 import { v4 as uuidv4 } from "uuid";
 const threadId = uuidv4();
-
+interface InteractionStatus {
+  counter: number;
+}
+const interactionStatus: InteractionStatus = {
+  counter: 0,
+};
 /**
  * * Function to generate a question based on the message from the assistant
  * 
@@ -56,9 +61,9 @@ function normalizeText(text:string): string {
     .replace(/\s+/g, ' ') // replaces multiple spaces/newlines/tabs with a single space
     .trim(); 
 }
-let questionNumber = 0;
+
 function  markQuestion(question:string): void {
-  questionNumber++;
+
   const textNodeResult  = document.evaluate(`//*[text()='${question}']`, chatbotInterface!.dialogElement!.ownerDocument, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
   if (textNodeResult) {
     // Sobe ao nó pai, caso tenha encontrado um nó de texto
@@ -67,16 +72,17 @@ function  markQuestion(question:string): void {
       : textNodeResult as HTMLElement;
 
     // Adiciona o atributo de identificação à pergunta
-    element?.setAttribute("qw-question", questionNumber.toString());
+    element?.setAttribute("qw-cui-question", interactionStatus.counter.toString());
   }
 }
 
 function markResponses(responses:HTMLElement[]): void {
   responses.forEach((response) => {
     const el = response as HTMLElement;
-    el.setAttribute("qw-response", questionNumber.toString());
+    el.setAttribute("qw-cui-response", interactionStatus.counter.toString());
   })
 }
+
 
 
 /**
@@ -106,7 +112,8 @@ export async function initiateInteractionWorkflow(initialMsg: HTMLElement[],
 
     while (true) {
         // Mark Message Html as containing the objective
-    
+        interactionStatus.counter++;
+
          let question:FinalOutput = await generateAndSendQuestion(lastAnswersRawText, interactionGraph,setMessage, sendMessage);
          console.log("Question generated", question);
             if(question.lastMesssagePassedCheck){
@@ -115,7 +122,7 @@ export async function initiateInteractionWorkflow(initialMsg: HTMLElement[],
           });
           }
 
-         if (!question.response) {
+         if (question.status === "completed") {
           console.log("Finished interaction, no question generated");
           break;
         }
