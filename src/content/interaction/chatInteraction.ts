@@ -1,4 +1,3 @@
-
 import { ChatBotInterface, ResponsesSelectors } from "../../utils/types";
 
 let lastMessageUser: string = '';
@@ -39,11 +38,7 @@ export async function captureResponse(
   maxWaitTime = 2000,
   chatbotInterface?: ChatBotInterface
 ): Promise<HTMLElement[]> {
-  const startTime = Date.now();
-  let selector = chatbotInterface!.selectors.messages[0];
 
-  // obter mensagens existentes  
-  let existingMessages = document.querySelectorAll(selector);
   let response = await observeNewMessages(message, maxWaitTime, chatbotInterface!);
 
   return response;
@@ -51,7 +46,6 @@ export async function captureResponse(
 
 function startTimeOut(maxWaitTime: number, observer: MutationObserver, callback: () => void): NodeJS.Timeout {
   return setTimeout(() => {
-    console.log("Timeout reached, disconnecting observer");
     observer.disconnect();
     callback();
   }, maxWaitTime);
@@ -68,7 +62,7 @@ function stopTimeout(timeout: NodeJS.Timeout): void {
 
 function isNodeTypingInfo(node: Node): boolean {
   return document.evaluate(
-    `boolean(.//*[contains(@*, "typing")] | self::*[contains(@*, "typing")])`,
+    `boolean(.//*[contains(@*, "typing")  or contains(@*, "loading") ] | self::*[contains(@*, "typing") or contains(@*, "loading")])`,
     node,
     null,
     XPathResult.BOOLEAN_TYPE,
@@ -89,91 +83,122 @@ export function isChatBotMessage(node:HTMLElement, selectorMessage:string):boole
 }
 
 
-
 export function observeNewMessages(
   messageClient: string,
   maxWaitTime: number,
   chatbotInterface: ChatBotInterface
 
 ): Promise<HTMLElement[]> {
-  console.log(chatbotInterface);
   // obtain window of popup
 
-  let documentOwner = chatbotInterface!.windowElement!.ownerDocument;
-  let element = documentOwner.querySelector(chatbotInterface!.selectors.window[0]);
-  console.log(element);
-
-  if (!element) {
-    console.error("Windows of chatbot not found, improper selector.");
-    return Promise.reject();
-  }
-
-  return new Promise(  (resolve) => {
- 
-    let selectorMessage = chatbotInterface!.messagesSelector;
-    let responses: HTMLElement[] = [];
-    let timeout: NodeJS.Timeout; 
-    const observer = new MutationObserver((mutations) => {
-      // Inicia timeout
-   
-
-      let isTyping = false;
-      for (const mutation of mutations) {
-        // Added nodes
-          mutation.addedNodes.forEach((node) => {
+  const documentOwner:Document = chatbotInterface!.windowElement!.ownerDocument;
+  const observedNode:Node|null = documentOwner.querySelector(chatbotInterface!.selectors.window[0]);
+  const selectorMessage:string = chatbotInterface!.messagesSelector;
+  const existingMessages:Element[] = [...document.querySelectorAll(selectorMessage)];
+  let unResolvedDetectedMessages:HTMLElement[] = []
+  let detectedMessages: HTMLElement[] =[];
+  const excludedElements:HTMLElement[] = [];
+  if (!observedNode) return Promise.reject("Windows of chatbot not found, improper selector.");
   
-              if (node.nodeType === Node.TEXT_NODE) return;
-                
-                const element = node as HTMLElement;
-              
-              // if detected typing
-              if (isNodeTypingInfo(element)) {
-                  isTyping = true;
+  return new Promise( (resolve) => {
+    
 
-                  console.log("A parar o timeout");
-                  clearTimeout(timeout);
-                  console.log("Timeout stopped" , timeout);
-                  console.log("Detetado Máquina a escrever Typing:", node);
-              
-              } else if (isChatBotMessage(element, selectorMessage)) {
+    let timeout: NodeJS.Timeout; 
 
-                  responses.push(element);
+    const observer = new MutationObserver((mutations:MutationRecord[]) => {
+      // Inicia timeout
+      let isTyping:boolean = false;
+      let isDescendentNodeMutation:boolean = false;
+      for (const mutation of mutations) {
+        
+        let noPreviousSibling:boolean = false;
+        let noNextSibling:boolean = false;
 
-                  if(!isTyping){
-                    console.log("A fazer restart do timeout");
-                    restartTimeOut(5000, timeout, observer, () => resolve(responses));
-                  } 
-
-                  console.log("added node with textContent:", node.textContent);
+        if(mutation.type == "childList"){
+          // // mutations in the child list of descendent Node from main Node ?
+          if(mutation.target != observedNode  ) isDescendentNodeMutation = true;
+          // where was inserted
+          if(!mutation.nextSibling) noNextSibling = true;
+          if(!mutation.previousSibling) noPreviousSibling = true;
+          
+          // added Nodes
+          for(const addedNode of mutation.addedNodes){
+            // Only allow nodes of type Element
+            if(addedNode.nodeType == Node.ELEMENT_NODE){
+               const element:HTMLElement = addedNode as HTMLElement;
+               if(isNodeTypingInfo(addedNode as HTMLElement)){
+                // is NodeTypingInfo inside message ?
+                console.log("Detected Typing, stopping timeout")
+                isTyping = true;
+                stopTimeout(timeout);
               }
-          });
 
-          mutation.removedNodes.forEach((node) => {
+               //if is chatbot Message Push Promise to obtain element to unresolvedDetectedMessages
+              if(isChatBotMessage(element, selectorMessage)){
+                if(!isTyping){ 
+                  console.log("Restarting timer M1");
+                timeout = restartTimeOut(5000,timeout,observer,timeOutCallBack);
+                }
+                console.log("Chatbot Promise Detected");
+                if (!unResolvedDetectedMessages.includes(element)) {
+                  unResolvedDetectedMessages.push(element);
+                } }               
+              // does addedNode represents information that is loading or typing or contain one?
+           
+            }
+          }
 
-              if (isNodeTypingInfo(node)) {
-                  console.log("Detetado Máquina deixou de escrever Typing:", node);
-                  isTyping = false;
-                  // start timeout to detect if typing again
-                  console.log("Typing of Reiniciar timeout");
-                  timeout = startTimeOut(3000, observer, () => resolve(responses));
-                  //restartTimeOut(2000, timeout, observer, () => resolve(responses));
+          // Removed Nodes
+          for(const removedNode of mutation.removedNodes){
+              const element:HTMLElement = removedNode as HTMLElement;
+               // Only allow nodes of type Element e Text
+            if(removedNode.nodeType == Node.ELEMENT_NODE || removedNode.nodeType == Node.TEXT_NODE ){
+              // was typing removed? 
+              if(isNodeTypingInfo(removedNode as HTMLElement)){
+                console.log("Detected Removed Typing, starting timeout")
+                timeout = startTimeOut(5000, observer, timeOutCallBack)
               }
-          });
+            }   
+          }
+            
+        }else if(mutation.type == "characterData"){
+        //  console.log("Detected mutation type characterData",mutation);
+          // text altered
+        }else{
+          // atributtes
+          //console.log("Detected mutation type atributtes",mutation);
+        }
+      
       }
   });
-    timeout = startTimeOut(5000, observer, () => resolve(responses));
-    observer.observe(element, {
-      childList: true,
-      subtree: true,
+  const timeOutCallBack =async ()=>{
+      detectedMessages = [...unResolvedDetectedMessages || []] ;
+      unResolvedDetectedMessages = [];
+      console.log("Got all Messages giving them back to llm", detectedMessages);
+      observer.disconnect();
+     }
+    timeout = startTimeOut(7000, observer, timeOutCallBack) ;
+
+
+    observer.observe(observedNode, {
+    subtree:true,
+    characterData:true,
+    characterDataOldValue:true,
+    childList:true,
+    attributes:true,
+    attributeOldValue: true
     });
     
     waitForObserverDisconnect(observer).then(() =>{
     console.log('Observer Disconnected');
-    resolve(responses);
+    let newMessages:HTMLElement[] = detectedMessages;
+    detectedMessages = [];
+    resolve(newMessages);
     });  
     
 
   });
+}
   function waitForObserverDisconnect(observer: MutationObserver): Promise<void> {
     return new Promise<void>((resolve) => {
       const originalDisconnect = observer.disconnect.bind(observer); // Store original disconnect
@@ -184,5 +209,4 @@ export function observeNewMessages(
       };
     });
   }
-}
 
