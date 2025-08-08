@@ -38,15 +38,12 @@ const response = await interactionGraph.invoke(
 );
   const question: FinalOutput = response.finalOutput as FinalOutput;
 
-  if (!question.response) {
-    console.log("Finished interaction, no question generated");
-    return question;
-  }
   const questionText = question.response;
   console.log(questionText);
-
-  await setMessage(questionText);
-  await sendMessage();
+  if (question.status === "running") {
+      await setMessage(questionText);
+      await sendMessage();
+  }
   return question;
 }
 
