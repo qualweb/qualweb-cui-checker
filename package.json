@@ -41,6 +41,7 @@
     "esm": "^3.2.25",
     "file-saver": "^2.0.2",
     "highlight.js": "^11.11.1",
+    "html2pdf.js": "^0.10.3",
     "htmlfy": "^0.6.0",
     "langchain": "^0.3.19",
     "shadow-dom-selector": "^5.0.1",
@@ -48,7 +49,6 @@
     "vue": "^3.5.13",
     "vue-code-highlight": "^0.7.8",
     "vue-router": "^4.5.0",
-    "vue3-html2pdf": "^1.1.2",
     "vuex": "^4.1.0",
     "xpath-to-css": "^1.2.0",
     "xpath-to-selector": "^1.1.3"

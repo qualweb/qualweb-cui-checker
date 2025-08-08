@@ -16,7 +16,7 @@
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import html2pdf from 'html2pdf.js'
-
+import { onMounted } from 'vue'
 // Referência ao iframe
 const pdfFrame = ref(null)
 
@@ -26,11 +26,22 @@ const rules = computed(() => store.getters.getAllRulesAndResults)
 const chatbotSummary = computed(() => store.getters.getChatbotSummary)
 const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot)
 const filters = computed(() => store.getters.getFilters)
+const currentUrl = ref('')
 
 const currentSummary = computed(() => {
   return evaluateChatbot.value ? chatbotSummary.value : null
 })
 
+
+
+
+onMounted(() => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]) {
+      currentUrl.value = tabs[0].url
+    }
+  })
+})
 // Função para gerar o HTML completo do relatório
 function getHtmlContent() {
   const today = new Date().toLocaleDateString()
@@ -120,10 +131,10 @@ tbody tr:nth-child(even) {
         <h4>${currentSummary.value?.title || ''}</h4>
         <br/>
         <table class="table">
-          <thead><tr><td>URL:</td><td>${storage.url}</td></tr></thead>
+          <thead><tr><td>URL:</td><td>${currentUrl.value}</td></tr></thead>
         </table>
         <table class="table">
-          <thead><tr><td>Data Avaliação: ${today}</td><td>Estado: estado</td></tr></thead>
+          <thead><tr><td>Data Avaliação: ${today}</td></tr></thead>
         </table>
         <h4>Resultados</h4>
         <table class="table">

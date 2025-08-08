@@ -40,6 +40,7 @@ const config = {
         loader: 'source-map-loader',
           exclude: [
           /node_modules\/@microsoft\/recognizers-text-number-with-unit/,
+/node_modules\/html2pdf\.js/,
         ],
       },
       {
