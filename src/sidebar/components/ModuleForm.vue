@@ -42,9 +42,12 @@ export default {
       actIdValue: "act",
       actLabel: "ACT Rules",
       actValue: false,
-      htmlIdValue: "html",
-      htmlLabel: "WCAG 2.1 Techniques",
-      htmlValue: false,
+      wcagIdValue: "wcag",
+      wcagLabel: "WCAG 2.1 Techniques",
+      wcagValue: false,
+      cuiIdValue: "cui",
+      cuiLabel: "CUI Rules",
+      cuiValue: false,
       bgColor: "white",
       checkColor: "black",
     };
@@ -52,7 +55,7 @@ export default {
   computed: {
     ...mapGetters({ evaluated: "getEvaluated" }),
     isDisabled() {
-      return !(this.evaluated && (this.evaluated.act || this.evaluated.html));
+      return !(this.evaluated && (this.evaluated.act || this.evaluated.wcag || this.evaluated.cui));
     },
   },
   methods: {

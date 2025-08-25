@@ -71,7 +71,7 @@
               :bgColor="bgColor"
               :checkColor="checkColor"
               @toggle:check="updateFilter"
-              v-model="filter.html"
+              v-model="filter.wcag"
             ></Checkbox>
           </li>
           <li>
@@ -112,7 +112,7 @@ import Checkbox from './Checkbox.vue';
 const isOpen = ref(false);
 const actIdValue = 'act';
 const actLabel = 'ACT Rules';
-const tecniquesIdValue = 'html';
+const tecniquesIdValue = 'wcag';
 const tecniquesLabel = 'WCAG 2.1 Techniques';
 const cuiIdValue = 'cui';
 const cuiLabel = 'CUI Rules';

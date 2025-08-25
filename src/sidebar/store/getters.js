@@ -39,7 +39,7 @@ export const getAllRulesAndResults = (state) => {
   if (evaluateChatbot) {
     const chatbotResults = {
       act: state.chatbotAct,
-      html: state.chatbotHtml,
+      wcag: state.chatbotWcag,
       cui: state.chatbotCui,
     };
 
@@ -126,7 +126,7 @@ export const getAllRuleCodeAndTitle = (state) => {
   if (evaluateChatbot) {
     const chatbotResults = {
       act: state.chatbotAct,
-      html: state.chatbotHtml,
+      wcag: state.chatbotWcag,
       cui: state.chatbotCui,
     };
 
@@ -216,8 +216,8 @@ export const getAllData = (state) => {
     chatbotAct: state.chatbotAct,
     cui: state.cui,
     chatbotCui: state.chatbotCui,
-    html: state.html,
-    chatbotHtml: state.chatbotHtml,
+    wcag: state.wcag,
+    chatbotWcag: state.chatbotWcag,
     css: state.css,
   };
 };

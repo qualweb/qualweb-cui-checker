@@ -3,13 +3,13 @@ import * as types from "./mutation-types";
 export const setReport = async function ({ commit }, modules) {
   let report = await evaluate(
     modules.act,
-    modules.html,
+    modules.wcag,
     modules.css,
     modules.cui
   );
 
   commit(types.SETACT, report.act);
-  commit(types.SETHTML, report.html);
+  commit(types.SETWCAG, report.wcag);
   commit(types.SETCUI, report.cui);
   commit(types.SETCSS, report.css);
   commit(types.SETSUMMARY, report.summary);
@@ -33,11 +33,11 @@ export const setACT = ({ commit }, payload) => {
 export const setChatbotACT = ({ commit }, payload) => {
   commit(types.SETCHATBOTACT, payload);
 };
-export const setHTML = ({ commit }, payload) => {
-  commit(types.SETHTML, payload);
+export const setWCAG = ({ commit }, payload) => {
+  commit(types.SETWCAG, payload);
 };
-export const setChatbotHTML = ({ commit }, payload) => {
-  commit(types.SETCHATBOTHTML, payload);
+export const setChatbotWCAG = ({ commit }, payload) => {
+  commit(types.SETCHATBOTWCAG, payload);
 };
 export const setCUI = ({ commit }, payload) => {
   commit(types.SETCUI, payload);
@@ -67,7 +67,7 @@ export const setStartingFilter = ({ commit }, modules) => {
     warning: true,
     inapplicable: false,
     act: modules.act,
-    html: modules.html,
+    wcag: modules.wcag,
     cui: modules.cui,
   });
 };

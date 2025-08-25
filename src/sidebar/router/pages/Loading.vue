@@ -11,13 +11,13 @@
 import { mapActions, mapGetters } from "vuex";
 export default {
   name: "Loading",
-  props: ["act", "html", "cui", "css"],
+  props: ["act", "wcag", "cui", "css"],
   methods: {
     ...mapActions([
       "setACT",
       "setChatbotACT",
-      "setHTML",
-      "setChatbotHTML",
+      "setWCAG",
+      "setChatbotWCAG",
       "setCUI",
       "setChatbotCUI",
       "setCSS",
@@ -40,8 +40,8 @@ export default {
       chatbotActResult,
       cuiResult,
       chatbotCuiResult,
-      htmlResult,
-      chatbotHtmlResult,
+      wcagResult,
+      chatbotWcagResult,
       cssResult,
       summary,
       chatbotSummary;
@@ -52,11 +52,11 @@ export default {
       this.setACT(actResult);
       chatbotActResult && this.setChatbotACT(chatbotActResult);
     }
-    if (modules.html) {
+    if (modules.wcag) {
       this.state = "Evaluating WCAG module";
-      [htmlResult, chatbotHtmlResult] = await evaluateWCAG();
-      this.setHTML(htmlResult);
-      chatbotHtmlResult && this.setChatbotHTML(chatbotHtmlResult);
+      [wcagResult, chatbotWcagResult] = await evaluateWCAG();
+      this.setWCAG(wcagResult);
+      chatbotWcagResult && this.setChatbotWCAG(chatbotWcagResult);
     }
     if (modules.cui) {
       this.state = "Evaluating CUI module";

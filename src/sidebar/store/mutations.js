@@ -16,11 +16,11 @@ export default {
   [types.SETCHATBOTCUI](state, payload) {
     state.chatbotCui = payload;
   },
-  [types.SETHTML](state, payload) {
-    state.html = payload;
+  [types.SETWCAG](state, payload) {
+    state.wcag = payload;
   },
-  [types.SETCHATBOTHTML](state, payload) {
-    state.chatbotHtml = payload;
+  [types.SETCHATBOTWCAG](state, payload) {
+    state.chatbotWcag = payload;
   },
   [types.SETCSS](state, payload) {
     state.css = payload;
@@ -63,13 +63,13 @@ export default {
     state.highlightActive = payload;
   },
   [types.RESET](state) {
-    state.evaluated = { act: false, cui: false, css: false, html: false };
+    state.evaluated = { act: false, cui: false, css: false, wcag: false };
     state.act = {};
     state.chatbotAct = {};
     state.cui = {};
     state.chatbotCui = {};
-    state.html = {};
-    state.chatbotHtml = {};
+    state.wcag = {};
+    state.chatbotWcag = {};
     state.css = {};
     state.summary = {};
     state.chatbotSummary = {};

@@ -32,8 +32,8 @@
         <Checkbox
           idValue="wcagTechniquesCheckbox"
           :label="'WCAG Techniques'"
-          v-model="htmlValue"  
-          @toggle:check="updateEvaluated('html', $event)" 
+          v-model="wcagValue"  
+          @toggle:check="updateEvaluated('wcag', $event)" 
           bgColor="#e15500"
           checkColor="#ffffff"
         />
@@ -61,19 +61,19 @@ import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
-import { messages } from '../../../utils/messagesToSend';
+
 
 const store = useStore();
 const router = useRouter();
 
 const actValue = ref(false);
-const htmlValue = ref(false);
+const wcagValue = ref(false);
 const cuiValue = ref(false);
 
 const evaluated = computed(() => store.getters.getEvaluated);
 
 const isDisabled = computed(() => {
-  return !(evaluated.value && (evaluated.value.act || evaluated.value.html || evaluated.value.cui));
+  return !(evaluated.value && (evaluated.value.act || evaluated.value.wcag || evaluated.value.cui));
 });
 
 const setEvaluated = async (idValue, value) => {
@@ -116,7 +116,7 @@ const updateEvaluated = async (idValue, event) => {
 onMounted(() => {
   if (evaluated.value) {
     actValue.value = evaluated.value.act || false;
-    htmlValue.value = evaluated.value.html || false;
+    wcagValue.value = evaluated.value.wcag || false;
     cuiValue.value = evaluated.value.cui || false;
   }
 });

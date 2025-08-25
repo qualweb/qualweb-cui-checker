@@ -1,7 +1,7 @@
 export const SETACT = "SETACT";
 export const SETCHATBOTACT = "SETCHATBOTACT";
-export const SETHTML = "SETHTML";
-export const SETCHATBOTHTML = "SETCHATBOTHTML";
+export const SETWCAG = "SETWCAG";
+export const SETCHATBOTWCAG = "SETCHATBOTWCAG";
 export const SETCSS = "SETCSS";
 export const SETCUI = "SETCUI";
 export const SETCHATBOTCUI = "SETCHATBOTCUI";
