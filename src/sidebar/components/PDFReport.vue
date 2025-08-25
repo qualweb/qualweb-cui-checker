@@ -19,13 +19,11 @@ import html2pdf from 'html2pdf.js'
 import { onMounted } from 'vue'
 // Referência ao iframe
 const pdfFrame = ref(null)
-
 const store = useStore()
-const storage = computed(() => store.getters.getStorage)
-const rules = computed(() => store.getters.getAllRulesAndResults)
+
+const rules = computed(() => store.getters.getCurrentFilteredRules)
 const chatbotSummary = computed(() => store.getters.getChatbotSummary)
 const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot)
-const filters = computed(() => store.getters.getFilters)
 const currentUrl = ref('')
 
 const currentSummary = computed(() => {
@@ -49,7 +47,87 @@ function getHtmlContent() {
   return `
     <!DOCTYPE html>
     <html>
-      <head>
+     ${generateHTMLHeadAndStyles()}
+      <body class="pdf-report">
+        <h1>Accessibility  Report</h1>
+        <h4>${currentSummary.value?.title || ''}</h4>
+        <br/>
+        <table class="table">
+          <thead><tr><td>URL:</td><td>${currentUrl.value}</td></tr></thead>
+        </table>
+        <table class="table">
+          <thead><tr><td>Evaluation Date: ${today}</td></tr></thead>
+        </table>
+        <h4>Rules</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Passed</th>
+              <th scope="col">Failed</th>
+              <th scope="col">Warning</th>
+              <th scope="col">Inapplicable</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr  style="text-align: center;">
+              <td>${currentSummary.value.passed}</td>
+              <td>${currentSummary.value.failed}</td>
+              <td>${currentSummary.value.warning}</td>
+              <td>${currentSummary.value.inapplicable}</td>
+            </tr>
+          </tbody>
+
+        </table>
+        <br/><br/>
+            ${rules.value.map(rule => `
+
+              <table class="table">
+        
+          <thead>
+            <tr>
+              <th scope="col">Rule</th>
+              <th scope="col">Title</th>
+              <th scope="col">Result</th>
+            </tr>
+          </thead>
+          <tbody>  
+            <tr>
+                <td>${rule.code}</td>
+                <td>${rule.name}</td>
+                <td>${rule.metadata.outcome}</td>
+              </tr>
+              <tr>
+                <th colspan="3">
+                Tests for this Rule
+                </th>
+              </tr>
+              <tr>
+                <th>
+                  Passed
+                </th>
+                <th>Failed</td>
+                <th>Inaplicable</td>
+                </tr>
+              <tr>
+                <td>${rule.metadata.passed}</td>
+                <td>${rule.metadata.failed}</td>
+                <td>${rule.metadata.inapplicable}</td> 
+                </tr>
+            </tbody>
+        
+        </table>
+        <br/>
+        <br/>
+        
+            `).join('')}
+      
+    
+      </body>
+    </html>
+  `
+}
+function generateHTMLHeadAndStyles(){
+return `<head>
         <meta charset='UTF-8'>
  
         <style>
@@ -91,7 +169,7 @@ function getHtmlContent() {
 
 th,
 td {
-  padding: 0.75rem;
+  padding: 0.5rem;
   vertical-align: top;
   border-top: 1px solid #dee2e6;
   font-size: 14px;
@@ -124,98 +202,16 @@ tbody tr:nth-child(even) {
 .table-hover tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.075);
 }
-        </style>
-      </head>
-      <body class="pdf-report">
-        <h1>Relatório de Acessibilidade</h1>
-        <h4>${currentSummary.value?.title || ''}</h4>
-        <br/>
-        <table class="table">
-          <thead><tr><td>URL:</td><td>${currentUrl.value}</td></tr></thead>
-        </table>
-        <table class="table">
-          <thead><tr><td>Data Avaliação: ${today}</td></tr></thead>
-        </table>
-        <h4>Resultados</h4>
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Passed</th>
-              <th scope="col">Failed</th>
-              <th scope="col">Warning</th>
-              <th scope="col">Inapplicable</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr  style="text-align: center;">
-              <td>${currentSummary.value.passed}</td>
-              <td>${currentSummary.value.failed}</td>
-              <td>${currentSummary.value.warning}</td>
-              <td>${currentSummary.value.inapplicable}</td>
-            </tr>
-          </tbody>
-
-        </table>
-        <br/><br/>
-            ${rules.value.map(rule => `
-              <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Regra</th>
-              <th scope="col">Titulo</th>
-              <th scope="col">Nível</th>
-              <th scope="col">Resultado</th>
-            </tr>
-          </thead>
-          <tbody>  
-            <tr>
-                <td>${rule.code}</td>
-                <td>${rule.title}</td>
-                <td>${rule.levels}</td>
-                <td>${rule.outcome}</td>
-              </tr>
-              
-            </tbody>
-        
-      ${
-        (rule.results && rule.results.length > 0)
-          ? `<table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Descrição</th>
-                  <th scope="col">Veridict</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rule.results.map(result => `
-                  <tr>
-                    <td>${result.description}</td>
-                    <td>${result.verdict}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>`
-          : `<p class="text-muted">Nenhum resultado encontrado para esta regra.</p>
-           <br/>`
-         
-      }  </table>
-        <br/>
-        <br/>
-        
-            `).join('')}
-      
-    
-      </body>
-    </html>
-  `
+</style>
+      </head>`;
 }
-
 // Geração do PDF
 async function generateReport() {
   const frame = document.getElementById('pdfFrame')
   const html = getHtmlContent()
+  const today = new Date().toLocaleString()
   frame.srcdoc  = html;
-
+  
 
   frame.onload = () => {
    html2pdf()
@@ -234,7 +230,7 @@ async function generateReport() {
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
   })
   .from(frame.contentDocument.documentElement)
-  .save()
+  .save(`accessibility_report_${today}.pdf`)
   }
 }
 </script>

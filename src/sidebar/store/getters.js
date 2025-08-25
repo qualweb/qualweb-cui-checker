@@ -16,6 +16,23 @@ export const getCurrentRule = (state) => {
     return null;
   }
 };
+
+export const getCurrentFilteredRules = (state) => {
+    //state get evaluated 
+    const evaluatedState = state.evaluated; // { wcag: true, cui: false, act: true }
+    console.log(evaluatedState);
+    const evaluatedModules = Object.entries(evaluatedState).filter(([_ , value]) => value === true).map(([key]) => key);
+    console.log(evaluatedModules);
+    let rules = [];
+
+    for(const module of evaluatedModules){
+      const rulesModule = Object.values(state[module]);
+      rules.push(...rulesModule);
+    }
+
+    return rules;
+};
+
 export const getCurrentRuleResults = (state) => {
   let currentRule = state.currentRule;
   let rule = state[currentRule.module][currentRule.code];

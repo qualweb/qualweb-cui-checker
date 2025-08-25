@@ -2,6 +2,7 @@
   <div class="bigContainer">
     <button @click="returnToMain()">Back</button>
     <PDFReport></PDFReport>
+    <CSVReport></CSVReport>
     <Summary></Summary>
     <ColapsibleFilter></ColapsibleFilter>
     <div class="container-1">
@@ -20,12 +21,14 @@ import Summary from "../../components/Summary.vue";
 import ListOfRules from "../../components/ListOfRules.vue";
 import FilterByResult from "../../components/FilterByResult.vue";
 import PDFReport from "../../components/PDFReport.vue";
-
+import CSVReport from "../../components/CSVReport.vue";
 import { mapActions } from "vuex";
+
 
 export default {
   components: {
     PDFReport,
+    CSVReport,
     ColapsibleFilter,
     Summary,
     ListOfRules,
