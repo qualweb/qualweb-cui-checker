@@ -1,6 +1,6 @@
 export const getAllRulesFromModule = (state) => (module) => state[module];
 export const getRuleWithCode = (state) => (code, module) => state[module][code];
-export const getEvaluated = (state) => state["evaluated"];
+export const getEvaluated = (state) => state['evaluated'];
 export const getCurrentRule = (state) => {
   let currentRule = state.currentRule;
   if (!!currentRule) {
@@ -18,19 +18,21 @@ export const getCurrentRule = (state) => {
 };
 
 export const getCurrentFilteredRules = (state) => {
-    //state get evaluated 
-    const evaluatedState = state.evaluated; // { wcag: true, cui: false, act: true }
-    console.log(evaluatedState);
-    const evaluatedModules = Object.entries(evaluatedState).filter(([_ , value]) => value === true).map(([key]) => key);
-    console.log(evaluatedModules);
-    let rules = [];
+  //state get evaluated
+  const evaluatedState = state.evaluated; // { wcag: true, cui: false, act: true }
+  console.log(evaluatedState);
+  const evaluatedModules = Object.entries(evaluatedState)
+    .filter(([_, value]) => value === true)
+    .map(([key]) => key);
+  console.log(evaluatedModules);
+  let rules = [];
 
-    for(const module of evaluatedModules){
-      const rulesModule = Object.values(state[module]);
-      rules.push(...rulesModule);
-    }
+  for (const module of evaluatedModules) {
+    const rulesModule = Object.values(state[module]);
+    rules.push(...rulesModule);
+  }
 
-    return rules;
+  return rules;
 };
 
 export const getCurrentRuleResults = (state) => {
@@ -66,20 +68,19 @@ export const getAllRulesAndResults = (state) => {
         for (const [key, value] of Object.entries(results)) {
           const ruleOutcome = value.metadata.outcome;
           if (filter[ruleOutcome]) {
-            
-              let results = value.results;
-              let newResults = [];
-              for (let result of results) {
-                if (filter[result.verdict]) {
-                  newResults.push(result);
-                }
+            let results = value.results;
+            let newResults = [];
+            for (let result of results) {
+              if (filter[result.verdict]) {
+                newResults.push(result);
               }
+            }
             rules.push({
               title: value.name,
               code: value.code,
               outcome: ruleOutcome,
               module: module,
-              results: newResults
+              results: newResults,
             });
           }
         }
@@ -113,7 +114,7 @@ export const getAllRulesAndResults = (state) => {
               code: value.code,
               outcome: value.metadata.outcome,
               module: module,
-              results: newResults
+              results: newResults,
             });
           }
         }
@@ -123,7 +124,6 @@ export const getAllRulesAndResults = (state) => {
 
   return rules;
 };
-
 
 export const getResultNumber = (state) => {
   let currentRule = state.currentRule;
@@ -194,9 +194,9 @@ export const getAllRuleCodeAndTitle = (state) => {
   return rules;
 };
 export const getFirstRule = (state) => {
-  let modules = Object.keys(state["evaluated"]);
-  let evaluated = state["evaluated"];
-  let filter = state["filter"];
+  let modules = Object.keys(state['evaluated']);
+  let evaluated = state['evaluated'];
+  let filter = state['filter'];
   let keys;
   let value, moduleState, result;
   let done = false;
@@ -208,9 +208,9 @@ export const getFirstRule = (state) => {
       moduleState = state[module];
       while (!done && index < keys.length) {
         value = moduleState[keys[index]];
-        ruleOutcome = value["metadata"]["outcome"];
+        ruleOutcome = value['metadata']['outcome'];
         if (filter[ruleOutcome]) {
-          result = { code: value["code"], module: module };
+          result = { code: value['code'], module: module };
           done = true;
         }
         index++;

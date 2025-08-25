@@ -3,63 +3,56 @@
     <div class="container">
       <h1 class="title">Settings</h1>
       <form @submit.prevent="onSubmit">
-      <div class="settings">
-        <div class="settings-container">
-    
-     
-        <label for="locale_select">Locale:</label>
-        <span>Setting used for localization checks (currrency, language, date)</span>
-        <select id="locale_select"  v-model="locale" required>
-          <option value="en-US">English (en-US)</option>
-          <option value="es-ES">Spanish (es-ES)</option>
-          <option value="fr-FR">French (fr-FR)</option>
-          <option value="pt-PT">Portuguese (pt-PT)</option>
-        </select>
+        <div class="settings">
+          <div class="settings-container">
+            <label for="locale_select">Locale:</label>
+            <span>Setting used for localization checks (currrency, language, date)</span>
+            <select id="locale_select" v-model="locale" required>
+              <option value="en-US">English (en-US)</option>
+              <option value="es-ES">Spanish (es-ES)</option>
+              <option value="fr-FR">French (fr-FR)</option>
+              <option value="pt-PT">Portuguese (pt-PT)</option>
+            </select>
 
-        <label for="location_llm">LLM Service:</label>
-        <select id="location_llm"  v-model="LLMService" required>
-          <option value="ollama">Local Ollama</option>
-          <option value="openai">OpenAI API</option>
-        </select>
-    
-        </div>
-        <div v-if="LLMService === 'openai'" class="settings-container">
-
+            <label for="location_llm">LLM Service:</label>
+            <select id="location_llm" v-model="LLMService" required>
+              <option value="ollama">Local Ollama</option>
+              <option value="openai">OpenAI API</option>
+            </select>
+          </div>
+          <div v-if="LLMService === 'openai'" class="settings-container">
             <label for="apiUrl">LLM API URL:</label>
-            <input type="text" id="apiUrl" v-model="apiUrl" placeholder="API URL"  required/>
-            
-            
-            <label for="apiKey">LLM API KEY:</label> 
-            <input type="text" id="apiKey" v-model="apiKey" placeholder="API Key" required/>
+            <input type="text" id="apiUrl" v-model="apiUrl" placeholder="API URL" required />
+
+            <label for="apiKey">LLM API KEY:</label>
+            <input type="text" id="apiKey" v-model="apiKey" placeholder="API Key" required />
             <label for="llmmodel">OpenAi Model:</label>
-            <select id="llmmodel"  v-model="llmModel" >
+            <select id="llmmodel" v-model="llmModel">
               <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
               <option value="gpt-4">gpt-4</option>
             </select>
-
-        
-
-    </div>
-      </div>
-      <div class="button-container">
-        <button id="cancelButton" class="button-cancel" @click="onClickCancelSettings">Cancel</button>
-        <button id="saveButton" type="submit" class="button-save" >Save Settings</button>
-      </div>
+          </div>
+        </div>
+        <div class="button-container">
+          <button id="cancelButton" class="button-cancel" @click="onClickCancelSettings">
+            Cancel
+          </button>
+          <button id="saveButton" type="submit" class="button-save">Save Settings</button>
+        </div>
       </form>
       <div v-if="showModal">
-      <Modal />
+        <Modal />
       </div>
     </div>
-
   </div>
 </template>
 <script setup>
-import {  computed } from 'vue';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
 import { z } from 'zod';
 import Modal from '../../components/Modal.vue';
-import { ref } from 'vue'
-const showModal = ref(false)
+import { ref } from 'vue';
+const showModal = ref(false);
 
 function startModal() {
   showModal.value = true;
@@ -67,38 +60,35 @@ function startModal() {
 const store = useStore();
 
 const schema = z.object({
-  locale:  z.string(),
+  locale: z.string(),
   apiUrl: z.string().refine((value) => value === '' || /^(https?:\/\/)/.test(value), {
-    message: "Invalid URL",
+    message: 'Invalid URL',
   }),
   apiKey: z.string().nullable(),
   llmModel: z.string().nullable(),
-
 });
 
 const locale = computed({
-  get: () => store.getters.getLocale, 
+  get: () => store.getters.getLocale,
   set: (value) => store.commit('SETLOCALE', value),
 });
 const apiKey = computed({
-  get: () => store.getters.getApiKey, 
+  get: () => store.getters.getApiKey,
   set: (value) => store.commit('SETAPIKEY', value),
 });
 const LLMService = computed({
-  get: () => store.getters.getLLMService, 
+  get: () => store.getters.getLLMService,
   set: (value) => store.commit('SETLLMSERVICE', value),
 });
 const apiUrl = computed({
-  get: () => store.getters.getLlmUrl, 
+  get: () => store.getters.getLlmUrl,
   set: (value) => store.commit('SETLLMURL', value),
 });
 
 const llmModel = computed({
-  get: () => store.getters.getLlmModel, 
+  get: () => store.getters.getLlmModel,
   set: (value) => store.commit('SETLLMMODEL', value),
 });
-
-
 
 const onClickCancelSettings = () => {
   window.close();
@@ -111,13 +101,12 @@ const onSubmit = () => {
     apiKey: apiKey.value,
     llmModel: llmModel.value,
   };
-  
+
   try {
     schema.parse(data);
-
   } catch (error) {
-    console.error("Validation error:", error.errors);
-    return; 
+    console.error('Validation error:', error.errors);
+    return;
   }
 
   onClickSave();
@@ -126,20 +115,16 @@ const onSubmit = () => {
 const onClickSave = () => {
   chrome.storage.local.set({ qualweb_settings: store.state }, () => {
     console.log('Settings saved');
-      startModal();
+    startModal();
   });
   store.commit('SETFIRSTRUN', false);
-
 };
 </script>
-
-
-
 
 <style scoped>
 .settings {
   margin-top: 50px;
-  margin-bottom: 100px ;
+  margin-bottom: 100px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -174,7 +159,7 @@ select {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-input{
+input {
   font-family: Arial, sans-serif;
   width: auto;
   padding: 10px;
@@ -195,7 +180,6 @@ input{
   gap: 10px;
   width: 120%;
   max-width: 250px;
-
 }
 .button-container {
   display: flex;

@@ -8,19 +8,17 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters } from 'vuex';
 export default {
-  name: "Loading",
-  props: ["act", "wcag", "cui", "css"],
+  name: 'Loading',
+  props: ['act', 'wcag', 'cui', 'css'],
   methods: {
-    ...mapActions([
-
-    ]),
-    ...mapGetters(["getEvaluated", "getFirstRule", "getResultFilter"]),
+    ...mapActions([]),
+    ...mapGetters(['getEvaluated', 'getFirstRule', 'getResultFilter']),
   },
   data() {
     return {
-      state: "Starting evaluation",
+      state: 'Starting evaluation',
     };
   },
   async mounted() {
@@ -36,31 +34,31 @@ export default {
       chatbotSummary;
     await startEvaluation();
     if (modules.act) {
-      this.state = "Evaluating ACT module";
+      this.state = 'Evaluating ACT module';
       [actResult, chatbotActResult] = await evaluateACT();
       this.setACT(actResult);
       chatbotActResult && this.setChatbotACT(chatbotActResult);
     }
     if (modules.wcag) {
-      this.state = "Evaluating WCAG module";
+      this.state = 'Evaluating WCAG module';
       [wcagResult, chatbotWcagResult] = await evaluateWCAG();
       this.setWCAG(wcagResult);
       chatbotWcagResult && this.setChatbotWCAG(chatbotWcagResult);
     }
     if (modules.cui) {
-      this.state = "Evaluating CUI module";
+      this.state = 'Evaluating CUI module';
       [cuiResult, chatbotCuiResult] = await evaluateCUI();
       this.setCUI(cuiResult);
       chatbotCuiResult && this.setChatbotCUI(chatbotCuiResult);
     }
-    this.state = "Ending evaluation";
+    this.state = 'Ending evaluation';
     [summary, chatbotSummary] = await endingEvaluation();
     this.setSummary(summary);
     chatbotSummary && this.setChatbotSummary(chatbotSummary);
     chatbotSummary && this.setEvaluateChatbot(true);
     this.setStartingFilter(modules);
     this.setCurrentRule(this.getFirstRule());
-    this.$router.push("/evaluation");
+    this.$router.push('/evaluation');
   },
 };
 </script>

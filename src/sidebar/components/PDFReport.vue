@@ -1,48 +1,45 @@
 <template>
   <div>
-    <button  @click="generateReport">Download PDF</button>
+    <button @click="generateReport">Download PDF</button>
 
     <iframe
-     :id="'pdfFrame'"
+      :id="'pdfFrame'"
       ref="pdfFrame"
       hidden
-      style="display: none;"
+      style="display: none"
       sandbox="allow-same-origin allow-scripts"
     ></iframe>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useStore } from 'vuex'
-import html2pdf from 'html2pdf.js'
-import { onMounted } from 'vue'
+import { ref, computed } from 'vue';
+import { useStore } from 'vuex';
+import html2pdf from 'html2pdf.js';
+import { onMounted } from 'vue';
 // Referência ao iframe
-const pdfFrame = ref(null)
-const store = useStore()
+const pdfFrame = ref(null);
+const store = useStore();
 
-const rules = computed(() => store.getters.getCurrentFilteredRules)
-const chatbotSummary = computed(() => store.getters.getChatbotSummary)
-const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot)
-const currentUrl = ref('')
+const rules = computed(() => store.getters.getCurrentFilteredRules);
+const chatbotSummary = computed(() => store.getters.getChatbotSummary);
+const evaluateChatbot = computed(() => store.getters.getEvaluateChatbot);
+const currentUrl = ref('');
 
 const currentSummary = computed(() => {
-  return evaluateChatbot.value ? chatbotSummary.value : null
-})
-
-
-
+  return evaluateChatbot.value ? chatbotSummary.value : null;
+});
 
 onMounted(() => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0]) {
-      currentUrl.value = tabs[0].url
+      currentUrl.value = tabs[0].url;
     }
-  })
-})
+  });
+});
 // Função para gerar o HTML completo do relatório
 function getHtmlContent() {
-  const today = new Date().toLocaleDateString()
+  const today = new Date().toLocaleDateString();
 
   return `
     <!DOCTYPE html>
@@ -79,7 +76,9 @@ function getHtmlContent() {
 
         </table>
         <br/><br/>
-            ${rules.value.map(rule => `
+            ${rules.value
+              .map(
+                (rule) => `
 
               <table class="table">
         
@@ -119,15 +118,17 @@ function getHtmlContent() {
         <br/>
         <br/>
         
-            `).join('')}
+            `,
+              )
+              .join('')}
       
     
       </body>
     </html>
-  `
+  `;
 }
-function generateHTMLHeadAndStyles(){
-return `<head>
+function generateHTMLHeadAndStyles() {
+  return `<head>
         <meta charset='UTF-8'>
  
         <style>
@@ -207,31 +208,30 @@ tbody tr:nth-child(even) {
 }
 // Geração do PDF
 async function generateReport() {
-  const frame = document.getElementById('pdfFrame')
-  const html = getHtmlContent()
-  const today = new Date().toLocaleString()
-  frame.srcdoc  = html;
-  
+  const frame = document.getElementById('pdfFrame');
+  const html = getHtmlContent();
+  const today = new Date().toLocaleString();
+  frame.srcdoc = html;
 
   frame.onload = () => {
-   html2pdf()
-  .set({
-    html2canvas: {
-      scale: 1,
-      logging: false,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#ffffff',
-      ignoreElements: el => {
-        // ignora scripts ou elementos fora do contexto do relatório
-        return el.tagName === 'SCRIPT'
-      }
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-  })
-  .from(frame.contentDocument.documentElement)
-  .save(`accessibility_report_${today}.pdf`)
-  }
+    html2pdf()
+      .set({
+        html2canvas: {
+          scale: 1,
+          logging: false,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: '#ffffff',
+          ignoreElements: (el) => {
+            // ignora scripts ou elementos fora do contexto do relatório
+            return el.tagName === 'SCRIPT';
+          },
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      })
+      .from(frame.contentDocument.documentElement)
+      .save(`accessibility_report_${today}.pdf`);
+  };
 }
 </script>
 

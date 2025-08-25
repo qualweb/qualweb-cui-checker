@@ -1,13 +1,11 @@
-import { PromptTemplate } from "@langchain/core/prompts";
+import { PromptTemplate } from '@langchain/core/prompts';
 
+/**Prompt for Detection of elements in HTML
+ *
+ * {formatInstructions} is the format of the output
+ */
 
-  /**Prompt for Detection of elements in HTML
-   * 
-   * {formatInstructions} is the format of the output
-   */
-
-
-  export const detectionCorrection = PromptTemplate.fromTemplate(`
+export const detectionCorrection = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selectors:
     
     1. The main parent window that contains the chatbot interface.
@@ -45,9 +43,8 @@ import { PromptTemplate } from "@langchain/core/prompts";
     {input}
     
       `);
-      
-  
-  export const detectionPrompt = PromptTemplate.fromTemplate(`
+
+export const detectionPrompt = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selectors:
     
     1. The main parent window that contains the chatbot interface.
@@ -82,8 +79,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
     
       `);
 
-  
-  export const detectionPromptTestB = PromptTemplate.fromTemplate(`
+export const detectionPromptTestB = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selectors:
     
     1. The main parent window that contains the chatbot interface.
@@ -118,7 +114,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
     
       `);
 
-    export const detectionPromptReducedtest= PromptTemplate.fromTemplate(`
+export const detectionPromptReducedtest = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selector:
     1. The selector for elements that represent messages from the chatbot, excluding reliance on \`textContent\`.
     2. The microphone button (if present) that activates microphone input for the prompt and permits dictate.
@@ -144,7 +140,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
     {input}
     
       `);
-    export const detectionPromptReduced= PromptTemplate.fromTemplate(`
+export const detectionPromptReduced = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selector:
     1. The selector for elements that represent messages from the chatbot, excluding reliance on \`textContent\`.
     2. The microphone button (if present) that activates microphone input for the prompt.
@@ -170,7 +166,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
     {input}
     
       `);
-    export const detectionPromptReducedBackup= PromptTemplate.fromTemplate(`
+export const detectionPromptReducedBackup = PromptTemplate.fromTemplate(`
     Task: Analyze the given HTML structure and identify the following elements using RELATIVE CSS selector:
     1. The selector for elements that represent messages from the chatbot, excluding reliance on \`textContent\`.
     2. The microphone button (if present) that activates microphone input for the prompt.
@@ -201,8 +197,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
     
       `);
 
-
-          export const detectionPromptReducedbackup= PromptTemplate.fromTemplate(`
+export const detectionPromptReducedbackup = PromptTemplate.fromTemplate(`
 Task:
 From a given HTML that represents the main section of messages between a user and a chatbot, find:
 
@@ -226,7 +221,7 @@ If an element is not found, return "null".
     {input}
     
       `);
-    export const detectionPromptReducednew= PromptTemplate.fromTemplate(`
+export const detectionPromptReducednew = PromptTemplate.fromTemplate(`
 Task:
 From a given HTML that represents the main section of messages between a user and a chatbot, find:
 

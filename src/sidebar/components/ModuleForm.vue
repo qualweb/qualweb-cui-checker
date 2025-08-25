@@ -21,48 +21,43 @@
           :value="htmlValue"
         ></Checkbox>
       </div>
-      <input
-        :disabled="isDisabled"
-        type="submit"
-        value="Evaluate"
-        class="submit button"
-      />
+      <input :disabled="isDisabled" type="submit" value="Evaluate" class="submit button" />
     </form>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import Checkbox from "./Checkbox.vue";
+import { mapActions, mapGetters } from 'vuex';
+import Checkbox from './Checkbox.vue';
 
 export default {
-  name: "ModuleForm",
+  name: 'ModuleForm',
   data() {
     return {
-      actIdValue: "act",
-      actLabel: "ACT Rules",
+      actIdValue: 'act',
+      actLabel: 'ACT Rules',
       actValue: false,
-      wcagIdValue: "wcag",
-      wcagLabel: "WCAG 2.1 Techniques",
+      wcagIdValue: 'wcag',
+      wcagLabel: 'WCAG 2.1 Techniques',
       wcagValue: false,
-      cuiIdValue: "cui",
-      cuiLabel: "CUI Rules",
+      cuiIdValue: 'cui',
+      cuiLabel: 'CUI Rules',
       cuiValue: false,
-      bgColor: "white",
-      checkColor: "black",
+      bgColor: 'white',
+      checkColor: 'black',
     };
   },
   computed: {
-    ...mapGetters({ evaluated: "getEvaluated" }),
+    ...mapGetters({ evaluated: 'getEvaluated' }),
     isDisabled() {
       return !(this.evaluated && (this.evaluated.act || this.evaluated.wcag || this.evaluated.cui));
     },
   },
   methods: {
-    ...mapActions(["setEvaluated"]),
+    ...mapActions(['setEvaluated']),
     async sendFormData(e) {
       e.preventDefault();
-      this.$router.push("/loading");
+      this.$router.push('/loading');
     },
     async updateEvaluated(idValue, value) {
       await this.setEvaluated({
@@ -99,7 +94,7 @@ export default {
   text-decoration: none;
   border-radius: 0.2rem;
   color: white;
-  font-family: "Oswald", sans-serif;
+  font-family: 'Oswald', sans-serif;
   text-transform: uppercase;
 }
 :disabled {

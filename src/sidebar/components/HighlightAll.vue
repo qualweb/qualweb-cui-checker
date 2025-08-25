@@ -2,26 +2,24 @@
   <button class="btn" aria-label="Highlight active element">
     <i
       @click="changeHighlightAll()"
-      :class="[
-        highlightActive ? 'material-icons-round' : 'material-icons-outlined',
-      ]"
+      :class="[highlightActive ? 'material-icons-round' : 'material-icons-outlined']"
       >wb_iridescent</i
     >
   </button>
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters, mapActions } from 'vuex';
 export default {
-  name: "HighlightAll",
+  name: 'HighlightAll',
   data() {
     return {};
   },
   computed: mapGetters({
-    highlightActive: "getHighlightActive",
+    highlightActive: 'getHighlightActive',
   }),
   methods: {
-    ...mapActions(["setHighlightActive"]),
+    ...mapActions(['setHighlightActive']),
     changeHighlightAll() {
       this.setHighlightActive(!this.highlightActive);
     },

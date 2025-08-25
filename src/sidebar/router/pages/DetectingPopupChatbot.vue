@@ -3,7 +3,6 @@
     <div v-if="getDetectingChatbot">
       <div class="loader"></div>
       <p class="state">{{ state }}</p>
-
     </div>
     <div v-else>
       <p class="state">{{ state }}</p>
@@ -21,41 +20,46 @@
     <button
       id="cancelButton"
       class="button-cancel"
-      @click="() => {
-        this.$router.go(-1);
-      }">Cancel</button>
+      @click="
+        () => {
+          this.$router.go(-1);
+        }
+      "
+    >
+      Cancel
+    </button>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import ActionPrompt from "../../components/ActionPrompt.vue";
+import { mapActions, mapGetters } from 'vuex';
+import ActionPrompt from '../../components/ActionPrompt.vue';
 
 export default {
-  name: "detectingPopupChatbot",
+  name: 'detectingPopupChatbot',
   props: [],
   components: {
     ActionPrompt,
   },
   methods: {
-    ...mapActions(["setDetectingChatbot","setSelectors"]),
+    ...mapActions(['setDetectingChatbot', 'setSelectors']),
     cancel() {
       this.$router.go(-1);
     },
     requestCorrectionElementLLM(functionCode) {
-      this.state = "Requesting Correction";
+      this.state = 'Requesting Correction';
       this.setDetectingChatbot(true);
       startCorrectionChatbot().then((result) => {
         if (Object.keys(result).length > 0) {
-          this.state = "Chatbot Detected";
+          this.state = 'Chatbot Detected';
 
           this.setDetectingChatbot(false);
           startVerificationElement(this.workflow[this.currentStep].nameElement);
         } else {
-          this.state = "Chatbot Not Detected";
+          this.state = 'Chatbot Not Detected';
           this.setDetectingChatbot(false);
           setTimeout(() => {
-            this.$router.push("/failed-detection");
+            this.$router.push('/failed-detection');
           }, 2000);
         }
       });
@@ -68,64 +72,61 @@ export default {
           startVerificationElement(this.workflow[this.currentStep].nameElement);
         }, 800);
       } else {
-  
         this.setSelectors(this.resultLLM);
         endVerificationElement(this.workflow[this.currentStep].nameElement);
-        this.$router.push("/ready");
+        this.$router.push('/ready');
       }
     },
   },
   computed: {
-    ...mapGetters(["getDetectingChatbot"]),
+    ...mapGetters(['getDetectingChatbot']),
   },
   data() {
     return {
-      state: "Identifying Chatbot",
+      state: 'Identifying Chatbot',
       currentStep: 0,
       resultLLM: {},
       workflow: [
         {
-          nameElement: "windowSelector",
-          question: "Is main window of chatbot selected correctly?",
-        },  
-        {
-          nameElement: "messagesSelector",
-          question:
-            "Are individual messages on chatbot app selected correctly?",
+          nameElement: 'windowSelector',
+          question: 'Is main window of chatbot selected correctly?',
         },
         {
-          nameElement: "inputSelector",
-          question: "Is selected input of chatbot correct?",
+          nameElement: 'messagesSelector',
+          question: 'Are individual messages on chatbot app selected correctly?',
         },
         {
-          nameElement: "microphoneSelector",
-          question: "Is microphone window selected correctly?",
+          nameElement: 'inputSelector',
+          question: 'Is selected input of chatbot correct?',
+        },
+        {
+          nameElement: 'microphoneSelector',
+          question: 'Is microphone window selected correctly?',
         },
       ],
     };
   },
   async mounted() {
     this.setDetectingChatbot(true);
-    this.state = "Detecting Chatbot";
+    this.state = 'Detecting Chatbot';
     try {
-    const detected = await startDetectingChatbot();
-    this.state = "Identifying Selectors";
+      const detected = await startDetectingChatbot();
+      this.state = 'Identifying Selectors';
     } catch (error) {
-      console.error("Error during detection:", error);
+      console.error('Error during detection:', error);
     }
     startIdentifySelectorsChatbot().then((result) => {
-      
       if (Object.keys(result).length > 0) {
         this.resultLLM = result.chatbot;
-        this.state = "Chatbot Detected";
+        this.state = 'Chatbot Detected';
 
         this.setDetectingChatbot(false);
         startVerificationElement(this.workflow[this.currentStep].nameElement);
       } else {
-        this.state = "Chatbot Not Detected";
+        this.state = 'Chatbot Not Detected';
         this.setDetectingChatbot(false);
         setTimeout(() => {
-          this.$router.push("/failed-detection");
+          this.$router.push('/failed-detection');
         }, 2000);
       }
     });

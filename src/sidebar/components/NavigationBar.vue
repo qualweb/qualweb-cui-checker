@@ -1,13 +1,7 @@
 <template>
   <div class="container">
-    <button
-      :disabled="highlightActive"
-      class="highlight btn"
-      v-on:click="highligthElement"
-    >
-      <span v-if="highligthElementAvailable" class="flexElement"
-        >Highlight Element</span
-      >
+    <button :disabled="highlightActive" class="highlight btn" v-on:click="highligthElement">
+      <span v-if="highligthElementAvailable" class="flexElement">Highlight Element</span>
       <span v-else class="flexElement">Stop Highlight</span>
       <i class="material-icons-round flexElement">wb_iridescent</i>
     </button>
@@ -54,10 +48,10 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters } from 'vuex';
 export default {
-  name: "NavigationBar",
-  props: ["size"],
+  name: 'NavigationBar',
+  props: ['size'],
   data() {
     return {
       index: 1,
@@ -65,7 +59,7 @@ export default {
     };
   },
   computed: mapGetters({
-    highlightActive: "getHighlightActive",
+    highlightActive: 'getHighlightActive',
   }),
   watch: {
     size: function (newResults, oldQuestion) {
@@ -89,7 +83,7 @@ export default {
       if (this.index - 1 > 0) {
         this.disableHighlight();
         this.index--;
-        this.$emit("change", this.index);
+        this.$emit('change', this.index);
       }
       if (this.highlightActive) {
         this.highligthElement();
@@ -99,7 +93,7 @@ export default {
       if (this.index < this.size) {
         this.disableHighlight();
         this.index++;
-        this.$emit("change", this.index);
+        this.$emit('change', this.index);
       }
       if (this.highlightActive) {
         this.highligthElement();
@@ -109,7 +103,7 @@ export default {
       if (this.index !== this.size) {
         this.disableHighlight();
         this.index = this.size;
-        this.$emit("change", this.index);
+        this.$emit('change', this.index);
       }
       if (this.highlightActive) {
         this.highligthElement();
@@ -118,7 +112,7 @@ export default {
     first() {
       if (this.index !== 1) {
         this.clean();
-        this.$emit("change", this.index);
+        this.$emit('change', this.index);
       }
       if (this.highlightActive) {
         this.highligthElement();
@@ -126,16 +120,16 @@ export default {
     },
     highligthElement() {
       if (this.highligthElementAvailable) {
-        this.$emit("highlight", this.index);
+        this.$emit('highlight', this.index);
       } else {
-        this.$emit("offHighlight", this.index);
+        this.$emit('offHighlight', this.index);
       }
 
       this.highligthElementAvailable = !this.highligthElementAvailable;
     },
     disableHighlight() {
       if (this.highligthElementAvailable === false) {
-        this.$emit("offHighlight", this.index);
+        this.$emit('offHighlight', this.index);
         this.highligthElementAvailable = true;
       }
     },

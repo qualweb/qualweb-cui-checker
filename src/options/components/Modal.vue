@@ -13,18 +13,12 @@
   </div>
 </template>
 <script setup>
-
-
 function closeModal() {
   window.close();
 }
 </script>
 
-
-
-
 <style scoped>
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -45,9 +39,8 @@ function closeModal() {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-
 }
-.position-icon{
+.position-icon {
   position: absolute;
   top: 12px;
   right: 20px;
@@ -55,11 +48,7 @@ function closeModal() {
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;

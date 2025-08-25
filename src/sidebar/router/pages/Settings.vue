@@ -3,32 +3,34 @@
     <div class="container">
       <h1 class="title">Settings</h1>
       <div class="settings">
-      <div class="settings-container">
-        <label for="locale">Language:</label>
-        <select id="locale"  v-model="settings.locale">
-          <option value="en_US">English (US)</option>
-          <option value="es_ES">Spanish (Spain)</option>
-          <option value="fr_FR">French (France)</option>
-          <option value="de_DE">German (Germany)</option>
-          <option value="it_IT">Italian (Italy)</option>
-          <option value="pt_PT">Portuguese (Portugal)</option>
-          <option value="zh_CN">Chinese (Simplified)</option>
-          <option value="ja_JP">Japanese</option>
-          <option value="ko_KR">Korean</option>
-          <option value="ru_RU">Russian</option>
-          <option value="ar_EG">Arabic (Egypt)</option>
-          <option value="hi_IN">Hindi (India)</option>
-          <option value="nl_NL">Dutch (Netherlands)</option>
-          <option value="sv_SE">Swedish (Sweden)</option>
-          <option value="tr_TR">Turkish (Turkey)</option>
-        </select>
+        <div class="settings-container">
+          <label for="locale">Language:</label>
+          <select id="locale" v-model="settings.locale">
+            <option value="en_US">English (US)</option>
+            <option value="es_ES">Spanish (Spain)</option>
+            <option value="fr_FR">French (France)</option>
+            <option value="de_DE">German (Germany)</option>
+            <option value="it_IT">Italian (Italy)</option>
+            <option value="pt_PT">Portuguese (Portugal)</option>
+            <option value="zh_CN">Chinese (Simplified)</option>
+            <option value="ja_JP">Japanese</option>
+            <option value="ko_KR">Korean</option>
+            <option value="ru_RU">Russian</option>
+            <option value="ar_EG">Arabic (Egypt)</option>
+            <option value="hi_IN">Hindi (India)</option>
+            <option value="nl_NL">Dutch (Netherlands)</option>
+            <option value="sv_SE">Swedish (Sweden)</option>
+            <option value="tr_TR">Turkish (Turkey)</option>
+          </select>
+        </div>
       </div>
-    </div>
       <div class="button-container">
-        <button id="cancelButton" class="button-cancel" @click="onClickCancelSettings">Cancel</button>
+        <button id="cancelButton" class="button-cancel" @click="onClickCancelSettings">
+          Cancel
+        </button>
         <button id="saveButton" class="button-save" @click="onClickSave">Save Settings</button>
       </div>
-    </div>  
+    </div>
   </div>
 </template>
 <script setup>
@@ -59,13 +61,10 @@ const onClickSave = () => {
 };
 </script>
 
-
-
-
 <style scoped>
 .settings {
   margin-top: 50px;
-  margin-bottom: 100px ;
+  margin-bottom: 100px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -109,7 +108,6 @@ select {
   gap: 10px;
   width: 100%;
   max-width: 250px;
-
 }
 .button-container {
   display: flex;

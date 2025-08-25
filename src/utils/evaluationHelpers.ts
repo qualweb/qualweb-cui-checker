@@ -1,4 +1,4 @@
-import { Summary, Rule, Report, Result, ElementTest } from "./types";
+import { Summary, Rule, Report, Result, ElementTest } from './types';
 
 function addValuesToSummary(summary: Summary, report: Report) {
   summary.passed += report.metadata.passed;
@@ -13,9 +13,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
 
   for (const [ruleCode, rule] of Object.entries(result.assertions)) {
     const targetElement = rule.metadata.target.element;
-    const targetElements = Array.isArray(targetElement)
-      ? targetElement
-      : [targetElement];
+    const targetElements = Array.isArray(targetElement) ? targetElement : [targetElement];
 
     const isRelevant = targetElements.some((element) => {
       // Check if element is a valid selector
@@ -25,7 +23,6 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         }
       } catch (e) {
         console.warn(`Invalid selector: ${element}`);
-        
       }
       return false;
     });

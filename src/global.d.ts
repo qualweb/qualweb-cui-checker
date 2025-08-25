@@ -3,13 +3,13 @@ declare global {
     constructor(
       moduleOptions: ModuleOptions,
       translationOptions: { translate: any; fallback: any },
-      filePath?: string
+      filePath?: string,
     );
     test(data: TestingData): any;
     executeTests(): Promise<any>;
     getReport(): CUIChecksReport;
   }
-  
+
   interface QWCUI_Selectors {
     QW_CC_WINDOW: string;
     QW_CC_DIALOG: string;
@@ -24,7 +24,7 @@ declare global {
     test(data: TestingData): any;
     testSpecial(): any;
     getReport(): ACTReport;
-  } 
+  }
 
   class WCAGTechniquesRunner {
     constructor(locale: any, options?: any);

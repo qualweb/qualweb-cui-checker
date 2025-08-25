@@ -14,16 +14,14 @@
 </template>
 
 <script>
-
 // <FilterByResult :items="['All outcomes','Passed','Failed','Warning','Inapplicable']" ></FilterByResult>
-import ColapsibleFilter from "../../components/ColapsibleFilter.vue";
-import Summary from "../../components/Summary.vue";
-import ListOfRules from "../../components/ListOfRules.vue";
-import FilterByResult from "../../components/FilterByResult.vue";
-import PDFReport from "../../components/PDFReport.vue";
-import CSVReport from "../../components/CSVReport.vue";
-import { mapActions } from "vuex";
-
+import ColapsibleFilter from '../../components/ColapsibleFilter.vue';
+import Summary from '../../components/Summary.vue';
+import ListOfRules from '../../components/ListOfRules.vue';
+import FilterByResult from '../../components/FilterByResult.vue';
+import PDFReport from '../../components/PDFReport.vue';
+import CSVReport from '../../components/CSVReport.vue';
+import { mapActions } from 'vuex';
 
 export default {
   components: {
@@ -35,17 +33,17 @@ export default {
     FilterByResult,
   },
   methods: {
-    ...mapActions(["updateCurrentRule","reset"]),
+    ...mapActions(['updateCurrentRule', 'reset']),
     focusListContent(clickedElement) {
       // Update the currentRule in the Vuex store
       this.updateCurrentRule(clickedElement);
 
       // Change the route to 'rule-content'
-      this.$router.push({ name: "rule-content" });
+      this.$router.push({ name: 'rule-content' });
     },
     returnToMain() {
       this.reset();
-      this.$router.push({ path: "/ready" });
+      this.$router.push({ path: '/ready' });
     },
   },
 };

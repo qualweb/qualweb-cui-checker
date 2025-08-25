@@ -1,4 +1,4 @@
-import * as types from "./mutation-types";
+import * as types from './mutation-types';
 
 export default {
   [types.SETACT](state, payload) {
@@ -39,8 +39,8 @@ export default {
     let currentRule = state.currentRule;
     if (!!currentRule) {
       let currentRuleData = state[currentRule.module][currentRule.code];
-      let filter = state["filter"];
-      let outcome = currentRuleData["metadata"]["outcome"];
+      let filter = state['filter'];
+      let outcome = currentRuleData['metadata']['outcome'];
       let module = currentRule.module;
       if (!(filter[outcome] && filter[module])) {
         state.currentRule = null;

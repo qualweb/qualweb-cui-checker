@@ -3,22 +3,20 @@ export interface ChatResponse {
   response: string[];
 }
 
-export  interface QWCUI_Settings {
-    [key: string]: string;
-  }
+export interface QWCUI_Settings {
+  [key: string]: string;
+}
 
-export  interface LLM_Settings {
-    LLMService: string;
-    model: string;
-    apiURL: string| null;
-    apiKey: string| null; 
-  }
-
+export interface LLM_Settings {
+  LLMService: string;
+  model: string;
+  apiURL: string | null;
+  apiKey: string | null;
+}
 
 export interface ResponsesSelectors {
   [rule: string]: string[];
 }
-
 
 // @Deprecated
 export interface LLMResponse {
@@ -79,7 +77,7 @@ interface RuleMetadata {
   target: {
     element: string | string[];
   };
-  "success-criteria": SuccessCriteria[];
+  'success-criteria': SuccessCriteria[];
   related: string[];
   url: string;
   passed: number;
@@ -99,11 +97,11 @@ interface Rule {
   results: Result[];
 }
 
-interface Result{
+interface Result {
   attributes: string[];
   description: string;
   mapping: string;
-  elements:   [];
+  elements: [];
   resultCode: string;
   veridict: string;
 }
@@ -126,4 +124,4 @@ interface Report {
   };
 }
 
-export { Summary, Rule, RuleMetadata, Report , Result ,ElementTest};
+export { Summary, Rule, RuleMetadata, Report, Result, ElementTest };

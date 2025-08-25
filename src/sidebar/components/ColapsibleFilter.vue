@@ -150,7 +150,6 @@ const updateFilter = async (event) => {
 };
 
 const updateEvalType = async (event) => {
-
   await store.dispatch('setEvaluateChatbot', event.checked);
 };
 </script>
@@ -161,7 +160,7 @@ const updateEvalType = async (event) => {
 }
 p {
   font-size: 1.3rem;
-  font-family: "Oswald", sans-serif;
+  font-family: 'Oswald', sans-serif;
   text-transform: uppercase;
   text-align: center;
   margin-top: 0rem;
@@ -189,7 +188,7 @@ p {
   text-align: left;
   outline: none;
   font-size: 1.3rem;
-  font-family: "Oswald", sans-serif;
+  font-family: 'Oswald', sans-serif;
   text-transform: uppercase;
   border: 0.01em solid #888585;
   border-radius: 0.2rem;
@@ -222,12 +221,12 @@ p {
 }
 
 .collapsiblePlus:after {
-  content: "\02795"; /* Unicode character for "plus" sign (+) */
+  content: '\02795'; /* Unicode character for "plus" sign (+) */
   float: right;
 }
 
 .active:after {
-  content: "\2796"; /* Unicode character for "minus" sign (-) */
+  content: '\2796'; /* Unicode character for "minus" sign (-) */
   float: right;
 }
 </style>

@@ -14,4 +14,3 @@ export class LocalStorageSaver {
     return data ? JSON.parse(data) : null;
   }
 }
-

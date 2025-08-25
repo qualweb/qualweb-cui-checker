@@ -2,54 +2,44 @@
   <div class="bigContainer">
     <div class="container">
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon">
-      settings
+        settings
       </span>
       <h1 class="title">Chatbot Evaluation</h1>
-      
+
       <div class="button-container">
         <button id="chatButton" @click="interactWithMessages">Send and Receive Messages</button>
-        <button id="requestLLMButton" @click="onRequestLLMClick">
-          Detect Chatbot
-        </button>
+        <button id="requestLLMButton" @click="onRequestLLMClick">Detect Chatbot</button>
 
-        <button @click="startInputVoice">
-          Input Voice and Listen for Response
-        </button>
-        <button @click="LLMInteraction">
-          Start LLM Interaction
-        </button>
+        <button @click="startInputVoice">Input Voice and Listen for Response</button>
+        <button @click="LLMInteraction">Start LLM Interaction</button>
       </div>
       <hr />
       <div class="evaluation-container">
         <Checkbox
           idValue="actRulesCheckbox"
           :label="'ACT Rules'"
-          v-model="actValue" 
-            @toggle:check="updateEvaluated('act', $event)" 
+          v-model="actValue"
+          @toggle:check="updateEvaluated('act', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="wcagTechniquesCheckbox"
           :label="'WCAG Techniques'"
-          v-model="wcagValue"  
-          @toggle:check="updateEvaluated('wcag', $event)" 
+          v-model="wcagValue"
+          @toggle:check="updateEvaluated('wcag', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="bestPracticesCheckbox"
           :label="'CUI Rules'"
-          v-model="cuiValue" 
-          @toggle:check="updateEvaluated('cui', $event)" 
+          v-model="cuiValue"
+          @toggle:check="updateEvaluated('cui', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
-        <button
-          id="evaluateButton"
-          @click="onEvaluateClick"
-          :disabled="isDisabled"
-        >
+        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
           Evaluate Chatbot
         </button>
       </div>
@@ -61,7 +51,6 @@ import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
-
 
 const store = useStore();
 const router = useRouter();
@@ -77,7 +66,6 @@ const isDisabled = computed(() => {
 });
 
 const setEvaluated = async (idValue, value) => {
-  
   await store.dispatch('setEvaluated', {
     module: idValue,
     value: value,
@@ -109,7 +97,6 @@ const onRequestLLMClick = () => {
 };
 
 const updateEvaluated = async (idValue, event) => {
-
   await setEvaluated(idValue, event.checked);
 };
 
@@ -123,8 +110,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
-.position-icon{
+.position-icon {
   position: absolute;
   top: 12px;
   right: 20px;
@@ -132,11 +118,7 @@ onMounted(() => {
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;

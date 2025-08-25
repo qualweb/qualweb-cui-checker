@@ -1,35 +1,33 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-    <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
-      settings
+      <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
+        settings
       </span>
- 
-        <h1 class="title">QUALWEB CUI CHECK</h1>
-        <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
-        <p class="initial-text">Selectors not in memory<br> please detect Chatbot</p>
-        <div class="button-container">
-          <button @click="onDetectPopupChatbot">Detect Popup Chatbot</button>
-          <button @click="onDetectPageChatbot">Detect Chatbot in Page</button>
-        </div>
 
-  
+      <h1 class="title">QUALWEB CUI CHECK</h1>
+      <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+      <p class="initial-text">
+        Selectors not in memory<br />
+        please detect Chatbot
+      </p>
+      <div class="button-container">
+        <button @click="onDetectPopupChatbot">Detect Popup Chatbot</button>
+        <button @click="onDetectPageChatbot">Detect Chatbot in Page</button>
+      </div>
     </div>
   </div>
 </template>
 <script setup>
-
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();
 
-
 const onSettingsClick = () => {
   chrome.runtime.openOptionsPage();
 };
-
 
 const onDetectPopupChatbot = () => {
   router.push('/detecting-popup-chatbot');
@@ -38,17 +36,13 @@ const onDetectPopupChatbot = () => {
 const onDetectPageChatbot = () => {
   router.push('/detecting-page-chatbot');
 };
-
-
-
-
 </script>
 
 <style scoped>
-.initial-text{
-    text-align: center;
-    font-weight: 900;
-    margin-bottom: 1rem;
+.initial-text {
+  text-align: center;
+  font-weight: 900;
+  margin-bottom: 1rem;
 }
 .logo {
   width: auto;
@@ -56,20 +50,15 @@ const onDetectPageChatbot = () => {
   margin-bottom: 20px;
 }
 
-.position-icon-settings{
+.position-icon-settings {
   position: absolute;
   top: 12px;
   right: 20px;
   cursor: pointer;
 }
 
-
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;

@@ -1,12 +1,7 @@
-import * as types from "./mutation-types";
+import * as types from './mutation-types';
 
 export const setReport = async function ({ commit }, modules) {
-  let report = await evaluate(
-    modules.act,
-    modules.wcag,
-    modules.css,
-    modules.cui
-  );
+  let report = await evaluate(modules.act, modules.wcag, modules.css, modules.cui);
 
   commit(types.SETACT, report.act);
   commit(types.SETWCAG, report.wcag);
@@ -91,17 +86,16 @@ export const reset = ({ commit }) => {
   commit(types.RESET);
 };
 
-
 export const loadSelectors = async function ({ commit }) {
-  let qualweb_selectors = await chrome.storage.local.get("qualweb-selectors");
+  let qualweb_selectors = await chrome.storage.local.get('qualweb-selectors');
   if (qualweb_selectors === undefined) {
     qualweb_selectors = {};
   }
   let url = await getUrl();
   const parsedURL = new window.URL(url);
   const domain = parsedURL.hostname;
-  console.log("domain", domain);
-  console.log("qualweb_selectors", qualweb_selectors);
+  console.log('domain', domain);
+  console.log('qualweb_selectors', qualweb_selectors);
   if (qualweb_selectors[domain] !== undefined) {
     commit(types.SETSELECTORS, qualweb_selectors[domain]);
   } else {
@@ -110,19 +104,18 @@ export const loadSelectors = async function ({ commit }) {
 };
 
 export const setSelectors = async function ({ commit }, payload) {
-  
-  const qualweb_selectors = await chrome.storage.local.get("qualweb-selectors");
+  const qualweb_selectors = await chrome.storage.local.get('qualweb-selectors');
   if (qualweb_selectors === undefined) {
     qualweb_selectors = {};
   }
   let url = await getUrl();
   const parsedURL = new window.URL(url);
   const domain = parsedURL.hostname;
-  console.log("domain", domain);
-  console.log("qualweb_selectors", qualweb_selectors);
+  console.log('domain', domain);
+  console.log('qualweb_selectors', qualweb_selectors);
   qualweb_selectors[domain] = payload;
   await chrome.storage.local.set({
-    "qualweb-selectors": qualweb_selectors,
+    'qualweb-selectors': qualweb_selectors,
   });
   commit(types.SETSELECTORS, payload);
   commit(types.SETURL, url);

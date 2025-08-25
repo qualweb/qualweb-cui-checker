@@ -5,19 +5,19 @@
 </template>
 
 <script>
-import { saveAs } from "file-saver";
-import { mapGetters } from "vuex";
+import { saveAs } from 'file-saver';
+import { mapGetters } from 'vuex';
 export default {
-  name: "Export",
+  name: 'Export',
   methods: {
-    ...mapGetters(["getAllData"]),
+    ...mapGetters(['getAllData']),
     exportFile() {
       let data = this.getAllData();
       let stringData = JSON.stringify(data, null, 2);
       let blob = new Blob([stringData], {
-        type: "application/json;charset=utf-8",
+        type: 'application/json;charset=utf-8',
       });
-      saveAs(blob, "evaluation.json");
+      saveAs(blob, 'evaluation.json');
     },
   },
 };

@@ -1,15 +1,13 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-        <h1 class="title">QUALWEB CUI CHECK INSTALLED SUCCESSFULLY!</h1>
-        <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
-        <p>Thank your for installing qualweb cui check extension.</p>
-        <p>To get started, please configure settings of app to start using it</p>
-        <div class="button-container">
-          <button @click="onClickConfigure">Configure</button>
-        </div>
-
-  
+      <h1 class="title">QUALWEB CUI CHECK INSTALLED SUCCESSFULLY!</h1>
+      <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+      <p>Thank your for installing qualweb cui check extension.</p>
+      <p>To get started, please configure settings of app to start using it</p>
+      <div class="button-container">
+        <button @click="onClickConfigure">Configure</button>
+      </div>
     </div>
   </div>
 </template>
@@ -17,8 +15,6 @@
 import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-
-
 
 const store = useStore();
 const router = useRouter();
@@ -30,23 +26,22 @@ onMounted(() => {
 const onClickConfigure = () => {
   store.commit('SETFIRSTRUN', false);
 };
-
 </script>
 
 <style scoped>
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  height: 100vh;
 }
 .logo {
   width: auto;
   height: 400px;
   margin-bottom: 20px;
 }
-.position-icon{
+.position-icon {
   position: absolute;
   top: 12px;
   right: 20px;
@@ -54,17 +49,13 @@ body {
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   display: flex;
   flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;

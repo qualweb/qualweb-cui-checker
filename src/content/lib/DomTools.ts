@@ -1,16 +1,17 @@
-export function getUniqueSelector(element:Element): string | null {
-if (!element) return null;
-  const path:string[] = [];
-  let el:Element|null = element;
+export function getUniqueSelector(element: Element): string | null {
+  if (!element) return null;
+  const path: string[] = [];
+  let el: Element | null = element;
   while (el && el.nodeType === Node.ELEMENT_NODE) {
-    let selector:string = el.nodeName.toLowerCase();
+    let selector: string = el.nodeName.toLowerCase();
 
     if (el.id) {
       selector += `#${el.id}`;
       path.unshift(selector);
       break;
     } else {
-      let sib:Element|null = el, nth = 1;
+      let sib: Element | null = el,
+        nth = 1;
       while ((sib = sib.previousElementSibling)) {
         if (sib.nodeName.toLowerCase() === selector) nth++;
       }
@@ -20,12 +21,12 @@ if (!element) return null;
     el = el.parentNode as Element | null;
   }
 
-  return path.join(" > ");
+  return path.join(' > ');
 }
 
-export function isInsideIframe(element:Element): boolean {
-  let currentWindow:Window|null = element.ownerDocument.defaultView;
-  
+export function isInsideIframe(element: Element): boolean {
+  let currentWindow: Window | null = element.ownerDocument.defaultView;
+
   while (currentWindow && currentWindow !== window.top) {
     if (currentWindow.frameElement && currentWindow.frameElement.tagName === 'IFRAME') {
       return true;
@@ -35,9 +36,13 @@ export function isInsideIframe(element:Element): boolean {
 
   return false;
 }
-export function findDeepestNodeWithoutSibling(root:Element, elemTarget:Element, sibling:Element): Element | null {
-  let path:Element[] = [];
-  let current:Element | null = elemTarget;
+export function findDeepestNodeWithoutSibling(
+  root: Element,
+  elemTarget: Element,
+  sibling: Element,
+): Element | null {
+  let path: Element[] = [];
+  let current: Element | null = elemTarget;
 
   // Construir caminho desde elemTarget até root
   while (current && root.contains(current)) {
@@ -57,10 +62,10 @@ export function findDeepestNodeWithoutSibling(root:Element, elemTarget:Element, 
   return null;
 }
 
-export function findLowestCommonAncestorDOM(elem1:Element, elem2:Element): Element | null {
+export function findLowestCommonAncestorDOM(elem1: Element, elem2: Element): Element | null {
   const ancestors = new Set();
 
-  let current:Element|null = elem1;
+  let current: Element | null = elem1;
   while (current) {
     ancestors.add(current);
     current = current.parentElement;
@@ -77,11 +82,11 @@ export function findLowestCommonAncestorDOM(elem1:Element, elem2:Element): Eleme
   return null;
 }
 
-function isVisible(el:Element|null): boolean {
+function isVisible(el: Element | null): boolean {
   return !!(el && (el as HTMLElement).offsetParent !== null);
 }
 
-export function getFirstElementVisibleFromArray(elements:Element[]): Element | null {
+export function getFirstElementVisibleFromArray(elements: Element[]): Element | null {
   for (const el of elements) {
     if (isVisible(el)) {
       return el;
@@ -98,28 +103,27 @@ export function getFirstElementVisibleFromArray(elements:Element[]): Element | n
 export function cleanHTML(htmlTree: HTMLElement): string {
   let regexRellevant: RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
 
-
   let irrelevantTags = [
-    "header",
-    "footer",
-    "img",
-    "svg",
-    "td",
-    "table",
-    "tr",
-    "td",
-    "script",
-    "style",
-    "link",
-    "noscript",
-    "iframe",
-    "object",
-    "embed",
+    'header',
+    'footer',
+    'img',
+    'svg',
+    'td',
+    'table',
+    'tr',
+    'td',
+    'script',
+    'style',
+    'link',
+    'noscript',
+    'iframe',
+    'object',
+    'embed',
   ];
   let clonedDomTree = htmlTree.cloneNode(true) as HTMLElement;
 
   // encurtar texto em <p> e <span> para 100 caracteres and add ... to the end
-  clonedDomTree.querySelectorAll("p, span,div").forEach((element) => {
+  clonedDomTree.querySelectorAll('p, span,div').forEach((element) => {
     if (element.textContent!.length > 100) {
       // Iterate over the child nodes and modify only the text nodes
       let totalLength = 0;
@@ -134,8 +138,7 @@ export function cleanHTML(htmlTree: HTMLElement): string {
           // Shorten text if total length exceeds 100 characters
           if (totalLength > 100) {
             const excessLength = totalLength - 100;
-            child.textContent =
-              textContent.slice(0, textContent.length - excessLength) + "...";
+            child.textContent = textContent.slice(0, textContent.length - excessLength) + '...';
           }
         }
       });
@@ -144,39 +147,33 @@ export function cleanHTML(htmlTree: HTMLElement): string {
 
   // remover table td e tr
   // Remove tags that are not relevant
-  clonedDomTree
-    .querySelectorAll(irrelevantTags.join(","))
-    .forEach((element) => element.remove());
+  clonedDomTree.querySelectorAll(irrelevantTags.join(',')).forEach((element) => element.remove());
 
   // Remove regular comments
-  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(
-    /<!--[\s\S]*?-->/g,
-    ""
-  );
+  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[\s\S]*?-->/g, '');
 
   // Remove conditional comments (IE-specific)
   clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(
     /<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g,
-    ""
+    '',
   );
 
   // remove all attributes that are not relevant
   let relevantAttributes = [
-    "id",
-    "class",
-    "contenteditable",
+    'id',
+    'class',
+    'contenteditable',
     //"data-*",
-    "tabindex",
-    "role",
+    'tabindex',
+    'role',
   ];
 
-  clonedDomTree.querySelectorAll("*").forEach((element) => {
+  clonedDomTree.querySelectorAll('*').forEach((element) => {
     Array.from(element.attributes).forEach((attr) => {
-      if (!relevantAttributes.includes(attr.name) && !attr.name.startsWith("data-")) {
+      if (!relevantAttributes.includes(attr.name) && !attr.name.startsWith('data-')) {
         if (
-          (!attr.name.match(regexRellevant) &&
-            !attr.value.match(regexRellevant)) ||
-          attr.name === "src"
+          (!attr.name.match(regexRellevant) && !attr.value.match(regexRellevant)) ||
+          attr.name === 'src'
         ) {
           element.removeAttribute(attr.name);
         }
@@ -184,25 +181,24 @@ export function cleanHTML(htmlTree: HTMLElement): string {
     });
   });
 
-  let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, " $1 ");
+  let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, ' $1 ');
 
   return result;
 }
 
-
 // TODO: Afinar o regex para remover apenas os caracteres especiais necessários de acordo com regras de seletores CSS
 // esta a remover > e outros caracteres que não são necessários
-export function escapeCssSelector(selector:string): string {
+export function escapeCssSelector(selector: string): string {
   return selector.replace(/([,\/:;?@^`{|}~])/g, '\\$1');
 }
 
-export function clearDotIfCustomTagSelector(selector:string): string {
+export function clearDotIfCustomTagSelector(selector: string): string {
   if (selector.startsWith('.')) {
     return selector.slice(1);
   }
   return selector;
 }
 
-export function sleep(ms:number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

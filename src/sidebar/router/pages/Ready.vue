@@ -1,56 +1,48 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-           <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
-      settings
-    </span>
-        <h1 class="title">QUALWEB CUI CHECK</h1>
-         <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
- <div class="evaluation-container">
+      <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
+        settings
+      </span>
+      <h1 class="title">QUALWEB CUI CHECK</h1>
+      <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+      <div class="evaluation-container">
         <Checkbox
           idValue="actRulesCheckbox"
           :label="'ACT Rules'"
-          v-model="actValue" 
-            @toggle:check="updateEvaluated('act', $event)" 
+          v-model="actValue"
+          @toggle:check="updateEvaluated('act', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="wcagTechniquesCheckbox"
           :label="'WCAG Techniques'"
-          v-model="wcagValue"  
-          @toggle:check="updateEvaluated('wcag', $event)" 
+          v-model="wcagValue"
+          @toggle:check="updateEvaluated('wcag', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="bestPracticesCheckbox"
           :label="'CUI Rules'"
-          v-model="cuiValue" 
-          @toggle:check="updateEvaluatedCui('cui', $event)" 
+          v-model="cuiValue"
+          @toggle:check="updateEvaluatedCui('cui', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
-    </div>
-            <hr />
+      </div>
+      <hr />
 
       <div class="button-container">
-                 <button
-          id="evaluateButton"
-          @click="onEvaluateClick"
-          :disabled="isDisabled"
-        >
+        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
           Evaluate Chatbot
         </button>
 
         <button @click="LLMInteraction" :disabled="generateResponsesActive">
           Generate Responses for Evaluation
         </button>
-     
-     
       </div>
-
-    
     </div>
   </div>
 </template>
@@ -60,14 +52,10 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
 
-
 const store = useStore();
 const router = useRouter();
 
 const generateResponsesActive = ref(true);
-
-
-
 
 const actValue = ref(false);
 const wcagValue = ref(false);
@@ -80,7 +68,6 @@ const isDisabled = computed(() => {
 });
 
 const setEvaluated = async (idValue, value) => {
-  
   await store.dispatch('setEvaluated', {
     module: idValue,
     value: value,
@@ -98,9 +85,7 @@ const LLMInteraction = () => {
   startLLMInteraction();
 };
 
-
 const updateEvaluated = async (idValue, event) => {
-
   await setEvaluated(idValue, event.checked);
 };
 
@@ -109,7 +94,6 @@ const updateEvaluatedCui = async (idValue, event) => {
   await setEvaluated(idValue, event.checked);
 };
 
-
 onMounted(() => {
   if (evaluated.value) {
     actValue.value = evaluated.value.act || false;
@@ -117,29 +101,22 @@ onMounted(() => {
     cuiValue.value = evaluated.value.cui || false;
   }
 });
-
 </script>
 
 <style scoped>
-
-
 .logo {
   width: auto;
   height: 200px;
   margin-bottom: 20px;
 }
-.position-icon-settings{
+.position-icon-settings {
   position: absolute;
   top: 12px;
   right: 20px;
   cursor: pointer;
 }
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;

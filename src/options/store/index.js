@@ -1,9 +1,8 @@
 import { createStore } from 'vuex';
 
-import * as getters from "./getters";
-import mutations from "./mutations";
-import * as actions from "./actions";
-
+import * as getters from './getters';
+import mutations from './mutations';
+import * as actions from './actions';
 
 export const defaultState = {
   firstRun: false,
@@ -12,20 +11,20 @@ export const defaultState = {
     apiKey: '',
     llmUrl: '',
     llmModel: '',
-    locale : ''
+    locale: '',
   },
 };
 
 export default new createStore({
   state: {
     firstRun: false,
-  options: {
-    LLMService: '',
-    apiKey: '',
-    llmUrl: '',
-    llmModel: '',
-    locale : ''
-  },
+    options: {
+      LLMService: '',
+      apiKey: '',
+      llmUrl: '',
+      llmModel: '',
+      locale: '',
+    },
   },
 
   getters,

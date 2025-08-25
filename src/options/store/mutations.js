@@ -1,4 +1,4 @@
-import * as types from "./mutation-types";
+import * as types from './mutation-types';
 
 export default {
   [types.SETAPIKEY](state, apiKey) {
@@ -16,10 +16,10 @@ export default {
   [types.SETFIRSTRUN](state, firstRun) {
     state.firstRun = firstRun;
   },
-[types.SETOPTIONS](state, options) {
-  Object.assign(state, options);
-},
+  [types.SETOPTIONS](state, options) {
+    Object.assign(state, options);
+  },
   [types.SETLLMSERVICE](state, LLMService) {
     state.options.LLMService = LLMService;
-  }
+  },
 };

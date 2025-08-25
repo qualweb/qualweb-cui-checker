@@ -1,11 +1,9 @@
-import { ChatResponse, LLM_Settings, QWCUI_Settings, ResponseStore } from "../../utils/types";
-import { dispatchEvents, captureResponse, setLastMessageUser } from "./chatInteraction";
-import { sendMessageToBackground } from "../content";
-import { chatbotInterface } from "../detection/Detection";
+import { ChatResponse, LLM_Settings, QWCUI_Settings, ResponseStore } from '../../utils/types';
+import { dispatchEvents, captureResponse, setLastMessageUser } from './chatInteraction';
+import { sendMessageToBackground } from '../content';
+import { chatbotInterface } from '../detection/Detection';
 
-import { initiateInteractionWorkflow } from "../../assistant-interaction/interactionWorkflow";
-
-
+import { initiateInteractionWorkflow } from '../../assistant-interaction/interactionWorkflow';
 
 export const isPopupChatbot = false;
 
@@ -22,67 +20,61 @@ export function setSentMessage(message: string): void {
   sentMessage = message;
 }
 
-export async function getCurrentStatusInteraction() {
-  
-}
+export async function getCurrentStatusInteraction() {}
 
 export async function handleTypeMessages(request: { messages: string[] }): Promise<ChatResponse[]> {
   let chatResponses: ChatResponse[] = [];
-  
+
   for (let i = 0; i < request.messages.length; i++) {
     const message = request.messages[i];
-    let response: ChatResponse
+    let response: ChatResponse;
 
     if (chatbotInterface) {
-       await sendAndReceiveMessage(message);
+      await sendAndReceiveMessage(message);
       //chatResponses.push(response);
     } else {
       // response = await sendAndReceiveMessage(message);
     }
 
     if (i < request.messages.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
   return chatResponses;
 }
 
-
-
 //Function to hantdle Voice input with tts
-export async function handleVoiceInput(request: { messages: string[] }, chatbotElement: HTMLElement | null): Promise<ChatResponse[]> {
-    let chatResponses: ChatResponse[] = [];
-  
-    for (let i = 0; i < request.messages.length; i++) {
-  
-      const message = request.messages[i];
-      let response: ChatResponse;
-  
-      chatbotInterface?.microphoneElement!.click();
-      await new Promise(resolve => setTimeout(resolve, 500));
-      // Logic for voice input
-      await sendMessageToBackground("speakText", message);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      chatbotInterface?.microphoneElement!.click();
+export async function handleVoiceInput(
+  request: { messages: string[] },
+  chatbotElement: HTMLElement | null,
+): Promise<ChatResponse[]> {
+  let chatResponses: ChatResponse[] = [];
 
-      // TODO: Implement handle voice input with langgraph
-      if (chatbotElement) {
-        // response = await sendAndReceiveMessage("", chatbotElement);
-  
-      } else {
-        //  response = await sendAndReceiveMessage("");
-      }
-  
-      //chatResponses.push(response);
-  
-  
+  for (let i = 0; i < request.messages.length; i++) {
+    const message = request.messages[i];
+    let response: ChatResponse;
+
+    chatbotInterface?.microphoneElement!.click();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Logic for voice input
+    await sendMessageToBackground('speakText', message);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    chatbotInterface?.microphoneElement!.click();
+
+    // TODO: Implement handle voice input with langgraph
+    if (chatbotElement) {
+      // response = await sendAndReceiveMessage("", chatbotElement);
+    } else {
+      //  response = await sendAndReceiveMessage("");
     }
-  
-    return chatResponses;
-  
+
+    //chatResponses.push(response);
   }
+
+  return chatResponses;
+}
 
 /*  
 export function simulateInput(
@@ -136,127 +128,137 @@ export function simulateInput(
 */
 
 export async function simulateInput(
-  message: string,inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
+  message: string,
+  inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement,
 ) {
-  await inputMessage(message,inputElement);
+  await inputMessage(message, inputElement);
   await sendMessage(inputElement);
 }
 
-
 export async function inputMessage(
-  message: string, inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
+  message: string,
+  inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement,
 ) {
   setLastMessageUser(message);
   // reload input field
-   let inputField:HTMLElement|null = inputElement || null;
+  let inputField: HTMLElement | null = inputElement || null;
 
-   if(!inputElement){
-   let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
-   inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]!);
+  if (!inputElement) {
+    let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
+    inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]!);
   }
 
   // Element exists?
-  if(!inputField) {
-    console.error("Input field not found.");
+  if (!inputField) {
+    console.error('Input field not found.');
     return;
   }
   // if inputFiels is not DIV, INPUT or TEXTAREA, find nested input
-  if (inputField?.tagName !== "DIV" && inputField?.tagName !== "INPUT" && inputField?.tagName !== "TEXTAREA") {
-    inputField = inputField.querySelector('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]');
+  if (
+    inputField?.tagName !== 'DIV' &&
+    inputField?.tagName !== 'INPUT' &&
+    inputField?.tagName !== 'TEXTAREA'
+  ) {
+    inputField = inputField.querySelector(
+      'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
+    );
   }
 
-  if (inputField?.tagName === "DIV") {
-    if (message != "") {
+  if (inputField?.tagName === 'DIV') {
+    if (message != '') {
       inputField.innerHTML = message;
-    } 
-    } else if (
-    inputField?.tagName === "INPUT" ||
-    inputField?.tagName === "TEXTAREA"
-  ) {
-    if (message != "") {
+    }
+  } else if (inputField?.tagName === 'INPUT' || inputField?.tagName === 'TEXTAREA') {
+    if (message != '') {
       (inputField as HTMLInputElement | HTMLTextAreaElement).value = message;
-    }     
+    }
   } else {
-  
-      console.error("Input field or rich text editor not found.");
-
+    console.error('Input field or rich text editor not found.');
   }
 }
 
-
-
-export async function sendMessage(inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement
+export async function sendMessage(
+  inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement,
 ) {
-   let inputField:HTMLElement|null = inputElement || null;
+  let inputField: HTMLElement | null = inputElement || null;
 
-   if(!inputElement){
-   let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
-   inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]!);
+  if (!inputElement) {
+    let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
+    inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]!);
   }
 
-  if(!inputField) {
-    console.error("Input field not found.");
+  if (!inputField) {
+    console.error('Input field not found.');
     return;
   }
   // if inputField is not DIV content editable, INPUT or TEXTAREA, input should be nested
-  if (inputField.tagName !== "DIV" && inputField.tagName !== "INPUT" && inputField.tagName !== "TEXTAREA") {
-    inputField = inputField.querySelector('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]');
+  if (
+    inputField.tagName !== 'DIV' &&
+    inputField.tagName !== 'INPUT' &&
+    inputField.tagName !== 'TEXTAREA'
+  ) {
+    inputField = inputField.querySelector(
+      'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
+    );
   }
 
-  const textEditor = inputField as HTMLInputElement | HTMLTextAreaElement |HTMLDivElement;
+  const textEditor = inputField as HTMLInputElement | HTMLTextAreaElement | HTMLDivElement;
 
-  if (textEditor.tagName === "DIV") {
+  if (textEditor.tagName === 'DIV') {
     textEditor.focus();
     dispatchEvents(textEditor);
-  } else if (
-    textEditor.tagName === "INPUT" ||
-    textEditor.tagName === "TEXTAREA"
-  ) {
-    
-      textEditor.focus();
-    
+  } else if (textEditor.tagName === 'INPUT' || textEditor.tagName === 'TEXTAREA') {
+    textEditor.focus();
+
     dispatchEvents(textEditor);
   } else {
-    console.error("Input field or rich text editor not found.");
+    console.error('Input field or rich text editor not found.');
   }
 }
 
-export async function sendAndReceiveMessage(
-  message: string,
-): Promise<HTMLElement[]> {
+export async function sendAndReceiveMessage(message: string): Promise<HTMLElement[]> {
   simulateInput(message);
   return await captureResponse(message, '', 2000, chatbotInterface!);
 }
 
-export async function interactWithLLM(settings:QWCUI_Settings): Promise<void> {
+export async function interactWithLLM(settings: QWCUI_Settings): Promise<void> {
   const LLMSettings: LLM_Settings = {
     LLMService: settings.LLMService,
     model: settings.model,
     apiURL: settings.apiURL,
     apiKey: settings.apiKey,
   };
-   // if not valid LLM settings, throw error
+  // if not valid LLM settings, throw error
   if (!LLMSettings.LLMService) {
-    throw new Error("Invalid LLM settings");
+    throw new Error('Invalid LLM settings');
   }
   // Obtain first messages of chatbot to build context
   let documentOwner = chatbotInterface!.dialogElement!.ownerDocument;
-  let firstMessages: HTMLElement[] = Array.from(documentOwner.querySelectorAll(chatbotInterface!.messagesSelector)) as HTMLElement[];
-  let firstMessagesText:string = Array.from(firstMessages).map((element) => element.textContent).join("\n");
+  let firstMessages: HTMLElement[] = Array.from(
+    documentOwner.querySelectorAll(chatbotInterface!.messagesSelector),
+  ) as HTMLElement[];
+  let firstMessagesText: string = Array.from(firstMessages)
+    .map((element) => element.textContent)
+    .join('\n');
 
   // Obtain page title and description
   const pageTitle = document.title;
   const pageDescription = document.querySelector('meta[name="description"]');
-  
-  const firstInputChatbot =`
+
+  const firstInputChatbot = `
   Webpage title: ${pageTitle}
-  Webpage description: ${pageDescription ? pageDescription.getAttribute('content') : 'No description available'}
+  Webpage description: ${
+    pageDescription ? pageDescription.getAttribute('content') : 'No description available'
+  }
   Chatbot first messages: ${firstMessagesText}
   `;
-  
 
-  await initiateInteractionWorkflow(firstMessages,firstInputChatbot,inputMessage,sendMessage,captureResponse,LLMSettings);
-
-
-
-} 
+  await initiateInteractionWorkflow(
+    firstMessages,
+    firstInputChatbot,
+    inputMessage,
+    sendMessage,
+    captureResponse,
+    LLMSettings,
+  );
+}

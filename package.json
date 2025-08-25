@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "mocha --tsconfig tsconfig.spec.json test/**/*.spec.ts",
-    "prettier": "prettier \"src/**/*.{js,vue}\"",
+    "prettier": "prettier \"src/**/*.{js,ts,vue}\"",
     "prettier:write": "npm run prettier -- --write",
     "build-prod": "cross-env NODE_ENV=production webpack  --config webpack.config-production.js",
     "build-dev": "cross-env NODE_ENV=development webpack  --config webpack.config-development.js",

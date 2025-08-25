@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "ActionPrompt",
+  name: 'ActionPrompt',
   props: {
     question: {
       type: String,
@@ -34,7 +34,7 @@ export default {
 </script>
 
 <style scoped>
-.div-container-questions{
+.div-container-questions {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,7 +45,6 @@ export default {
   font-size: 1.5rem;
   margin: 20px;
   text-align: center;
-
 }
 .div-btn-actions {
   display: flex;
@@ -54,9 +53,7 @@ export default {
   justify-content: center;
   margin: 20px;
 }
-.btn-action{
-
- 
+.btn-action {
   cursor: pointer;
 
   padding: 10px;

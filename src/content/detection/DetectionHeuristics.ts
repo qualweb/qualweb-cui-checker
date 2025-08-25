@@ -1,5 +1,5 @@
 /** * Scoring function to evaluate the likelihood of an element being a chatbot interface.
- * 
+ *
  * @param element  The HTML element to score.
  * @returns  A score representing the likelihood of the element being a chatbot interface.
  *           Higher scores indicate a higher likelihood.
@@ -9,9 +9,11 @@ export function scoringTreeChatbot(element: HTMLElement): number {
   let score: number = 0;
   let elementToScore = element as HTMLElement;
   /// is element loaded a iframeDocument or shadowRoot and is loaded?
-  let allElements = elementToScore.querySelectorAll("*");
+  let allElements = elementToScore.querySelectorAll('*');
   let hasInputArea =
-    elementToScore.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]').length > 0;
+    elementToScore.querySelectorAll(
+      'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
+    ).length > 0;
   //console.log("Has input area: ", hasInputArea);
   if (!hasInputArea) {
     return 0;

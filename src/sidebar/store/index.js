@@ -1,21 +1,19 @@
 import { createStore } from 'vuex';
 
-import * as getters from "./getters";
-import mutations from "./mutations";
-import * as actions from "./actions";
-
-
+import * as getters from './getters';
+import mutations from './mutations';
+import * as actions from './actions';
 
 export const defaultState = {
   storage: {
     url: '',
-    selectors:{
+    selectors: {
       windowsSelector: '',
       dialogSelector: '',
       inputSelector: '',
       messagesSelector: '',
       microphoneSelector: '',
-    }
+    },
   },
   summary: {},
   chatbotSummary: {},
@@ -41,15 +39,15 @@ export const defaultState = {
 
 export default new createStore({
   state: {
-   storage: {
-    url: '',
-    selectors:{
-      windowsSelector: '',
-      dialogSelector: '',
-      inputSelector: '',
-      messagesSelector: '',
-      microphoneSelector: '',
-    }
+    storage: {
+      url: '',
+      selectors: {
+        windowsSelector: '',
+        dialogSelector: '',
+        inputSelector: '',
+        messagesSelector: '',
+        microphoneSelector: '',
+      },
     },
     summary: {},
     chatbotSummary: {},

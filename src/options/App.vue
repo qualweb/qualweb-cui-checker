@@ -1,10 +1,10 @@
 <template>
   <div class="content">
-    <div v-if="firstRun" >
+    <div v-if="firstRun">
       <Welcome />
     </div>
     <div v-else>
-        <router-view></router-view>
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -13,8 +13,6 @@
 import { computed, onMounted } from 'vue';
 import Welcome from './router/pages/Welcome.vue';
 import { useStore } from 'vuex';
-
-
 
 export default {
   components: {
@@ -32,8 +30,6 @@ export default {
     };
   },
 };
-
-
 </script>
 
 <style scoped>

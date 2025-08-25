@@ -1,23 +1,25 @@
 async function startEvaluation() {
-  return sendActionToActiveTab("startEvaluation");
+  return sendActionToActiveTab('startEvaluation');
 }
 
 async function evaluateACT() {
-  return sendActionToActiveTab("evaluateACT");
+  return sendActionToActiveTab('evaluateACT');
 }
 
 async function evaluateWCAG() {
-  return sendActionToActiveTab("evaluateWCAG");
+  return sendActionToActiveTab('evaluateWCAG');
 }
 
 async function evaluateCUI() {
   let settingsStorage = await getQualWebSettings();
-  console.log("Settings Storage: ", settingsStorage);
-  return sendActionToActiveTab("evaluateCUI",{settings: settingsStorage.options});
+  console.log('Settings Storage: ', settingsStorage);
+  return sendActionToActiveTab('evaluateCUI', {
+    settings: settingsStorage.options,
+  });
 }
 
 async function endingEvaluation() {
-  return sendActionToActiveTab("endingEvaluation");
+  return sendActionToActiveTab('endingEvaluation');
 }
 async function getUrl() {
   return new Promise((resolve, reject) => {
@@ -28,9 +30,8 @@ async function getUrl() {
 }
 
 async function getQualWebSettings() {
-
   return new Promise((resolve, reject) => {
-    chrome.storage.local.get("qualweb_settings", (result) => {
+    chrome.storage.local.get('qualweb_settings', (result) => {
       resolve(result.qualweb_settings);
     });
   });

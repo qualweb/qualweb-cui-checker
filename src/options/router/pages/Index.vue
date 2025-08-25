@@ -1,9 +1,7 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-  
-        <Settings />
-
+      <Settings />
     </div>
   </div>
 </template>
@@ -14,18 +12,12 @@ import { useRouter } from 'vue-router';
 
 import Settings from './Settings.vue';
 
-
-
 const store = useStore();
 const router = useRouter();
-
-
-
 </script>
 
 <style scoped>
-
-.position-icon{
+.position-icon {
   position: absolute;
   top: 12px;
   right: 20px;
@@ -33,11 +25,7 @@ const router = useRouter();
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;

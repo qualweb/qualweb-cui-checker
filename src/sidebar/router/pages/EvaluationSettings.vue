@@ -1,51 +1,43 @@
 <template>
   <div class="bigContainer">
     <div class="container">
-  <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
-      settings
+      <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
+        settings
       </span>
-          <span @click="onCloseClick" class="material-symbols-outlined position-icon-close">
-      cancel
+      <span @click="onCloseClick" class="material-symbols-outlined position-icon-close">
+        cancel
       </span>
       <h1 class="title">Evaluation Options</h1>
-      
-  
+
       <div class="evaluation-container">
         <Checkbox
           idValue="actRulesCheckbox"
           :label="'ACT Rules'"
-          v-model="actValue" 
-            @toggle:check="updateEvaluated('act', $event)" 
+          v-model="actValue"
+          @toggle:check="updateEvaluated('act', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="wcagTechniquesCheckbox"
           :label="'WCAG Techniques'"
-          v-model="wcagValue"  
-          @toggle:check="updateEvaluated('wcag', $event)" 
+          v-model="wcagValue"
+          @toggle:check="updateEvaluated('wcag', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
         <Checkbox
           idValue="bestPracticesCheckbox"
           :label="'CUI Rules'"
-          v-model="cuiValue" 
-          @toggle:check="updateEvaluated('cui', $event)" 
+          v-model="cuiValue"
+          @toggle:check="updateEvaluated('cui', $event)"
           bgColor="#e15500"
           checkColor="#ffffff"
         />
-        <button
-          id="evaluateButton"
-          @click="onEvaluateClick"
-          :disabled="isDisabled"
-        >
+        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
           Evaluate Chatbot
         </button>
-       <button
-      id="cancelButton"
-      class="button-cancel"
-      @click="onCancelClick">Cancel</button>
+        <button id="cancelButton" class="button-cancel" @click="onCancelClick">Cancel</button>
       </div>
     </div>
   </div>
@@ -55,7 +47,6 @@ import { computed, ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
-
 
 const store = useStore();
 const router = useRouter();
@@ -71,7 +62,6 @@ const isDisabled = computed(() => {
 });
 
 const setEvaluated = async (idValue, value) => {
-  
   await store.dispatch('setEvaluated', {
     module: idValue,
     value: value,
@@ -87,11 +77,10 @@ const onSettingsClick = () => {
 };
 
 const onCancelClick = () => {
-   router.push('/ready');
+  router.push('/ready');
 };
 
 const updateEvaluated = async (idValue, event) => {
-
   await setEvaluated(idValue, event.checked);
 };
 
@@ -118,13 +107,13 @@ onMounted(() => {
   margin-top: 20px;
   cursor: pointer;
 }
-.position-icon-close{
+.position-icon-close {
   position: absolute;
   top: 12px;
   right: 20px;
   cursor: pointer;
 }
-.position-icon-settings{
+.position-icon-settings {
   position: absolute;
   top: 12px;
   left: 20px;
@@ -132,11 +121,7 @@ onMounted(() => {
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 .bigContainer {
   margin: 0;
