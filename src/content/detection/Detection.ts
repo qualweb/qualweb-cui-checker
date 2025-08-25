@@ -1,7 +1,7 @@
 
 import { ChatBotInterface } from "../../utils/types";
 import { correctElementChatbot } from "./Correction";
-import { setGreen, unsetGreen } from "./../selectChatbot";
+import { setGreen, unsetGreen } from "../lib/visualHelpers";
 import { findLowestCommonAncestorDOM , cleanHTML, getFirstElementVisibleFromArray, sleep} from "../lib/DomTools";
 import { identifyElementsPageChatbot } from "./DetectChatbot";
 import { detectChatBotPageMutation, detectChatBotPopupMutation } from "./DetectionObservers";

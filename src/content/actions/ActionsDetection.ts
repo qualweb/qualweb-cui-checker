@@ -2,8 +2,8 @@ import { showMessage } from "../../utils/helpers";
 import { currentVerification, detectPopupChatbot,  obtainSelectorsPopupChatbot, detectAndGetSelectorsPageChatbot, requestCorrectionElement, startConfirmElement, } from "../detection/Detection";
 import { initiateStoredSelectors } from "../detection/StorageRetriever";
 
-import {  setGreen, unsetGreen } from "../selectChatbot";
-import { microphoneSelector } from "../selectVoiceinput";
+import {  unsetGreen } from "../lib/visualHelpers";
+
 import { IChromeRequest } from "./MapperActions";
 
 
@@ -71,11 +71,5 @@ export async function actionCorrectElementSelection(data: IChromeRequest): Promi
   }); 
 }
 
-export function actionSelectMicrophone(data: IChromeRequest) {
-  microphoneSelector.startMicrophoneSelection();
-}
 
-export function actionStartSelection(data: IChromeRequest) {
- console.log("Not implemented yet");
-}
 

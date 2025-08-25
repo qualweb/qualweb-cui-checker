@@ -1,7 +1,6 @@
 import { ChatResponse, LLM_Settings, QWCUI_Settings, ResponseStore } from "../../utils/types";
 import { dispatchEvents, captureResponse, setLastMessageUser } from "./chatInteraction";
 import { sendMessageToBackground } from "../content";
-import { getStoredMicrophoneButton } from "../selectVoiceinput";
 import { chatbotInterface } from "../detection/Detection";
 
 import { initiateInteractionWorkflow } from "../../assistant-interaction/interactionWorkflow";
@@ -65,8 +64,10 @@ export async function handleVoiceInput(request: { messages: string[] }, chatbotE
       // Logic for voice input
       await sendMessageToBackground("speakText", message);
       await new Promise(resolve => setTimeout(resolve, 500));
-      getStoredMicrophoneButton()!.click();
-  
+      
+      chatbotInterface?.microphoneElement!.click();
+
+      // TODO: Implement handle voice input with langgraph
       if (chatbotElement) {
         // response = await sendAndReceiveMessage("", chatbotElement);
   
