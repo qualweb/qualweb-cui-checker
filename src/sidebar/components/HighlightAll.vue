@@ -11,7 +11,6 @@
 </template>
 
 <script>
-import { saveAs } from "file-saver";
 import { mapGetters, mapActions } from "vuex";
 export default {
   name: "HighlightAll",

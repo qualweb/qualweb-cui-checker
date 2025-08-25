@@ -1,7 +1,6 @@
 import { createApp } from "vue";
 import router from "./router";
 import App from "./App.vue";
-import { messages } from "../utils/messagesToSend";
 import store from "./store";
 
 async function sendActionToActiveTab(action: string, payload: Record<string, any> = {}): Promise<any> {
@@ -88,7 +87,8 @@ getInitialRoute().then((initialRoute) => {
         if (activeTab?.id) {
           chrome.tabs.sendMessage(
             activeTab.id!,
-            { action: "startVoiceInput", messages },
+            //TODO: ajust voice input to llm interaction
+            { action: "startVoiceInput", messages: [] },
             (response) => {
               if (chrome.runtime.lastError) {
                 console.error(
