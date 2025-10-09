@@ -1,6 +1,26 @@
 import { caseHandlers, IChromeRequest } from './actions/MapperActions';
 
-// Main message listener
+
+(window as any).__qwContentLoaded = true;
+
+
+export let interactionPort: chrome.runtime.Port | null = null;
+
+chrome.runtime.onConnect.addListener((p: chrome.runtime.Port) => {
+  if (p.name === "qw-interaction") {
+    interactionPort = p;
+    // Start bi-directional connection with sidebar
+  interactionPort.onMessage.addListener((msg) => {
+    if(msg === "start"){
+      interactionPort?.postMessage({rule:"...", status:"Starting Interaction"});
+    }
+  });
+
+  interactionPort?.onDisconnect.addListener(() => {
+    interactionPort = null;
+});
+  }
+});
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   let action = request.action;
@@ -21,7 +41,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       return true;
     }
-
     return false;
   } else {
     console.error('No handler found for action:', action);
