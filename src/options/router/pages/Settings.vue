@@ -9,8 +9,6 @@
             <span>Setting used for localization checks (currrency, language, date)</span>
             <select id="locale_select" v-model="locale" required>
               <option value="en-US">English (en-US)</option>
-              <option value="es-ES">Spanish (es-ES)</option>
-              <option value="fr-FR">French (fr-FR)</option>
               <option value="pt-PT">Portuguese (pt-PT)</option>
             </select>
 

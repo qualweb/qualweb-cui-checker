@@ -1,9 +1,9 @@
 <template>
   <div class="div-container-questions">
     <span class="span-question">{{ question }}</span>
-    <div class="div-btn-actions">
-      <button class="btn-action" @click="actionYes()">Yes</button>
-      <button class="btn-action" @click="actionNo()">No</button>
+    <div class="button-container">
+      <button class="button-primary" @click="actionYes()">Yes</button>
+      <button class="button-neutral" @click="actionNo()">No</button>
     </div>
   </div>
 </template>
@@ -45,6 +45,33 @@ export default {
   font-size: 1.5rem;
   margin: 20px;
   text-align: center;
+}
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 250px;
+}
+.button-primary {
+  width: 100%;
+  padding: 10px;
+  background-color: #5a5654;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.button-neutral {
+  width: 100%;
+  padding: 10px;
+  background-color: #e15500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 .div-btn-actions {
   display: flex;
