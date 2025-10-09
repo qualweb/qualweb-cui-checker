@@ -1,27 +1,122 @@
 import { ChatBotInterface, LLM_Settings } from '../utils/types';
 import { chatbotInterface } from '../content/detection/Detection';
-import { addSelectors } from '../content/evaluation/Evaluation';
-import { initiateLangraphSettings, FinalOutput } from './graph';
-import { cleanHTML } from '../content/lib/DomTools';
-import {
-  AIMessage,
-  HumanMessage,
-  BaseMessage,
-  isToolMessage,
-  isHumanMessage,
-} from '@langchain/core/messages';
+import { initiateLangraphSettings } from './graph';
+import {interactionPort} from '../content/content';
+import {RULES_TESTED} from '../content/evaluation/Evaluation'
 import { v4 as uuidv4 } from 'uuid';
+import {  HumanMessage} from '@langchain/core/messages';
+import { FinalOutput } from './objectives';
 const threadId = uuidv4();
 interface InteractionStatus {
   counter: number;
 }
+
+let skipInterrupt = false;
+
 const interactionStatus: InteractionStatus = {
   counter: 0,
 };
+const INTERRUPT_NODE_NAME = ["human_skip_interrupt_question","human_skip_interrupt_strategy"];
+/**
+ * 
+ * @param stream 
+ * @returns 
+ */
+async function trackGraphExecution(stream):Promise<StreamEvent> {
+  let response;
+  let currentNode ="";
+  let lastEvent = null;
+  for await (const step of stream) {
+    console.log(step);    
+
+    if (step.event === 'interrupt') {
+      console.log("interrupt detected ")
+      // Interrution stop tracking
+      return {node:step.name,event:step.event,result:""};
+
+      // Event Start Chain
+    } else if (step.event === 'on_chain_start') {
+          currentNode = step.name;
+          console.log("Current Node", currentNode);
+          if (step.name === 'domain_obtainer') {
+
+            interactionPort?.postMessage({ rule: '', status: 'Obtaining Initial Context' });
+
+          }else if (step.name === 'strategy_formulator') {
+            interactionPort?.postMessage({ rule: '', status: 'Formulating Strategy' });
+          }else if (step.name === 'question_formulator') {
+            interactionPort?.postMessage({ rule: '', status: 'Formulating Question' });
+          }else if (step.name === 'qw_browser_test') {
+            interactionPort?.postMessage({ rule: '', status: 'Running in Browser Test' });
+          }else if (INTERRUPT_NODE_NAME.includes(step.name) ){
+            return {node:step.name,event:"interrupt",result:""};
+          }
+      //Event End Chain
+    } else if (step.event === 'on_chain_end') {
+          lastEvent = step;
+          if (step.name === 'domain_obtainer') {
+            interactionPort?.postMessage({ rule: '', status: 'Context Ready' });
+          }else if (step.name === 'objective_assigner') {
+            interactionPort?.postMessage({ rule: 'CODE_TEST', status: 'Current Objective' });
+          }else if (step.name === 'strategy_formulator') {
+            interactionPort?.postMessage({ rule: '', status: ' Strategy Ready' });
+          }else if (step.name === 'question_formulator') {
+            interactionPort?.postMessage({ rule: '', status: 'Question Ready' });
+          }else if (step.name === 'strategy_formulator') {
+            interactionPort?.postMessage({ rule: '', status: 'Formulating Strategy' });
+          }else if (step.name === 'qw_browser_test') {
+            interactionPort?.postMessage({ rule: '', status: 'Browser Test Complete' });
+          }else if (step.name === 'ChannelWrite<...>') {
+          if(step.data.output.finalOutput){
+          console.log('final output Reached!=!');
+          interactionPort?.postMessage({ rule: '', status: 'Waiting for answer' });
+          }
+          response = step.data!.output.finalOutput;
+        }
+        
+    }
+  }
+ interactionPort?.postMessage({ rule: '', status: 'Waiting for answer' });
+ return {node:"",event:"complete",result:response};
+}
+interface StreamEvent{
+  node:string;
+  event:string; // interrupt ou complete or other
+  result:FinalOutput|string|null;
+}
+
+async function graphStreamLoop(messages,graph,config):Promise<FinalOutput> {
+  let stream = await graph.streamEvents(messages, config);
+  let eventStream:StreamEvent;
+  while(true){
+  
+  eventStream = await trackGraphExecution(stream)
+  if(eventStream.event==="interrupt"){
+    if(skipInterrupt){
+      console.log("Skip interrupted pressed, updating state");
+      await graph.updateState(config,  { isSkipObjectivePressed: true });
+      skipInterrupt=false;
+        }else{
+      console.log("SKIP NOT Pressed, passing to next node");
+      await graph.updateState(config, {}, eventStream.node);
+        
+    }
+    stream = await graph.streamEvents(null, config);
+  }else{
+    console.log("Complete interaction, event given back",eventStream );
+    break;
+  }
+
+  }
+  console.log("Event stream result ",eventStream.result);
+  return eventStream.result as FinalOutput;
+}
+
 /**
  * * Function to generate a question based on the message from the assistant
  *
  * @param assistantMessage message from the assistant
+ * @param interactionGraph
  * @param setMessage  callback function to set the message
  * @param sendMessage  callback function to send the message
  * @returns promise that resolves to the question generated
@@ -31,20 +126,22 @@ async function generateAndSendQuestion(
   interactionGraph: any,
   setMessage: (message: string) => Promise<void>,
   sendMessage: () => Promise<void>,
-): Promise<FinalOutput> {
-  // Prepare the correct input object for interactionGraph.invoke
-  const response = await interactionGraph.invoke(
-    { messages: [new HumanMessage(assistantMessage)] },
-    {
-      configurable: {
-        thread_id: threadId,
-      },
-    },
-  );
-  const question: FinalOutput = response.finalOutput as FinalOutput;
+  ): Promise<FinalOutput> {
 
+  let messages = { messages: [new HumanMessage(assistantMessage)] };
+
+  let config = {
+    configurable: {
+      thread_id: threadId,
+    },
+    version: "v2" as const,
+  };
+
+
+  const finalState = await graphStreamLoop(messages,interactionGraph,config);
+
+  const question: FinalOutput = finalState as FinalOutput;
   const questionText = question.response;
-  console.log(questionText);
   if (question.status === 'running') {
     await setMessage(questionText);
     await sendMessage();
@@ -64,8 +161,10 @@ function normalizeText(text: string): string {
 }
 
 function markQuestion(question: string): void {
+  const end = Math.min(100, question.length)
+  const slicedQuestion = question.slice(0, end);
   const textNodeResult = document.evaluate(
-    `//*[text()='${question}']`,
+    `//*[contains(text(), "${slicedQuestion}")]`,
     chatbotInterface!.dialogElement!.ownerDocument,
     null,
     XPathResult.FIRST_ORDERED_NODE_TYPE,
@@ -84,10 +183,7 @@ function markQuestion(question: string): void {
 }
 
 function markResponses(responses: HTMLElement[]): void {
-  responses.forEach((response) => {
-    const el = response as HTMLElement;
-    el.setAttribute('qw-cui-response', interactionStatus.counter.toString());
-  });
+  responses.forEach((el) =>  el.setAttribute('qw-cui-response', interactionStatus.counter.toString()));
 }
 
 /**
@@ -97,16 +193,15 @@ function markResponses(responses: HTMLElement[]): void {
  * @param setMessage  callback function to set the message
  * @param sendMessage  callback function to send the message
  * @param captureNewMessages callback function to capture new messages
+ * @param settings
  * @returns promise that resolves when the interaction is finished
  */
 export async function initiateInteractionWorkflow(
   initialMsg: HTMLElement[],
-  initialInput: string,
   setMessage: (message: string) => Promise<void>,
   sendMessage: () => Promise<void>,
   captureNewMessages: (
     message: string,
-    check: string,
     maxWaitTime: number,
     chatbotInterface?: ChatBotInterface,
   ) => Promise<HTMLElement[]>,
@@ -115,22 +210,34 @@ export async function initiateInteractionWorkflow(
   const interactionGraph = await initiateLangraphSettings(settings);
 
   // initial message
-  let lasAnswersElements: HTMLElement[] = initialMsg;
-
+  let lastAnswersElements: HTMLElement[] = initialMsg;
+  
   let lastAnswersRawText: string =
-    document.URL +
-    ' ' +
+    'URL:' + document.URL +
+    '  message:' +
     normalizeText(
       initialMsg
         .map((element) => element.textContent)
         .join('\n')
         .trim(),
     );
+    if(!interactionPort) return;
+    let action = ""
+    interactionPort.onMessage.addListener((msg) => {
+      if(msg==="cancel"){
+        action="cancel";
+      }else if (msg=="skip"){
+        skipInterrupt = true;
+      }
+    });
 
   return new Promise(async (resolve, reject) => {
     while (true) {
       // Mark Message Html as containing the objective
       interactionStatus.counter++;
+      if(action === "cancel") break;
+      
+      interactionPort?.postMessage({rule:"",status:"Generating Question" });
 
       let question: FinalOutput = await generateAndSendQuestion(
         lastAnswersRawText,
@@ -138,13 +245,29 @@ export async function initiateInteractionWorkflow(
         setMessage,
         sendMessage,
       );
-      console.log('Question generated', question);
+
+      //TODO: Simplify code
       if (question.lastMesssagePassedCheck) {
-        lasAnswersElements.forEach((element) => {
-          element.setAttribute(question.lastMesssagePassedCheck!, '');
+        let passedCheck = question.lastMesssagePassedCheck;
+        let selector: string = 
+        typeof passedCheck === 'object' && passedCheck !== null && 'selector' in passedCheck
+        ? passedCheck.selector
+        : passedCheck;
+        if (typeof passedCheck === 'object' && passedCheck !== null) {
+          
+        const check = passedCheck as { selector: string; code: string; outcome: string };
+        const test: RuleTest = {
+          code: check.code,
+          selector: `[${check.selector}]`,
+          result: check.outcome
+        };
+        RULES_TESTED.push(test);
+        }
+        //Mark Response with special selector
+        lastAnswersElements.forEach((element) => {
+          element.setAttribute(selector, '');
         });
       }
-
       if (question.status === 'completed') {
         console.log('Finished interaction, no question generated');
         break;
@@ -154,15 +277,17 @@ export async function initiateInteractionWorkflow(
       // send the question to the assistant
 
       // wait for the answer and capture the new messages
-      lasAnswersElements = await captureNewMessages(question.response, '', 4000, chatbotInterface!);
-      markResponses(lasAnswersElements);
-      console.log('New messages', lasAnswersElements);
+      lastAnswersElements = await captureNewMessages(question.response, 4000, chatbotInterface!);
+      interactionPort?.postMessage({rule:"",status:"Detected New Response" });
+
+      markResponses(lastAnswersElements);
+      console.log('New messages', lastAnswersElements);
       // encapsulate the HTMLElement in a parent element
       lastAnswersRawText = normalizeText(
-        lasAnswersElements.map((element) => element.textContent).join('\n'),
+        lastAnswersElements.map((element) => element.textContent).join('\n'),
       );
     }
-
+    interactionPort?.postMessage({rule:"",status:"complete" });
     resolve();
   });
 }
