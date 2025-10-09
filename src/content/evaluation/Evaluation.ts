@@ -20,8 +20,11 @@ let chatbotSummary: Summary = {
   title: document.title,
 };
 
+// Rules tested during Interaction
+export const RULES_TESTED:RuleTest[] = [];
+
 export function startEvaluation(sendResponse: (response: any) => void) {
-  let summary = {
+  summary = {
     passed: 0,
     failed: 0,
     warning: 0,
@@ -129,12 +132,15 @@ export function addSelectors(selectors: QWCUI_Selectors) {
     QWCUI_Selectors[key] = selectors[key];
   });
 }
+
 interface QWCUI_Settings {
   [key: string]: string;
 }
+
 export async function evaluateCUI(qualweb_settings: QWCUI_Settings) {
   let cuiResult, chatbotCuiResult, result, chatbotResult;
   let settingsQualweb: QWCUI_Settings = {};
+  
 
   settingsQualweb['locale'] = qualweb_settings.locale;
   console.log('CUI Settings to sent to evaluation', settingsQualweb);
@@ -146,16 +152,16 @@ export async function evaluateCUI(qualweb_settings: QWCUI_Settings) {
   QWCUI_Selectors['QW_CC_INPUT'] = chatbotInterface!.selectors.input[0];
 
   if (chatbotInterface?.selectors.microphone) {
-    QWCUI_Selectors['QW_CC_MIC'] = chatbotInterface!.selectors.microphone[0];
+    QWCUI_Selectors['QW_CC_MIC'] = chatbotInterface.selectors.microphone[0];
   }
-
-  // let sourceHtml = document.documentElement.outerHTML;
+  console.log('CUI Selectors to sent to evaluation', QWCUI_Selectors);
   window.cui = new CUIChecksRunner(
     { selectors: QWCUI_Selectors, settings: settingsQualweb },
     { translate: 'en', fallback: 'en' },
     urlCommonWords,
+    RULES_TESTED,
   );
-  //window.cui.test({ sourceHtml });
+
   await window.cui.executeTests();
   cuiResult = window.cui.getReport();
   console.log('CUI Result', cuiResult);
