@@ -82,7 +82,7 @@ const onEvaluateClick = () => {
 };
 
 const LLMInteraction = () => {
-  startLLMInteraction();
+  router.push('/interaction');
 };
 
 const updateEvaluated = async (idValue, event) => {

@@ -8,3 +8,17 @@ async function startLLMInteraction(messages) {
     settings: settingsStorage.options,
   });
 }
+
+
+async function startInteraction() {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        const port = chrome.tabs.connect(tabs[0].id, { name: "qw-interaction" });
+        resolve(port);
+      } else {
+        reject(new Error("No active tab found"));
+      }
+    });
+  });
+};

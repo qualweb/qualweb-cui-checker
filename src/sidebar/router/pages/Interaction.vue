@@ -2,7 +2,13 @@
   <div class="container">
     <div>
       <div class="loader"></div>
-      <p class="state">{{ state }}</p>
+        <h2>Status</h2>
+        <p class="state">{{ isCanceled ? "" : rule }}</p>
+        <p class="state">{{ isCanceled ? "Canceling..." : state }}</p>
+      <div class="button-container">
+      <button class="button-neutral" @click="cancelInteraction" :disabled="isCanceled">Cancel</button>  
+      <button class="button-primary" @click="skipObjective"  :disabled="isCanceled">Skip Rule</button>
+      </div>
     </div>
   </div>
 </template>
@@ -10,56 +16,61 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 export default {
-  name: 'Loading',
-  props: ['act', 'wcag', 'cui', 'css'],
+  name: 'Interaction',
   methods: {
     ...mapActions([]),
-    ...mapGetters(['getEvaluated', 'getFirstRule', 'getResultFilter']),
+    ...mapGetters([]),
+    skipRule() {
+      if (this._port) {
+        this._port.postMessage("skip");
+      }
+    
+    },
+    cancelInteraction() {
+      if (this._port) {
+        this._port.postMessage("cancel");
+        this.isCanceled = true;  
+      }
+
+
+    },
+    skipObjective() {
+      if (this._port) {
+        this._port.postMessage("skip");
+
+      }
+
+
+    }
   },
   data() {
     return {
       state: 'Starting evaluation',
+      rule: '',
+      isCanceled:false
     };
   },
   async mounted() {
-    let modules = this.getEvaluated();
-    let actResult,
-      chatbotActResult,
-      cuiResult,
-      chatbotCuiResult,
-      wcagResult,
-      chatbotWcagResult,
-      cssResult,
-      summary,
-      chatbotSummary;
-    await startEvaluation();
-    if (modules.act) {
-      this.state = 'Evaluating ACT module';
-      [actResult, chatbotActResult] = await evaluateACT();
-      this.setACT(actResult);
-      chatbotActResult && this.setChatbotACT(chatbotActResult);
-    }
-    if (modules.wcag) {
-      this.state = 'Evaluating WCAG module';
-      [wcagResult, chatbotWcagResult] = await evaluateWCAG();
-      this.setWCAG(wcagResult);
-      chatbotWcagResult && this.setChatbotWCAG(chatbotWcagResult);
-    }
-    if (modules.cui) {
-      this.state = 'Evaluating CUI module';
-      [cuiResult, chatbotCuiResult] = await evaluateCUI();
-      this.setCUI(cuiResult);
-      chatbotCuiResult && this.setChatbotCUI(chatbotCuiResult);
-    }
-    this.state = 'Ending evaluation';
-    [summary, chatbotSummary] = await endingEvaluation();
-    this.setSummary(summary);
-    chatbotSummary && this.setChatbotSummary(chatbotSummary);
-    chatbotSummary && this.setEvaluateChatbot(true);
-    this.setStartingFilter(modules);
-    this.setCurrentRule(this.getFirstRule());
-    this.$router.push('/evaluation');
-  },
+    this._port = await startInteraction();
+    console.log('Connected to evaluation', this.port);
+    // Make bi-directional connection to tab
+    startLLMInteraction();
+    this._port.onMessage.addListener((msg) => {
+
+      if(msg.status==="complete"){
+        this._port.disconnect();
+        this.$router.push('/ready');
+
+      } else {
+      // {rule,status}
+      const { rule, status } = msg;
+      this.rule = rule;
+      this.state = status;      
+      }
+    });
+    
+    
+  }
 };
 </script>
 
@@ -71,11 +82,54 @@ export default {
   min-height: 50vh;
   height: 100%;
   display: flex;
+ 
   align-items: center;
   justify-content: center;
   flex-direction: column;
   overflow: hidden;
 }
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 250px;
+}
+.button-neutral {
+  width: 100%;
+  padding: 10px;
+  background-color: #5a5654;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-neutral:hover {
+  background-color: #75706e;
+
+}
+
+.button-primary {
+  width: 100%;
+  padding: 10px;
+  background-color: #e15500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-primary:hover {
+  background-color: #ff6a00;
+}
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .loader {
   border: 16px solid transparent; /* Light grey */
   border-top: 16px solid #e15500; /* Blue */
