@@ -1,9 +1,15 @@
 declare global {
+  interface RuleTest{
+    code:string;
+    selector:string;
+    result:string;
+  }
   class CUIChecksRunner {
     constructor(
       moduleOptions: ModuleOptions,
       translationOptions: { translate: any; fallback: any },
       filePath?: string,
+      rules?:RuleTest[]
     );
     test(data: TestingData): any;
     executeTests(): Promise<any>;
