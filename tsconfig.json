@@ -1,23 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2016",  
+    "target": "es2016",
     "lib": ["dom", "es2016"],
     "strict": true,
-    "module": "commonjs",
-
+    "module": "nodenext",
     "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
+    "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
   },
-  "types": ["chrome"],
+  "types": ["chrome", "vue"],
   "include": [
     "src/**/*.ts",
     "src/**/*.vue",
-    "src/**/*.d.ts",
-    "test/**/*.ts",
-  ]
+    "src/**/*.d.ts"
+, "Detection copy.ts"  ],
+  "exclude": ["node_modules", "dist"]
 }
