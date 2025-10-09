@@ -8,7 +8,8 @@ import Start from './pages/Start.vue';
 import Ready from './pages/Ready.vue';
 import FailedDetection from './pages/FailedDetection.vue';
 import EvaluationSettings from './pages/EvaluationSettings.vue';
-import DetectingPageChatbot from './pages/DetectingPageChatbot..vue';
+import DetectingPageChatbot from './pages/DetectingPageChatbot.vue';
+import Interaction from './pages/Interaction.vue'
 
 export default [
   {
@@ -34,6 +35,11 @@ export default [
     path: '/evaluation',
     name: 'evaluation',
     component: Evaluation,
+  },
+    {
+    path: '/interaction',
+    name: 'interaction',
+    component: Interaction,
   },
   {
     path: '/detecting-page-chatbot',
