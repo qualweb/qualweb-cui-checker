@@ -1,3 +1,7 @@
+
+let previousBoxShadow: string ="";
+let previousStyleTransition: string = "";
+let previousParentPosition:string = "";
 /**
  *
  * @param element
@@ -13,6 +17,9 @@ export function setGreen(element: HTMLElement): void {
     element.tagName === 'INPUT' ||
     element.isContentEditable
   ) {
+    previousBoxShadow = element.style.boxShadow;
+    previousStyleTransition = element.style.transition;
+
     element.style.transition = 'box-shadow 0.5s ease-in-out';
     element.style.boxShadow = '0 0 0 1000px rgba(0, 255, 0, 0.5) inset';
     return;
@@ -30,7 +37,7 @@ export function setGreen(element: HTMLElement): void {
     flashOverlay.style.backgroundColor = 'rgba(0, 255, 0, 0.5)';
     flashOverlay.style.transition = 'opacity 0.5s ease-in-out';
     flashOverlay.style.opacity = '0';
-
+    previousParentPosition = element.style.position;
     element.style.position = 'relative';
     element.appendChild(flashOverlay);
 
@@ -56,7 +63,8 @@ export function unsetGreen(element: HTMLElement | HTMLElement[]): void {
       el.tagName === 'INPUT' ||
       el.isContentEditable
     ) {
-      el.style.boxShadow = '';
+      el.style.boxShadow = previousBoxShadow;
+      el.style.transition = previousStyleTransition;
     } else {
       const overlay = el.querySelector('.chatbot-element-overlay') as HTMLElement | null;
       if (overlay) {
@@ -64,9 +72,12 @@ export function unsetGreen(element: HTMLElement | HTMLElement[]): void {
 
         setTimeout(() => {
           overlay.remove();
-          el.style.position = 'static';
+          el.style.position = previousParentPosition;
         }, 500);
       }
     }
   }
+  previousStyleTransition = "";
+  previousBoxShadow = "";
+  previousParentPosition = "";
 }

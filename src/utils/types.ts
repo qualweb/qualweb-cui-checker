@@ -12,6 +12,7 @@ export interface LLM_Settings {
   model: string;
   apiURL: string | null;
   apiKey: string | null;
+  locale:string;
 }
 
 export interface ResponsesSelectors {
