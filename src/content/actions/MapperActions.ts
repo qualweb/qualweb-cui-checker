@@ -1,13 +1,13 @@
 import {
   actionCorrectElementSelection,
   actionDetectChatbot,
-  actionEndSucessfulVerification,
+  actionEndSuccessfulVerification,
   actionIdentifyChatbotSelectors,
   actionSetStoredSelectors,
   actionStartVerification,
   startPageChatbotProcedure,
 } from './ActionsDetection';
-import { actionEndEvaluation, actionEvaluateACT, actionEvaluateCUI } from './ActionsEvaluation';
+import { actionEndEvaluation, actionEvaluateACT, actionEvaluateCUI, actionStartEvaluation } from './ActionsEvaluation';
 import {
   actionLLMInteraction,
   actionStartVoiceInput,
@@ -31,14 +31,14 @@ const caseDetectionHandlers: Record<string, (data: IChromeRequest) => void | Pro
   pageChatbotProcedure: startPageChatbotProcedure,
   identifySelectors: actionIdentifyChatbotSelectors,
   startVerification: actionStartVerification,
-  endSucessfulVerification: actionEndSucessfulVerification,
+  endSucessfulVerification: actionEndSuccessfulVerification,
   correctElementSelection: actionCorrectElementSelection,
   setStoredSelectors: actionSetStoredSelectors,
 };
 
 // handlers for the evaluation actions
 const caseEvaluationHandlers: Record<string, (data: IChromeRequest) => void | Promise<any>> = {
-  startEvaluation: actionStartVerification,
+  startEvaluation: actionStartEvaluation,
   evaluateACT: actionEvaluateACT,
   evaluateWCAG: actionEvaluateACT,
   evaluateCUI: actionEvaluateCUI,

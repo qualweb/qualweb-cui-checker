@@ -1,5 +1,4 @@
 import {
-  getCurrentStatusInteraction,
   handleTypeMessages,
   handleVoiceInput,
   interactWithLLM,
@@ -16,13 +15,6 @@ export function actionStartVoiceInput(data: IChromeRequest) {
   });
 }
 
-export function actionGetCurrentStateInteraction(data: IChromeRequest): Promise<object> {
-  /// start tts generation
-  return new Promise(async (resolve) => {
-    const awaitStatus = await getCurrentStatusInteraction();
-    resolve({ status: 'Status Interaction', responses: awaitStatus });
-  });
-}
 
 export async function actionLLMInteraction(data: IChromeRequest): Promise<object> {
   return new Promise(async (resolve) => {

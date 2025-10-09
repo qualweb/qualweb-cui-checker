@@ -43,7 +43,7 @@ export function actionStartVerification(data: IChromeRequest) {
   });
 }
 
-export function actionEndSucessfulVerification(data: IChromeRequest) {
+export function actionEndSuccessfulVerification(data: IChromeRequest) {
   if (currentVerification) {
     unsetGreen(currentVerification);
     data.sendResponse({ status: 'confirmed' });
