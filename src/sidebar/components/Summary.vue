@@ -78,6 +78,7 @@ export default {
 <style scoped>
 .title {
   overflow: hidden;
+  text-wrap: wrap;
 }
 .text {
   font-family: 'Roboto', sans-serif;

@@ -72,7 +72,11 @@ a {
   margin: 1em;
 }
 .arrow-container {
-  padding: 1rem;
+  z-index: 1000;
+  position: sticky;
+  background-color: #393939;
+  top: 0;
+  border-bottom: 1px solid #ccc; 
 }
 .arrow-button {
   background: none;

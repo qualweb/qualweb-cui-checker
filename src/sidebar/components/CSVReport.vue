@@ -1,6 +1,8 @@
 <template>
   <div>
-    <button @click="generateReport">Download CSV</button>
+    <a href="#" @click.prevent="generateReport">
+          <span class="icon">📊</span> CSV
+      </a>
   </div>
 </template>
 
@@ -8,6 +10,7 @@
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { onMounted } from 'vue';
+const emit = defineEmits(['buttonClicked']);
 // Referência ao iframe
 
 const store = useStore();
@@ -68,7 +71,23 @@ async function generateReport() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  emit('buttonClicked');
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.dropdown-menu a {
+  color: #333;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.95em;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown-menu .icon {
+    margin-right: 8px;
+}</style>

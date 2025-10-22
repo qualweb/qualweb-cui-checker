@@ -37,5 +37,7 @@ export default {
 <style>
 .result {
   padding: 0.8rem;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 </style>

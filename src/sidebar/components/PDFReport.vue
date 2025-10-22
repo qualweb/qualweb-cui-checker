@@ -1,7 +1,8 @@
 <template>
   <div>
-    <button @click="generateReport">Download PDF</button>
-
+        <a href="#" @click.prevent="generateReport">
+          <span class="icon">📄</span> PDF
+        </a>
     <iframe
       :id="'pdfFrame'"
       ref="pdfFrame"
@@ -17,6 +18,7 @@ import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import html2pdf from 'html2pdf.js';
 import { onMounted } from 'vue';
+const emit = defineEmits(['buttonClicked']);
 // Referência ao iframe
 const pdfFrame = ref(null);
 const store = useStore();
@@ -231,6 +233,7 @@ async function generateReport() {
       })
       .from(frame.contentDocument.documentElement)
       .save(`accessibility_report_${today}.pdf`);
+      emit('buttonClicked');
   };
 }
 </script>
@@ -248,5 +251,20 @@ iframe {
   top: -9999px;
   left: -9999px;
   border: none;
+}
+.dropdown-menu a {
+  color: #333;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.95em;
+}
+
+.dropdown-menu a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown-menu .icon {
+    margin-right: 8px;
 }
 </style>

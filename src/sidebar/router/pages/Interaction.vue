@@ -6,8 +6,9 @@
         <p class="state">{{ isCanceled ? "" : rule }}</p>
         <p class="state">{{ isCanceled ? "Canceling..." : state }}</p>
       <div class="button-container">
-      <button class="button-neutral" @click="cancelInteraction" :disabled="isCanceled">Cancel</button>  
       <button class="button-primary" @click="skipObjective"  :disabled="isCanceled">Skip Rule</button>
+      <button class="button-neutral" @click="cancelInteraction" :disabled="isCanceled">Cancel Interaction</button>  
+      
       </div>
     </div>
   </div>

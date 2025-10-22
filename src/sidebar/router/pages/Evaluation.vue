@@ -1,8 +1,22 @@
 <template>
   <div class="bigContainer">
-    <button @click="returnToMain()">Back</button>
-    <PDFReport></PDFReport>
-    <CSVReport></CSVReport>
+    <div class="navigation-bar">
+      <button @click="returnToMain()" class="button-neutral">Back</button>
+   <div class="download-dropdown">
+      <button class="download-button" @click="toggleDropdown">
+        Download
+        <span class="dropdown-arrow">
+          {{ isDropdownOpen ? '▲' : '▼' }}
+        </span>
+      </button>
+      <div v-if="isDropdownOpen" class="dropdown-menu">
+            <PDFReport 
+            @buttonClicked="toggleDropdown"></PDFReport>
+            <CSVReport @buttonClicked="toggleDropdown"></CSVReport>
+       </div>
+    </div>
+   </div>
+
     <Summary></Summary>
     <ColapsibleFilter></ColapsibleFilter>
     <div class="container-1">
@@ -32,6 +46,9 @@ export default {
     ListOfRules,
     FilterByResult,
   },
+  data: () => ({
+    isDropdownOpen: false,
+  }),
   methods: {
     ...mapActions(['updateCurrentRule', 'reset']),
     focusListContent(clickedElement) {
@@ -45,6 +62,9 @@ export default {
       this.reset();
       this.$router.push({ path: '/ready' });
     },
+    toggleDropdown() {
+      this.isDropdownOpen = !this.isDropdownOpen;
+    }
   },
 };
 </script>
@@ -54,27 +74,29 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   overflow: hidden;
   margin-left: 0.2rem;
 }
 .bigContainer {
-  min-height: 150vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #303030;
 }
+.navigation-bar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .container-1 {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  overflow: hidden;
+  width: 100%;
   background-color: #393939;
-  /*
-      grid-column-gap:1rem;
-      grid-row-gap:1rem;
-      */
 }
 .title {
   text-align: center;
+  text-wrap: pretty;
   font-weight: 900;
 }
 .summary {
@@ -88,6 +110,63 @@ export default {
 .column-2 {
   overflow-y: auto;
 }
+.download-dropdown {
+  position: relative; 
+  display: inline-block;
+}
+
+.download-button {
+  background-color: #cc510a; 
+  color: white;
+  border: none;
+  border-radius: 0 0 0 5px;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #ff6a00;
+}
+
+.dropdown-arrow {
+  margin-left: 8px;
+  font-size: 0.8em;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  z-index: 10; 
+  background-color: #fff;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+  margin-top: 2px;
+  padding: 5px 0;
+}
+
+.button-neutral {
+  background-color: #75706c;
+  color: white;
+  border: none;
+  border-radius: 0 0 5px 0 ;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 13px;
+  cursor: pointer;
+}
+.neutral-button:hover {
+  background-color: #888481;
+}
+
+
 @media only screen and (max-width: 700px) {
   .container-1 {
     display: flex;
@@ -100,4 +179,6 @@ export default {
     flex: 1;
   }
 }
+
+
 </style>
