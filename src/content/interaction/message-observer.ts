@@ -122,8 +122,25 @@ export function startObserverDetectMessages(
           // MutationType characterData
         } else if (mutation.type == 'characterData') {
             //TODO: Logic when characterData
+      }else if (mutation.type === 'attributes') {
+            const oldValue = mutation.oldValue;                  // Old value of the attribute
+            let newValue: string | null = null;
+            if (mutation.target instanceof Element) {
+
+              newValue = mutation.target.getAttribute(mutation.attributeName??'');
+            
+            }
+          if ((oldValue?.includes('typing') || oldValue?.includes('loading')) &&
+            (!newValue?.includes('typing') && !newValue?.includes('loading'))) {
+            if(isTypingSign){
+              console.log("Detected Removed typing sign, restarting timer");
+               timeout = startTimeOut(5000, observer, timeOutCallBack);
+            isTypingSign = false;
+              
+            }
+         }
+        }
       }
-    }
     });
 
     timeOutCallBack = async () => {
