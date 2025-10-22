@@ -5,9 +5,7 @@ import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
 
 export const Settings: LLM_Settings = {
-  model: 'gpt-4o',
   apiKey: null,
-  apiURL: 'https://api.openai.com/v1',
   LLMService: 'openai',
   locale:""
 };

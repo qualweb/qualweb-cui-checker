@@ -4,12 +4,6 @@ export default {
   [types.SETAPIKEY](state, apiKey) {
     state.options.apiKey = apiKey;
   },
-  [types.SETLLMURL](state, llmUrl) {
-    state.options.llmUrl = llmUrl;
-  },
-  [types.SETLLMMODEL](state, llmModel) {
-    state.options.llmModel = llmModel;
-  },
   [types.SETLOCALE](state, locale) {
     state.options.locale = locale;
   },

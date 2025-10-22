@@ -70,8 +70,6 @@ export async function sendAndReceiveMessage(message: string): Promise<HTMLElemen
 export async function interactWithLLM(settings: QWCUI_Settings): Promise<void> {
   const LLMSettings: LLM_Settings = {
     LLMService: settings.LLMService,
-    model: settings.model,
-    apiURL: settings.apiURL,
     apiKey: settings.apiKey,
     locale: settings.locale
   };

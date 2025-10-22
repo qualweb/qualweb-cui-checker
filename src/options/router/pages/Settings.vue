@@ -19,16 +19,10 @@
             </select>
           </div>
           <div v-if="LLMService === 'openai'" class="settings-container">
-            <label for="apiUrl">LLM API URL:</label>
-            <input type="text" id="apiUrl" v-model="apiUrl" placeholder="API URL" required />
-
-            <label for="apiKey">LLM API KEY:</label>
+          
+            <label for="apiKey">API KEY:</label>
             <input type="text" id="apiKey" v-model="apiKey" placeholder="API Key" required />
-            <label for="llmmodel">OpenAi Model:</label>
-            <select id="llmmodel" v-model="llmModel">
-              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-              <option value="gpt-4">gpt-4</option>
-            </select>
+           
           </div>
         </div>
         <div class="button-container">
@@ -59,11 +53,7 @@ const store = useStore();
 
 const schema = z.object({
   locale: z.string(),
-  apiUrl: z.string().refine((value) => value === '' || /^(https?:\/\/)/.test(value), {
-    message: 'Invalid URL',
-  }),
-  apiKey: z.string().nullable(),
-  llmModel: z.string().nullable(),
+  apiKey: z.string().nullable()
 });
 
 const locale = computed({
@@ -78,15 +68,6 @@ const LLMService = computed({
   get: () => store.getters.getLLMService,
   set: (value) => store.commit('SETLLMSERVICE', value),
 });
-const apiUrl = computed({
-  get: () => store.getters.getLlmUrl,
-  set: (value) => store.commit('SETLLMURL', value),
-});
-
-const llmModel = computed({
-  get: () => store.getters.getLlmModel,
-  set: (value) => store.commit('SETLLMMODEL', value),
-});
 
 const onClickCancelSettings = () => {
   window.close();
@@ -95,9 +76,8 @@ const onClickCancelSettings = () => {
 const onSubmit = () => {
   const data = {
     locale: locale.value,
-    apiUrl: apiUrl.value,
     apiKey: apiKey.value,
-    llmModel: llmModel.value,
+
   };
 
   try {

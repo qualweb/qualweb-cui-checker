@@ -1,6 +1,4 @@
 export const SETAPIKEY = 'SETAPIKEY';
-export const SETLLMURL = 'SETLLMURL';
-export const SETLLMMODEL = 'SETLLMMODEL';
 export const SETLOCALE = 'SETLOCALE';
 export const SETFIRSTRUN = 'SETFIRSTRUN';
 export const SETOPTIONS = 'SETOPTIONS';

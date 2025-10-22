@@ -9,8 +9,6 @@ export const defaultState = {
   options: {
     LLMService: '',
     apiKey: '',
-    llmUrl: '',
-    llmModel: '',
     locale: '',
   },
 };
@@ -21,8 +19,6 @@ export default new createStore({
     options: {
       LLMService: '',
       apiKey: '',
-      llmUrl: '',
-      llmModel: '',
       locale: '',
     },
   },

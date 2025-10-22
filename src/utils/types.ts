@@ -9,8 +9,6 @@ export interface QWCUI_Settings {
 
 export interface LLM_Settings {
   LLMService: string;
-  model: string;
-  apiURL: string | null;
   apiKey: string | null;
   locale:string;
 }
