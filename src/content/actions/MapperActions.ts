@@ -1,8 +1,6 @@
 import {
   actionCorrectElementSelection,
-  actionDetectChatbot,
   actionEndSuccessfulVerification,
-  actionIdentifyChatbotSelectors,
   actionSetStoredSelectors,
   actionStartVerification,
   startPageChatbotProcedure,
@@ -27,9 +25,7 @@ const caseInteractionHandlers: Record<string, (data: IChromeRequest) => void | P
 
 // handlers for the detection of chatbot actions
 const caseDetectionHandlers: Record<string, (data: IChromeRequest) => void | Promise<any>> = {
-  detectChatbot: actionDetectChatbot,
   pageChatbotProcedure: startPageChatbotProcedure,
-  identifySelectors: actionIdentifyChatbotSelectors,
   startVerification: actionStartVerification,
   endSucessfulVerification: actionEndSuccessfulVerification,
   correctElementSelection: actionCorrectElementSelection,

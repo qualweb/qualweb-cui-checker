@@ -1,7 +1,6 @@
 import Index from './pages/Index';
 import Evaluation from './pages/Evaluation';
 import RuleContent from './pages/RuleContent';
-import DetectingPopupChatbot from './pages/DetectingPopupChatbot';
 import Loading from './pages/Loading';
 import Settings from './pages/Settings.vue';
 import Start from './pages/Start.vue';
@@ -45,11 +44,6 @@ export default [
     path: '/detecting-page-chatbot',
     name: 'detecting-page-chatbot',
     component: DetectingPageChatbot,
-  },
-  {
-    path: '/detecting-popup-chatbot',
-    name: 'detecting-popup-chatbot',
-    component: DetectingPopupChatbot,
   },
   {
     path: '/failed-detection',

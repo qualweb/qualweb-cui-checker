@@ -1,8 +1,6 @@
 import { showMessage } from '../../utils/helpers';
 import {
   currentVerification,
-  detectPopupChatbot,
-  obtainSelectorsPopupChatbot,
   detectAndGetSelectorsPageChatbot,
   requestCorrectionElement,
   startConfirmElement,
@@ -13,24 +11,9 @@ import { unsetGreen } from '../lib/visualHelpers';
 
 import { IChromeRequest } from './MapperActions';
 
-export async function actionDetectChatbot(data: IChromeRequest): Promise<object> {
-  return new Promise(async (resolve, reject) => {
-    showMessage('Please open the chatbot');
-    const response = await detectPopupChatbot();
-    resolve(response);
-  });
-}
-
 export async function startPageChatbotProcedure(data: IChromeRequest): Promise<object> {
   return new Promise(async (resolve, reject) => {
     const response = await detectAndGetSelectorsPageChatbot();
-    resolve(response);
-  });
-}
-
-export async function actionIdentifyChatbotSelectors(data: IChromeRequest): Promise<object> {
-  return new Promise(async (resolve, reject) => {
-    const response = await obtainSelectorsPopupChatbot();
     resolve(response);
   });
 }

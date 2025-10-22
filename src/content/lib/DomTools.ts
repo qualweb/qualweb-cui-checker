@@ -1,3 +1,5 @@
+import { documentOwner } from "../detection/Detection";
+
 export function getUniqueSelector(element: Element): string | null {
   if (!element) return null;
   const path: string[] = [];
@@ -23,6 +25,12 @@ export function getUniqueSelector(element: Element): string | null {
 
   return path.join(' > ');
 }
+function isRandomValue(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value) // UUID
+    || /^[0-9a-f]{16,}$/i.test(value) // hashes longos
+    || /^\d{10,}$/.test(value);       // timestamps longos
+}
+
 
 export function isInsideIframe(element: Element): boolean {
   let currentWindow: Window | null = element.ownerDocument.defaultView;
@@ -95,96 +103,6 @@ export function getFirstElementVisibleFromArray(elements: Element[]): Element | 
   return null;
 }
 
-/**Function to clean HTML to reduce size of tokens sent to LLM
- * @param htmlTree - HTML element tree to clean
- * @returns cleaned HTML string
- */
-
-export function cleanHTML(htmlTree: HTMLElement): string {
-  let regexRellevant: RegExp = /[\s\S]*(scroll|chat)[\s\S]*/;
-
-  let irrelevantTags = [
-    'header',
-    'footer',
-    'img',
-    'svg',
-    'td',
-    'table',
-    'tr',
-    'td',
-    'script',
-    'style',
-    'link',
-    'noscript',
-    'iframe',
-    'object',
-    'embed',
-  ];
-  let clonedDomTree = htmlTree.cloneNode(true) as HTMLElement;
-
-  // encurtar texto em <p> e <span> para 100 caracteres and add ... to the end
-  clonedDomTree.querySelectorAll('p, span,div').forEach((element) => {
-    if (element.textContent!.length > 100) {
-      // Iterate over the child nodes and modify only the text nodes
-      let totalLength = 0;
-      const childNodes = Array.from(element.childNodes); // Convert NodeList to an array
-
-      childNodes.forEach((child) => {
-        if (child.nodeType === Node.TEXT_NODE) {
-          // Check if it's a text node
-          const textContent = child.textContent!;
-          totalLength += textContent.length;
-
-          // Shorten text if total length exceeds 100 characters
-          if (totalLength > 100) {
-            const excessLength = totalLength - 100;
-            child.textContent = textContent.slice(0, textContent.length - excessLength) + '...';
-          }
-        }
-      });
-    }
-  });
-
-  // remover table td e tr
-  // Remove tags that are not relevant
-  clonedDomTree.querySelectorAll(irrelevantTags.join(',')).forEach((element) => element.remove());
-
-  // Remove regular comments
-  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(/<!--[\s\S]*?-->/g, '');
-
-  // Remove conditional comments (IE-specific)
-  clonedDomTree.innerHTML = clonedDomTree.innerHTML.replace(
-    /<!--[^\]]*?\[if[^\]]*?\]>[\s\S]*?<!\[endif\]-->/g,
-    '',
-  );
-
-  // remove all attributes that are not relevant
-  let relevantAttributes = [
-    'id',
-    'class',
-    'contenteditable',
-    //"data-*",
-    'tabindex',
-    'role',
-  ];
-
-  clonedDomTree.querySelectorAll('*').forEach((element) => {
-    Array.from(element.attributes).forEach((attr) => {
-      if (!relevantAttributes.includes(attr.name) && !attr.name.startsWith('data-')) {
-        if (
-          (!attr.name.match(regexRellevant) && !attr.value.match(regexRellevant)) ||
-          attr.name === 'src'
-        ) {
-          element.removeAttribute(attr.name);
-        }
-      }
-    });
-  });
-
-  let result = clonedDomTree.innerHTML.replace(/\s*(<[^>]+>)\s*/g, ' $1 ');
-
-  return result;
-}
 
 // TODO: Afinar o regex para remover apenas os caracteres especiais necessários de acordo com regras de seletores CSS
 // esta a remover > e outros caracteres que não são necessários
@@ -201,4 +119,223 @@ export function clearDotIfCustomTagSelector(selector: string): string {
 
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+
+export function findScrollable(element) {
+  // Função interna para verificar se é scrollable
+  const isScrollable = el => {
+    const style = getComputedStyle(el);
+    const overflowY = style.overflowY;
+    const overflowX = style.overflowX;
+    const canScrollY = (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
+    const canScrollX = (overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
+    return canScrollY || canScrollX;
+  };
+
+  if (isScrollable(element)) {
+    return element;
+  }
+
+  for (let child of element.children) {
+    const scrollableDescendant = findScrollable(child);
+    if (scrollableDescendant) return scrollableDescendant;
+  }
+
+  return null; 
+}
+
+
+export function detectChatbotInputCrossOrigin() {
+  function isCandidateIframe(iframe) {
+    const style = window.getComputedStyle(iframe);
+    return isVisible(iframe) && /fixed|sticky/.test(style.position);
+  }
+
+  // Inputs do documento principal
+  let topInput:Element|null = null;
+  let topScore = -Infinity;
+  let lowerPointsKeywords=["search"]
+  const nonAIInputKeywords = [
+    "email", "username", "user", "login", "password", "pin", "token",
+    "first name", "last name", "full name", "dob", "date of birth",
+    "address", "street", "city", "state", "zip", "postcode",
+    "phone", "mobile", "fax", "contact number",
+    "credit card", "cvv", "expiry", "paypal", "billing",
+    "subscribe", "newsletter", "coupon", "promo", "discount",
+    "search", "find", "filter", "query", "sort",
+    "captcha", "recaptcha", "verification code", "security code",
+    "submit", "form", "feedback", "comment",
+    "upload", "file", "attachment",
+    "url", "website", "link",
+    "rating", "stars", "vote", "review","list",'date'
+  ];
+function isNonAIInput(el) {
+  return Array.from(el.attributes).some(attr => {
+    const val = (attr as any).value;
+    return (
+      val &&
+      nonAIInputKeywords.some(keyword =>
+        val.toLowerCase().includes(keyword)
+      )
+    );
+  });
+}
+  const inputs = [...document.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
+  console.log("inputs detected",inputs);
+  for (const input of inputs) {
+    const rect = input.getBoundingClientRect();
+    const distance = Math.hypot(window.innerWidth - rect.right, window.innerHeight - rect.bottom);
+    const score = -distance / 1000; // só posição
+
+     
+    const finalScore = isNonAIInput(input) ? score - 1000 : score + 1000; // penaliza se não for candidato
+    console.log("Score of ", input, " = ", finalScore);
+  if (finalScore > topScore) {
+    topScore = finalScore;
+    topInput = input;
+  }
+  }
+
+  // Inputs "prováveis" dentro de iframes cross-origin
+  const iframes = [...document.querySelectorAll('iframe')];
+  console.log("Found Iframes", iframes);
+  for (const iframe of iframes) {
+    let documentIframe:Document|null = null;
+    try{
+    documentIframe = iframe.contentDocument || iframe.contentWindow!.document;
+    }catch(e){
+      // Logic to send to devtools chrome extension
+      continue;
+    }
+      const inputs = [...documentIframe.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
+  console.log("inputs detected",inputs);
+  for (const input of inputs) {
+    const rect = input.getBoundingClientRect();
+    const distance = Math.hypot(window.innerWidth - rect.right, window.innerHeight - rect.bottom);
+    const score = -distance / 1000; // só posição
+
+     
+    const finalScore = isNonAIInput(input) ? score - 1000 : score + 1000; 
+
+    //TODO: if there is no candidate with positive score, return null and show message no chatbot found
+    if (finalScore > 0) {
+      console.log("Score of ", input, " = ", finalScore);
+    }
+  if (finalScore > topScore) {
+    topScore = finalScore;
+    topInput = input;
+  }
+  }
+  }
+  if(topScore > 0){
+    console.log("Existe  um input com mais de 0")
+    return topInput;
+  }else{
+    return null;
+  }
+}
+
+
+
+/**
+ * Gera um seletor CSS para agrupamento (classes, atributos).
+ * 
+ * @param {Element} element 
+ * @returns {string | null} 
+ */
+export function getGroupSelectorRelative(element) {
+  if (!element) return null;
+
+  // Se a tag é custom (tem um "-")
+  if (element.tagName.includes('-')) {
+    return element.tagName.toLowerCase();
+  }
+  let selector = element.tagName.toLowerCase();
+
+  let counterData = 0;
+  // first try data-* attributes
+  Object.values(element.attributes).forEach((attr:any) => {
+  if (attr.name.startsWith('data-')) {
+    const key = attr.name;  
+    const value = attr.value; 
+     if(!isAutoGeneratedValue(value) && value !== "true" && value !== "false" && !/\d/.test(value) && counterData <=2 ){
+      selector += `[${key}="${value}"]`;
+      counterData++;
+    }else if(/\d/.test(value) && counterData <=2 ){
+      selector += `[${key}]`; 
+       counterData++;
+    }
+  }
+  });
+  if(selector.length > element.tagName.length) return selector;
+  // if not, try classes 
+  element.classList.forEach(cls =>{
+    if(!isFrameworkClass(cls)){
+          selector += `.${escapeCSS(cls)}`;
+    }
+  });
+  return selector;
+
+  // if not found, it should relate to custom attributes
+}
+function isAutoGeneratedValue(value) {
+  if (!value || typeof value !== 'string') return false;
+
+  // Numérico longo (IDs sequenciais ou random)
+  if (/^\d{3,}$/.test(value)) return true;
+
+  //  UUID 
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) return true;
+
+
+  if (value.length > 20 && /^[A-Za-z0-9+/=]+$/.test(value)) return true;
+
+ 
+  if (/^(react|ng|vue|css|Mui|ant|chakra|p-|sc-|module-)-?\d*/i.test(value)) return true;
+
+  // Texto com entropia alta (muitas letras maiúsculas/minúsculas/números especiais)
+  if (entropy(value) > 3.5) return true;
+
+  // Se não bate em nenhum padrão  considera estável
+  return false;
+}
+
+// calcula entropia aproximada de uma string
+function entropy(str) {
+  const freq = {};
+  for (const char of str) freq[char] = (freq[char] || 0) + 1;
+  let ent = 0;
+  for (const char in freq) {
+    const p = freq[char] / str.length;
+    ent -= p * Math.log2(p);
+  }
+  return ent;
+}
+
+function isFrameworkClass(cls) {
+  return /^(m-|mt-|mb-|ml-|mr-|p-|pt-|pb-|pl-|pr-|text-|bg-|flex|grid|gap-|col-|row-|w-|h-|rounded-|ant-|Mui|chakra-|css-|p-)/.test(cls);
+}
+
+function escapeCSS(str) {
+  // Escapa todos os caracteres especiais que podem causar erro no querySelector
+  return str.replace(/([ !"#$%&'()*+,.\/:;<=>?@[\\\]^`{|}~])/g, '\\$1');
+}
+
+
+
+export function findElementByExactText(container,text) {
+    // Converte o texto para minúsculas e escapa aspas simples, se necessário
+  
+     const xpath = `.//*[normalize-space() = '${text}']`;
+  
+    const result = documentOwner.evaluate(
+        xpath,
+        container,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null
+    ).singleNodeValue;
+
+    return result; 
 }

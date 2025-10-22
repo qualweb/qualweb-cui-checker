@@ -12,8 +12,7 @@
         please detect Chatbot
       </p>
       <div class="button-container">
-        <button @click="onDetectPopupChatbot">Detect Popup Chatbot</button>
-        <button @click="onDetectPageChatbot">Detect Chatbot in Page</button>
+        <button @click="onDetectChatbot">Detect Chatbot</button>
       </div>
     </div>
   </div>
@@ -29,11 +28,8 @@ const onSettingsClick = () => {
   chrome.runtime.openOptionsPage();
 };
 
-const onDetectPopupChatbot = () => {
-  router.push('/detecting-popup-chatbot');
-};
 
-const onDetectPageChatbot = () => {
+const onDetectChatbot = () => {
   router.push('/detecting-page-chatbot');
 };
 </script>
