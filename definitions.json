@@ -1,0 +1,7 @@
+{
+  "VERSION": "1.0.0",
+  "DIST_FOLDER":"dist",
+  "RESOURCES_WORDS_PT":"common-words-pt.txt",
+  "INITIAL_INTERACTION_MESSAGE_PT":"Olá, Sou o QW CUI.",
+  "INITIAL_INTERACTION_MESSAGE_EN":"Hello, I am the QW CUI."
+}

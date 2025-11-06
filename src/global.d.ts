@@ -45,7 +45,7 @@ declare global {
     cui: CUIChecksRunner;
     webkitAudioContext: typeof AudioContext;
   }
-}
+
 interface CUIChecksReport {
   assertions: Record<string, CUIRule>;
   metadata: {
@@ -65,4 +65,12 @@ interface ACTReport {
   };
 }
 
+declare const APP_CONFIG: {
+  VERSION: string;
+  DIST_FOLDER:string;
+  RESOURCES_WORDS_PT: string;
+  INITIAL_INTERACTION_MESSAGE_PT:string;
+  INITIAL_INTERACTION_MESSAGE_EN:string;
+};
+}
 export {};
