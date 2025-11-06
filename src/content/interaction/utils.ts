@@ -1,7 +1,3 @@
-export function setLastMessageUser(message: string) {
-  lastMessageUser = message;
-}
-let lastMessageUser: string = '';
 
 
 export function isNodeTypingInfo(node: Node): boolean {
@@ -14,7 +10,7 @@ export function isNodeTypingInfo(node: Node): boolean {
   ).booleanValue;
 }
 
-function hasExactText(el, text) {
+function hasExactText(el: HTMLElement, text: string):boolean {
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
     let currentNode;
     while (currentNode = walker.nextNode()) {
@@ -30,7 +26,7 @@ function hasExactText(el, text) {
  * @param node element to check
  * @param selectorMessage selector of chatbot responses
  */
-export function isChatBotMessage(node: HTMLElement, selectorMessage: string): boolean {
+export function isChatBotMessage(node: HTMLElement, selectorMessage: string,lastMessageUser:string): boolean {
     if (lastMessageUser) {
     var test = lastMessageUser && hasExactText(node, lastMessageUser);
     if (test) {
@@ -48,27 +44,42 @@ export function isContainedInSelector(node: HTMLElement, selector: string): bool
   );
 }
 
-export function startTimeOut(
-  maxWaitTime: number,
-  observer: MutationObserver,
-  callback: () => void,
-): NodeJS.Timeout {
-  return setTimeout(() => {
-    observer.disconnect();
-    callback();
-  }, maxWaitTime);
+
+
+/**  Function to normalize the text
+ *
+ * @param text text to normalize
+ * @returns
+ */
+export function normalizeText(text: string): string {
+  return text
+    .replace(/\s+/g, ' ') // replaces multiple spaces/newlines/tabs with a single space
+    .trim();
 }
 
-export function restartTimeOut(
-  maxWaitTime: number,
-  timeout: NodeJS.Timeout,
-  observe: MutationObserver,
-  callback: () => void,
-): NodeJS.Timeout {
-  clearTimeout(timeout);
-  return startTimeOut(maxWaitTime, observe, callback);
+
+export function markQuestion(ownerDocument:Document,question: string,counter:number): void {
+  const end = Math.min(100, question.length)
+  const slicedQuestion = question.slice(0, end);
+  const textNodeResult = document.evaluate(
+    `//*[contains(text(), "${slicedQuestion}")]`,
+    ownerDocument,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue;
+  if (textNodeResult) {
+    // Sobe ao nó pai, caso tenha encontrado um nó de texto
+    const element =
+      textNodeResult.nodeType === Node.TEXT_NODE
+        ? textNodeResult.parentElement
+        : (textNodeResult as HTMLElement);
+
+    // Adiciona o atributo de identificação à pergunta
+    element?.setAttribute('qw-cui-question', counter.toString());
+  }
 }
 
-export function stopTimeout(timeout: NodeJS.Timeout): void {
-  clearTimeout(timeout);
+export function markResponses(responses: HTMLElement[],counter:number): void {
+  responses.forEach((el) =>  el.setAttribute('qw-cui-response', counter.toString()));
 }

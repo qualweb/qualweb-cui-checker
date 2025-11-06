@@ -1,30 +1,37 @@
+import { sendMessageToBackground } from '../content';
 import { chatbotInterface } from '../detection/Detection';
-import { setLastMessageUser } from './utils';
 
-export type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement;
+
+export type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement ;
 
 export async function simulateInput(
-  message: string,
-  inputElement?: ChatbotInputElement,
+  message: string
 ) {
-  await inputMessage(message, inputElement);
-  await sendMessage(inputElement);
+  await inputMessage(message);
+  await sendMessage();
+}
+export async function inputVoiceMessage(
+  message: string,
+): Promise<void> {
+
+    let microphoneElement = chatbotInterface.getMicrophoneElement();
+    if(microphoneElement){
+      microphoneElement.click();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Logic for voice input
+    await sendMessageToBackground('speakText', message);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    microphoneElement.click();
+    }
+
 }
 
 export async function inputMessage(
-  message: string,
-  inputElement?: ChatbotInputElement,
+  message: string
 ) {
-  setLastMessageUser(message);
   // reload input field
-  let inputField: HTMLElement | null = inputElement || null;
+  let inputField: ChatbotInputElement  | null = chatbotInterface.getInputElement();
 
-  if (!inputElement) {
-    let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
-    inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]!);
-  }
-
-  // Element exists?
   if (!inputField) {
     console.error('Input field not found.');
     return;
@@ -32,7 +39,7 @@ export async function inputMessage(
   // if inputFields is not DIV, INPUT or TEXTAREA, find nested input
   if (
     inputField?.tagName !== 'DIV' &&
-    inputField?.tagName !== 'INPUT' &&
+    inputField?.tagName !== 'INPUT' && 
     inputField?.tagName !== 'TEXTAREA'
   ) {
     inputField = inputField.querySelector(
@@ -72,16 +79,10 @@ export function dispatchEvents(element: HTMLElement) {
   }, 100);
 }
 
-export async function sendMessage(
-  inputElement?: HTMLInputElement | HTMLTextAreaElement | HTMLDivElement,
-) {
-  let inputField: HTMLElement | null = inputElement || null;
-
-  if (!inputElement) {
-    let ownerDocument = chatbotInterface!.dialogElement!.ownerDocument;
-    inputField = ownerDocument.querySelector<HTMLElement>(chatbotInterface!.selectors.input[0]);
-  }
-
+export async function sendMessage() {
+  let inputField: HTMLElement | null = chatbotInterface.getInputElement();
+  
+  inputField = chatbotInterface.getInputElement();
   if (!inputField) {
     console.error('Input field not found.');
     return;
