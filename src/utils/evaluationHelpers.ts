@@ -1,11 +1,6 @@
-import { Summary, Rule, Report, Result, ElementTest } from './types';
+import {  Rule, Report, Result, ElementTest } from './types';
 
-function addValuesToSummary(summary: Summary, report: Report) {
-  summary.passed += report.metadata.passed;
-  summary.failed += report.metadata.failed;
-  summary.warning += report.metadata.warning;
-  summary.inapplicable += report.metadata.inapplicable;
-}
+
 
 function filterResults(result: Report, chatbotElement: HTMLElement): Report {
   let filteredAssertions: { [rule: string]: Rule } = {};
@@ -26,7 +21,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
       }
       return false;
     });
-
+    const ignoreSelectors = ['extension'];
     if (isRelevant) {
       let filteredResults: Result[] = [];
       (rule.results as Result[]).forEach((result) => {
@@ -34,7 +29,12 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         let elements: ElementTest[];
 
         elements = (result.elements as ElementTest[]).filter((element) => {
-          if (chatbotElement.querySelector(element.pointer) !== null) {
+          if (element.pointer.includes('extension')) {
+            return false;
+          }
+          let elementToFilter = document.querySelector(element.pointer);
+
+          if (elementToFilter !== null && chatbotElement.contains(elementToFilter)) {
             return element;
           }
         });
@@ -63,4 +63,4 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
   };
 }
 
-export { addValuesToSummary, filterResults };
+export {  filterResults };
