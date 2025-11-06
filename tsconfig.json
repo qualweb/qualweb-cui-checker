@@ -18,6 +18,6 @@
     "src/**/*.ts",
     "src/**/*.vue",
     "src/**/*.d.ts"
-, "Detection copy.ts"  ],
+   ],
   "exclude": ["node_modules", "dist"]
 }
