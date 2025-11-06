@@ -1,26 +1,9 @@
-import { caseHandlers, IChromeRequest } from './actions/MapperActions';
 
+import { HANDLERS, IChromeRequest } from './actions/MapperActions';
 
+// flag to indicate that the content script has loaded
 (window as any).__qwContentLoaded = true;
 
-
-export let interactionPort: chrome.runtime.Port | null = null;
-
-chrome.runtime.onConnect.addListener((p: chrome.runtime.Port) => {
-  if (p.name === "qw-interaction") {
-    interactionPort = p;
-    // Start bi-directional connection with sidebar
-  interactionPort.onMessage.addListener((msg) => {
-    if(msg === "start"){
-      interactionPort?.postMessage({rule:"...", status:"Starting Interaction"});
-    }
-  });
-
-  interactionPort?.onDisconnect.addListener(() => {
-    interactionPort = null;
-});
-  }
-});
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   let action = request.action;
@@ -31,8 +14,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   let data: IChromeRequest = { request, sendResponse };
 
-  if (caseHandlers[action]) {
-    const result: any = caseHandlers[action](data);
+  if (HANDLERS[action]) {
+    const result: any = HANDLERS[action](data);
     if (result instanceof Promise) {
       result.then((response) => {
         sendResponse(response);
