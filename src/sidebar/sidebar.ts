@@ -74,31 +74,3 @@ getInitialRoute().then((initialRoute) => {
     app.mount('#app');
   });
 });
-
-const voiceInputButton = document.getElementById('voiceInputButton');
-if (voiceInputButton) {
-  voiceInputButton.addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const activeTab = tabs[0];
-      if (activeTab?.id) {
-        chrome.tabs.sendMessage(
-          activeTab.id!,
-          //TODO: ajust voice input to llm interaction
-          { action: 'startVoiceInput', messages: [] },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error('Error sending message:', chrome.runtime.lastError.message);
-            } else {
-              console.log(response?.status);
-            }
-          },
-        );
-      }
-    });
-
-    // setTimeout(() => {
-    //   const audio = new Audio("../audio/chatbotClip1.mp3");
-    //   audio.play();
-    // }, 1500);
-  });
-}

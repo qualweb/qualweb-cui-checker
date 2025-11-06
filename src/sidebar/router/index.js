@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import routes from './routes';
-import { nextTick } from 'vue';
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
