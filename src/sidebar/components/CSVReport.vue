@@ -77,7 +77,7 @@ async function generateReport() {
 
 <style scoped>
 .dropdown-menu a {
-  color: #333;
+  color: #ccc;
   padding: 10px 15px;
   text-decoration: none;
   display: block;
@@ -85,7 +85,7 @@ async function generateReport() {
 }
 
 .dropdown-menu a:hover {
-  background-color: #f1f1f1;
+  background-color: #575757;
 }
 
 .dropdown-menu .icon {
