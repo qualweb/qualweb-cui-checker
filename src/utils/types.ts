@@ -1,3 +1,5 @@
+
+
 export interface ChatResponse {
   message: string;
   response: string[];
@@ -17,42 +19,19 @@ export interface ResponsesSelectors {
   [rule: string]: string[];
 }
 
-// @Deprecated
-export interface LLMResponse {
-  xpath_chatbot: string | null;
-  xpath_microphone: string | null;
-}
 
-// Interface for the response from the local LLM
-export interface LocalLLMResponse {
-  xpath_window: string | null;
-  xpath_input: string | null;
-  xpath_conversation: string | null;
-  xpath_bot_selector: string | null;
-  xpath_microphone: string | null;
-}
-
-// Interface for the ChatBot ELements and selector
-export interface ChatBotInterface {
-  windowElement: HTMLElement | null;
-  inputElement: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
-  messagesSelector: string;
-  dialogElement: HTMLElement | null;
-  microphoneElement: HTMLElement | null;
-  selectors: ChatbotSelector;
-}
 
 // Selectors for the chatbot elements
 // first index in each array is the current selector for the chatbot element
 // more selectors are added when the makes new requests for the chatbot elements, saving possible correct selectors
-export interface ChatbotSelector {
-  window: string[];
-  dialog: string[];
-  messages: string[];
-  input: string[];
-  microphone: string[];
-}
-
+export interface ChatBotSelectors {
+    iframeSelector?: string;
+    inputSelector: string;
+    messagesSelector: string;
+    dialogSelector: string;
+    microphoneSelector?: string;
+    windowSelector: string;
+  }
 export interface ResponseStore {
   [message: string]: string;
 }
