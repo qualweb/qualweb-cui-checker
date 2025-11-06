@@ -1,5 +1,5 @@
 import { MemorySaver } from '@langchain/langgraph/web';
-import { LLM_Settings } from '../utils/types';
+import { LLM_Settings } from '../../utils/types';
 import { workflow } from './workflow';
 import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';

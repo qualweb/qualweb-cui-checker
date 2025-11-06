@@ -1,8 +1,6 @@
 //import { TavilySearch } from "@langchain/tavily";
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
-
-
+import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
 
 /*const webSearchTool = new TavilySearch({
   maxResults: 4,
@@ -30,21 +28,19 @@ const assistantServicesSearch = tool(
 */
 const askAssistantForInformation = tool(
   async (input) => {
-      return input.strategy;
+    return input.strategy;
   },
   {
-    name: "Ask_Assistant_Context",
-    description:
-      "Ask assistant for information about services or help offered.",
+    name: 'Ask_Assistant_Context',
+    description: 'Ask assistant for information about services or help offered.',
     schema: z.object({
-      strategy: z.string().describe("Strategy to use to adquire the information about the help or services offered by the entity chatbot, based on the knowledge already acquired."),
+      strategy: z
+        .string()
+        .describe(
+          'Strategy to use to adquire the information about the help or services offered by the entity chatbot, based on the knowledge already acquired.',
+        ),
     }),
-  }
+  },
 );
 
-
-
-
-
-
-export const ALL_TOOLS_LIST =[askAssistantForInformation]
+export const ALL_TOOLS_LIST = [askAssistantForInformation];
