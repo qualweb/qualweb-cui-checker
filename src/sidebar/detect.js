@@ -9,12 +9,12 @@ async function sendActionToActiveTab(action, payload = {}) {
         chrome.tabs.sendMessage(tabs[0].id, { action, ...payload }, (response) => {
           if (chrome.runtime.lastError) {
             console.error(chrome.runtime.lastError);
-            chrome.runtime.sendMessage({
-              type: 'restartContentScript',
-              tab: tabs[0].id,
-            });
+          
 
             return reject(chrome.runtime.lastError);
+          }
+          if (response.status === 'error') {
+            return reject(new Error(response.message));
           }
           resolve(response);
         });
@@ -26,6 +26,10 @@ async function sendActionToActiveTab(action, payload = {}) {
 }
 async function startDetectingChatbot() {
   return sendActionToActiveTab('detectChatbot');
+}
+
+async function cancelDetectionRequest(){
+  return sendActionToActiveTab('cancelDetection')
 }
 
 async function startPageChatbotProcedure() {
@@ -51,11 +55,15 @@ async function startVerificationElement(elementName) {
 }
 
 async function endVerificationElement(elementName) {
-  return sendActionToActiveTab('endSucessfulVerification', {
+  return sendActionToActiveTab('endSuccessfulVerification', {
     element: elementName,
   });
 }
 
 async function setStoredChatbotSelectors(elementName) {
   return sendActionToActiveTab('setStoredSelectors', { element: elementName });
+}
+
+async function resetDataContentScript() {
+  return sendActionToActiveTab('resetData');
 }
