@@ -14,7 +14,6 @@
 
             <label for="location_llm">LLM Service:</label>
             <select id="location_llm" v-model="LLMService" required>
-              <option value="ollama">Local Ollama</option>
               <option value="openai">OpenAI API</option>
             </select>
           </div>
@@ -60,10 +59,12 @@ const locale = computed({
   get: () => store.getters.getLocale,
   set: (value) => store.commit('SETLOCALE', value),
 });
+
 const apiKey = computed({
   get: () => store.getters.getApiKey,
   set: (value) => store.commit('SETAPIKEY', value),
 });
+
 const LLMService = computed({
   get: () => store.getters.getLLMService,
   set: (value) => store.commit('SETLLMSERVICE', value),
