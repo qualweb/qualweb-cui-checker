@@ -1,9 +1,24 @@
 <template>
   <div class="bigContainer">
     <div class="container">
+      <div>
+      <div class="position-icon-menu">
+
+        <span class="material-symbols-outlined position-icon-help rotatable" :class="{ rotated: isDropdownOpen }"  @click="toggleDropdown">
+        menu
+        </span>
+  
+      <div v-if="isDropdownOpen" class="dropdown-menu">
+        <ul>
+          <li @click="onHelpClick">Help</li>
+          <li @click="forgetSelectors">Forget Chatbot</li>
+        </ul> 
+       </div>
+    </div>
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
         settings
       </span>
+      </div>
       <h1 class="title">QUALWEB CUI CHECK</h1>
       <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
       <div class="evaluation-container">
@@ -35,19 +50,21 @@
       <hr />
 
       <div class="button-container">
-        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
-          Evaluate Chatbot
-        </button>
-
         <button @click="LLMInteraction" :disabled="generateResponsesActive">
-          Generate Responses for Evaluation
+          Start Interaction
+        </button>
+          <button @click="LLMSoundInteraction" :disabled="generateResponsesActive">
+          Start Sound Interaction
+        </button>
+        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
+          Evaluate Chatbot Accessibility
         </button>
       </div>
     </div>
   </div>
 </template>
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
@@ -60,6 +77,7 @@ const generateResponsesActive = ref(true);
 const actValue = ref(false);
 const wcagValue = ref(false);
 const cuiValue = ref(false);
+const isDropdownOpen = ref(false);
 
 const evaluated = computed(() => store.getters.getEvaluated);
 
@@ -77,12 +95,41 @@ const setEvaluated = async (idValue, value) => {
 const onSettingsClick = () => {
   chrome.runtime.openOptionsPage();
 };
+
+const onHelpClick = () => {
+  router.push('/help');
+};
+
 const onEvaluateClick = () => {
   router.push('/loading');
 };
 
+const toggleDropdown = () => {
+      isDropdownOpen.value = !isDropdownOpen.value;
+    }
+
 const LLMInteraction = () => {
   router.push('/interaction');
+};
+
+const LLMSoundInteraction = () => {
+  router.push('/interaction-sound');
+};
+
+const forgetSelectors = async () => {
+  await store.dispatch('forgetChatbotSelectors');
+  isDropdownOpen.value = false;
+  console.log("going to rest data");
+  await resetDataContentScript();
+  router.push('/');
+};
+
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.dropdown-menu');
+  const menuIcon = document.querySelector('.position-icon-help');
+  if (dropdown && !dropdown.contains(event.target) && !menuIcon.contains(event.target)) {
+    isDropdownOpen.value = false;
+  }
 };
 
 const updateEvaluated = async (idValue, event) => {
@@ -100,7 +147,12 @@ onMounted(() => {
     wcagValue.value = evaluated.value.wcag || false;
     cuiValue.value = evaluated.value.cui || false;
   }
+  document.addEventListener('click', handleClickOutside)
 });
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+});
+
 </script>
 
 <style scoped>
@@ -113,6 +165,12 @@ onMounted(() => {
   position: absolute;
   top: 12px;
   right: 20px;
+  cursor: pointer;
+}
+.position-icon-menu {
+  position: absolute;
+  top: 12px;
+  left: 20px;
   cursor: pointer;
 }
 .material-symbols-outlined {
@@ -133,6 +191,57 @@ onMounted(() => {
   justify-content: center;
   flex-direction: column;
   overflow: auto;
+  margin-top: 1rem;
+}
+
+
+.menu-dropdown {
+  position: relative; 
+  display: inline-block;
+}
+
+
+.rotatable {
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out;
+}
+
+.rotatable.rotated {
+  transform: rotate(90deg);
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  z-index: 10; 
+  background-color: #303030;
+  border: 1px solid #ccc;
+  width: 8rem;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+
+}
+.dropdown-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  
+}
+.dropdown-menu li:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+
+}
+
+.dropdown-menu li { 
+  text-align: center;
+  cursor: pointer;
+  color: white;
+  padding: 10px;
+}
+.dropdown-menu li:hover {
+  background-color: #575757;
 }
 
 .title {

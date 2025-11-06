@@ -10,9 +10,10 @@
         </span>
       </button>
       <div v-if="isDropdownOpen" class="dropdown-menu">
-            <PDFReport 
-            @buttonClicked="toggleDropdown"></PDFReport>
-            <CSVReport @buttonClicked="toggleDropdown"></CSVReport>
+        <ul>
+          <li><PDFReport @buttonClicked="toggleDropdown"></PDFReport></li>
+          <li><CSVReport @buttonClicked="toggleDropdown"></CSVReport></li>
+        </ul>
        </div>
     </div>
    </div>
@@ -35,7 +36,7 @@ import ListOfRules from '../../components/ListOfRules.vue';
 import FilterByResult from '../../components/FilterByResult.vue';
 import PDFReport from '../../components/PDFReport.vue';
 import CSVReport from '../../components/CSVReport.vue';
-import { mapActions } from 'vuex';
+import { mapActions,mounted } from 'vuex';
 
 export default {
   components: {
@@ -64,8 +65,21 @@ export default {
     },
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
-    }
+    },
+    handleClickOutside(event){
+  const dropdown = document.querySelector('.dropdown-menu');
+  const menuIcon = document.querySelector('.download-button');
+  if (dropdown && !dropdown.contains(event.target) && !menuIcon.contains(event.target)) {
+    this.isDropdownOpen = false;
+  }
   },
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside)
+},
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside)
+  }
 };
 </script>
 
@@ -136,19 +150,40 @@ export default {
   margin-left: 8px;
   font-size: 0.8em;
 }
-
 .dropdown-menu {
   position: absolute;
   top: 100%; 
   left: 0;
   z-index: 10; 
-  background-color: #fff;
-  min-width: 180px;
+  background-color: #303030;
+  border: 1px solid #ccc;
+  width:6rem;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   border-radius: 4px;
-  margin-top: 2px;
-  padding: 5px 0;
+
 }
+.dropdown-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  
+}
+.dropdown-menu li:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+
+}
+
+.dropdown-menu li { 
+  text-align: center;
+  cursor: pointer;
+  color: white;
+
+}
+.dropdown-menu li:hover {
+  background-color: #575757;
+}
+
 
 .button-neutral {
   background-color: #75706c;
