@@ -1,14 +1,12 @@
-import Index from './pages/Index';
 import Evaluation from './pages/Evaluation';
 import RuleContent from './pages/RuleContent';
 import Loading from './pages/Loading';
-import Settings from './pages/Settings.vue';
 import Start from './pages/Start.vue';
 import Ready from './pages/Ready.vue';
-import FailedDetection from './pages/FailedDetection.vue';
-import EvaluationSettings from './pages/EvaluationSettings.vue';
-import DetectingPageChatbot from './pages/DetectingPageChatbot.vue';
+import Detection from './pages/Detection.vue';
 import Interaction from './pages/Interaction.vue'
+import InteractionSound from './pages/InteractionSound.vue'
+import Help from './pages/Help.vue';
 
 export default [
   {
@@ -21,16 +19,6 @@ export default [
     component: Ready,
   },
   {
-    path: '/settings',
-    name: 'settings',
-    component: Settings,
-  },
-  {
-    path: '/evaluation-settings',
-    name: 'evaluation-settings',
-    component: EvaluationSettings,
-  },
-  {
     path: '/evaluation',
     name: 'evaluation',
     component: Evaluation,
@@ -41,14 +29,14 @@ export default [
     component: Interaction,
   },
   {
-    path: '/detecting-page-chatbot',
-    name: 'detecting-page-chatbot',
-    component: DetectingPageChatbot,
+    path: '/interaction-sound',
+    name: 'interaction-sound',
+    component: InteractionSound,
   },
   {
-    path: '/failed-detection',
-    name: 'failed-detection',
-    component: FailedDetection,
+    path: '/detecting-chatbot',
+    name: 'detecting-chatbot',
+    component: Detection,
   },
   {
     path: '/rule-content',
@@ -59,5 +47,10 @@ export default [
     path: '/loading',
     name: 'loading',
     component: Loading,
+  },
+    {
+    path: '/help',
+    name: 'help',
+    component: Help,
   },
 ];

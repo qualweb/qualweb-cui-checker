@@ -15,7 +15,6 @@
 </template>
 
 <script>
-import { routerKey } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 export default {
   name: 'Interaction',
@@ -24,7 +23,7 @@ export default {
     ...mapGetters([]),
     cancelInteraction() {
       if (this._port) {
-        this._port.postMessage({action: "cancel_interaction"});
+        this._port.postMessage("cancel");
         this.isCanceled = true;  
       }
 
@@ -32,7 +31,7 @@ export default {
     },
     skipObjective() {
       if (this._port) {
-        this._port.postMessage({action: "skip_objective"});
+        this._port.postMessage("skip");
 
       }
 
@@ -47,20 +46,14 @@ export default {
     };
   },
   async mounted() {
-    this._port = await prepareCommunicationBackground();
+     this._port = await prepareCommunicationBackground();
     if (!this._port) {
       console.error('Failed to connect to background script');
       return;
     }
-    
     // Make bi-directional connection to tab
-    const response = await startLLMInteraction();
-    console.log('LLM interaction started with status:', response.status);
-    if (response.status !== 'success') {
-      console.error('Failed to start LLM interaction', response.message);
-      router.push('/ready');
-    }
-    this._port.onMessage.addListener((msg) => {
+    startLLMSoundInteraction();
+     this._port.onMessage.addListener((msg) => {
 
       if(msg.action==="cancelled"){
         this._port.disconnect();
