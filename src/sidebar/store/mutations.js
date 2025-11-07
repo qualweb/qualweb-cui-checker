@@ -1,4 +1,4 @@
-import * as types from "./mutation-types";
+import * as types from './mutation-types';
 
 export default {
   [types.SETACT](state, payload) {
@@ -16,11 +16,11 @@ export default {
   [types.SETCHATBOTCUI](state, payload) {
     state.chatbotCui = payload;
   },
-  [types.SETHTML](state, payload) {
-    state.html = payload;
+  [types.SETWCAG](state, payload) {
+    state.wcag = payload;
   },
-  [types.SETCHATBOTHTML](state, payload) {
-    state.chatbotHtml = payload;
+  [types.SETCHATBOTWCAG](state, payload) {
+    state.chatbotWcag = payload;
   },
   [types.SETCSS](state, payload) {
     state.css = payload;
@@ -39,8 +39,8 @@ export default {
     let currentRule = state.currentRule;
     if (!!currentRule) {
       let currentRuleData = state[currentRule.module][currentRule.code];
-      let filter = state["filter"];
-      let outcome = currentRuleData["metadata"]["outcome"];
+      let filter = state['filter'];
+      let outcome = currentRuleData['metadata']['outcome'];
       let module = currentRule.module;
       if (!(filter[outcome] && filter[module])) {
         state.currentRule = null;
@@ -63,13 +63,13 @@ export default {
     state.highlightActive = payload;
   },
   [types.RESET](state) {
-    state.evaluated = { act: false, cui: false, css: false, html: false };
+    state.evaluated = { act: false, cui: false, css: false, wcag: false };
     state.act = {};
     state.chatbotAct = {};
     state.cui = {};
     state.chatbotCui = {};
-    state.html = {};
-    state.chatbotHtml = {};
+    state.wcag = {};
+    state.chatbotWcag = {};
     state.css = {};
     state.summary = {};
     state.chatbotSummary = {};
@@ -87,5 +87,11 @@ export default {
   },
   [types.SETDETECTINGCHATBOT](state, payload) {
     state.detectingChatbot = payload;
+  },
+  [types.SETURL](state, payload) {
+    state.storage.url = payload;
+  },
+  [types.SETSELECTORS](state, payload) {
+    state.storage.selectors = payload;
   },
 };

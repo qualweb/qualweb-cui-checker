@@ -5,16 +5,16 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
-  name: "RunAgain",
+  name: 'RunAgain',
   methods: {
-    ...mapActions(["reset"]),
-    ...mapGetters(["getEvaluated", "getFirstRule"]),
+    ...mapActions(['reset']),
+    ...mapGetters(['getEvaluated', 'getFirstRule']),
     runAgain() {
       this.reset();
-      this.$router.push("/");
+      this.$router.push('/');
     },
   },
 };

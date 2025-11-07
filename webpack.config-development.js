@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('node:path');
 const webpack = require('webpack');
 const ejs = require('ejs');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -7,6 +7,9 @@ const ExtReloader = require('webpack-ext-reloader');
 const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
+const fs = require('node:fs');
+const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
+
 const config = {
   mode: 'development',
   entry: {
@@ -18,21 +21,30 @@ const config = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].bundle.js'
+    filename: '[name].bundle.js',
+    publicPath:'dist/',
   },
   resolve: {
     alias: {
-   'vue': 'vue/dist/vue.esm-bundler.js'
+   'vue': 'vue/dist/vue.esm-bundler.js',
+     "@microsoft/recognizers-text-number-with-unit": path.resolve(
+        __dirname,
+        "node_modules/@microsoft/recognizers-text-number-with-unit/dist/recognizers-text-number-with-unit.es5.js"
+      ),
     },
     extensions: ['.ts', '.js', '.vue'],
   },
-  devtool: 'source-map',
+  devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
         enforce: 'pre',
         test: /\.js$/,
         loader: 'source-map-loader',
+          exclude: [
+          /node_modules\/@microsoft\/recognizers-text-number-with-unit/,
+/node_modules\/html2pdf\.js/,
+        ],
       },
       {
         test: /\.ts$/,
@@ -97,14 +109,13 @@ const config = {
     ],
   },
   optimization: {
-    minimize: true,
-    minimizer: [new TerserPlugin({
-      terserOptions: {
-        keep_classnames: true, 
-      },
-    })],
+    minimize: false
+   
   },
   plugins: [
+     new webpack.DefinePlugin({
+      APP_CONFIG: JSON.stringify(definitions),
+    }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].css' }),
     new CopyPlugin({
@@ -115,7 +126,8 @@ const config = {
       { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'act.js' },
       { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'cui.js' },
       { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
-      { from: 'src/locales/en.js', to: 'locales/en.js' },
+      { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'common-words-pt.txt' },
+      //{ from: 'src/locales/en.js', to: 'locales/en.js' },
       { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
       { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
       { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },

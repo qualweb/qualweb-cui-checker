@@ -44,9 +44,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters } from 'vuex';
 export default {
-  name: "VueSelect",
+  name: 'VueSelect',
   props: {
     items: {
       type: Array,
@@ -56,7 +56,7 @@ export default {
     },
     value: {
       type: String,
-      default: "All outcomes",
+      default: 'All outcomes',
     },
   },
   data() {
@@ -69,8 +69,8 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["setFilter", "setCurrentRule"]),
-    ...mapGetters(["getFirstRule"]),
+    ...mapActions(['setFilter', 'setCurrentRule']),
+    ...mapGetters(['getFirstRule']),
     focus() {
       this.focusedElem = true;
     },
@@ -88,8 +88,7 @@ export default {
       return this.selectedIdx === idx;
     },
     moveUp() {
-      this.hoverIndex =
-        this.hoverIndex === 0 ? this.items.length - 1 : this.hoverIndex - 1;
+      this.hoverIndex = this.hoverIndex === 0 ? this.items.length - 1 : this.hoverIndex - 1;
     },
     moveDown() {
       this.hoverIndex = (this.hoverIndex + 1) % this.items.length;
@@ -151,7 +150,7 @@ $item-selected-color: rgba(0, 0, 0, 0.25);
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 6px solid $border-color;
-    content: "";
+    content: '';
     height: 0;
     position: absolute;
     right: 8px;
@@ -164,7 +163,7 @@ $item-selected-color: rgba(0, 0, 0, 0.25);
     border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-bottom: 6px solid $border-color;
-    content: "";
+    content: '';
     height: 0;
     position: absolute;
     right: 8px;

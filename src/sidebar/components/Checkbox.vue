@@ -19,7 +19,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-const model = defineModel()
+const model = defineModel();
 const props = defineProps({
   idValue: String,
   label: String,
@@ -28,14 +28,14 @@ const props = defineProps({
 });
 
 const toggleChecked = (event) => {
-  emit("toggle:check",event.target); 
+  emit('toggle:check', event.target);
 };
 
 const focusedElem = ref(false);
 const emit = defineEmits(['toggle:check']);
 const cssVars = computed(() => ({
-  "--bg-color": props.bgColor,
-  "--bg-check": props.checkColor,
+  '--bg-color': props.bgColor,
+  '--bg-check': props.checkColor,
 }));
 
 function focus() {
@@ -89,7 +89,7 @@ function blur() {
 }
 .md-checkbox label:before,
 .md-checkbox label:after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
@@ -103,7 +103,7 @@ function blur() {
   cursor: pointer;
   transition: background 0.3s;
 }
-.md-checkbox input[type="checkbox"] {
+.md-checkbox input[type='checkbox'] {
   outline: 0;
   width: 1.25rem;
   margin: 0;
@@ -111,11 +111,11 @@ function blur() {
   float: left;
   font-size: inherit;
 }
-.md-checkbox input[type="checkbox"]:checked + label:before {
+.md-checkbox input[type='checkbox']:checked + label:before {
   background: var(--bg-color);
   border: none;
 }
-.md-checkbox input[type="checkbox"]:checked + label:after {
+.md-checkbox input[type='checkbox']:checked + label:after {
   transform: translate(0.25em, 0.3365384615em) rotate(-45deg);
   width: 0.75rem;
   height: 0.375rem;
@@ -123,10 +123,10 @@ function blur() {
   border-top-style: none;
   border-right-style: none;
 }
-.md-checkbox input[type="checkbox"]:disabled + label:before {
+.md-checkbox input[type='checkbox']:disabled + label:before {
   border-color: rgba(0, 0, 0, 0.26);
 }
-.md-checkbox input[type="checkbox"]:disabled:checked + label:before {
+.md-checkbox input[type='checkbox']:disabled:checked + label:before {
   background: rgba(0, 0, 0, 0.26);
 }
 </style>

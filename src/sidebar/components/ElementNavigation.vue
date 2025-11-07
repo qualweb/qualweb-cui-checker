@@ -12,12 +12,12 @@
 </template>
 
 <script>
-import NavigationBar from "./NavigationBar.vue";
-import RuleResult from "./RuleResult.vue";
-import { mapGetters } from "vuex";
+import NavigationBar from './NavigationBar.vue';
+import RuleResult from './RuleResult.vue';
+import { mapGetters } from 'vuex';
 
 export default {
-  name: "ElementNavigation",
+  name: 'ElementNavigation',
   data() {
     return {
       element: null,
@@ -27,15 +27,14 @@ export default {
   beforeUpdate() {
     if (this.lastHighlightElement !== null) {
       let selector = this.lastHighlightElement.pointer;
-      chrome.devtools.inspectedWindow.eval(
-        `turnOffhighlightElement("${selector}")`,
-        { useContentScriptContext: true }
-      );
+      chrome.devtools.inspectedWindow.eval(`turnOffhighlightElement("${selector}")`, {
+        useContentScriptContext: true,
+      });
     }
   },
-  computed: mapGetters({ results: "getCurrentRuleResults" }),
+  computed: mapGetters({ results: 'getCurrentRuleResults' }),
   methods: {
-    ...mapGetters(["getCurrentRuleResults"]),
+    ...mapGetters(['getCurrentRuleResults']),
     updateResult(index) {
       this.element = this.results[index - 1];
     },
@@ -43,18 +42,17 @@ export default {
       let element = this.results[index - 1];
       this.lastHighlightElement = element;
       let elements = element.elements;
-      chrome.devtools.inspectedWindow.eval(
-        "highlightElement(" + JSON.stringify(elements) + ")",
-        { useContentScriptContext: true }
-      );
+      chrome.devtools.inspectedWindow.eval('highlightElement(' + JSON.stringify(elements) + ')', {
+        useContentScriptContext: true,
+      });
     },
     offHighlightElement(index) {
       this.lastHighlightElement = null;
       let element = this.results[index - 1];
       let elements = element.elements;
       chrome.devtools.inspectedWindow.eval(
-        "turnOffhighlightElement(" + JSON.stringify(elements) + ")",
-        { useContentScriptContext: true }
+        'turnOffhighlightElement(' + JSON.stringify(elements) + ')',
+        { useContentScriptContext: true },
       );
     },
   },

@@ -1,5 +1,5 @@
 declare const locale_en: {
-  "act-rules": {
+  'act-rules': {
     [key: string]: {
       name: string;
       description: string;

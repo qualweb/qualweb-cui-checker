@@ -36,25 +36,25 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import RuleResult from "../../components/RuleResult.vue";
-import ElementNavigation from "../../components/ElementNavigation.vue";
-import ColapsibleResultFilter from "../../components/ColapsibleResultFilter.vue";
+import { mapGetters } from 'vuex';
+import RuleResult from '../../components/RuleResult.vue';
+import ElementNavigation from '../../components/ElementNavigation.vue';
+import ColapsibleResultFilter from '../../components/ColapsibleResultFilter.vue';
 
 export default {
-  name: "ListContent",
+  name: 'ListContent',
   components: {
     RuleResult,
     ElementNavigation,
     ColapsibleResultFilter,
   },
   computed: mapGetters({
-    rule: "getCurrentRule",
-    results: "getCurrentRuleResults",
+    rule: 'getCurrentRule',
+    results: 'getCurrentRuleResults',
   }),
   methods: {
     goToEvaluation() {
-      this.$router.push({ name: "evaluation" });
+      this.$router.push({ name: 'evaluation' });
     },
   },
 };
@@ -72,7 +72,11 @@ a {
   margin: 1em;
 }
 .arrow-container {
-  padding: 1rem;
+  z-index: 1000;
+  position: sticky;
+  background-color: #393939;
+  top: 0;
+  border-bottom: 1px solid #ccc; 
 }
 .arrow-button {
   background: none;

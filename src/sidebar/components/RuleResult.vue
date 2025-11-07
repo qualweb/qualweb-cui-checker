@@ -22,11 +22,11 @@
 </template>
 
 <script>
-import { component as VueCodeHighlight } from "vue-code-highlight";
-import "vue-code-highlight/themes/prism-dark.css";
+import { component as VueCodeHighlight } from 'vue-code-highlight';
+import 'vue-code-highlight/themes/prism-dark.css';
 export default {
-  name: "RuleResult",
-  props: ["result"],
+  name: 'RuleResult',
+  props: ['result'],
   components: {
     VueCodeHighlight,
   },
@@ -37,5 +37,7 @@ export default {
 <style>
 .result {
   padding: 0.8rem;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 </style>

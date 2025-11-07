@@ -6,3 +6,6 @@
 **/package-lock.json
 useCases.txt
 settings.json
+.idea
+# LangGraph API
+.langgraph_api

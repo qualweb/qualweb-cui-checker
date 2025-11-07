@@ -1,15 +1,21 @@
 declare global {
+  interface RuleTest{
+    code:string;
+    selector:string;
+    result:string;
+  }
   class CUIChecksRunner {
     constructor(
       moduleOptions: ModuleOptions,
       translationOptions: { translate: any; fallback: any },
-      filePath?: string
+      filePath?: string,
+      rules?:RuleTest[]
     );
     test(data: TestingData): any;
     executeTests(): Promise<any>;
     getReport(): CUIChecksReport;
   }
-  
+
   interface QWCUI_Selectors {
     QW_CC_WINDOW: string;
     QW_CC_DIALOG: string;
@@ -24,7 +30,7 @@ declare global {
     test(data: TestingData): any;
     testSpecial(): any;
     getReport(): ACTReport;
-  } 
+  }
 
   class WCAGTechniquesRunner {
     constructor(locale: any, options?: any);
@@ -39,7 +45,7 @@ declare global {
     cui: CUIChecksRunner;
     webkitAudioContext: typeof AudioContext;
   }
-}
+
 interface CUIChecksReport {
   assertions: Record<string, CUIRule>;
   metadata: {
@@ -59,4 +65,12 @@ interface ACTReport {
   };
 }
 
+declare const APP_CONFIG: {
+  VERSION: string;
+  DIST_FOLDER:string;
+  RESOURCES_WORDS_PT: string;
+  INITIAL_INTERACTION_MESSAGE_PT:string;
+  INITIAL_INTERACTION_MESSAGE_EN:string;
+};
+}
 export {};

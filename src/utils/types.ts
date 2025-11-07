@@ -1,6 +1,18 @@
+
+
 export interface ChatResponse {
   message: string;
   response: string[];
+}
+
+export interface QWCUI_Settings {
+  [key: string]: string;
+}
+
+export interface LLM_Settings {
+  LLMService: string;
+  apiKey: string | null;
+  locale:string;
 }
 
 export interface ResponsesSelectors {
@@ -8,42 +20,18 @@ export interface ResponsesSelectors {
 }
 
 
-// @Deprecated
-export interface LLMResponse {
-  xpath_chatbot: string | null;
-  xpath_microphone: string | null;
-}
-
-// Interface for the response from the local LLM
-export interface LocalLLMResponse {
-  xpath_window: string | null;
-  xpath_input: string | null;
-  xpath_conversation: string | null;
-  xpath_bot_selector: string | null;
-  xpath_microphone: string | null;
-}
-
-// Interface for the ChatBot ELements and selector
-export interface ChatBotInterface {
-  windowElement: HTMLElement | null;
-  inputElement: HTMLElement | HTMLInputElement | HTMLTextAreaElement | null;
-  messagesSelector: string;
-  dialogElement: HTMLElement | null;
-  microphoneElement: HTMLElement | null;
-  selectors: ChatbotSelector;
-}
 
 // Selectors for the chatbot elements
 // first index in each array is the current selector for the chatbot element
 // more selectors are added when the makes new requests for the chatbot elements, saving possible correct selectors
-export interface ChatbotSelector {
-  window: string[];
-  dialog: string[];
-  messages: string[];
-  input: string[];
-  microphone: string[];
-}
-
+export interface ChatBotSelectors {
+    iframeSelector?: string;
+    inputSelector: string;
+    messagesSelector: string;
+    dialogSelector: string;
+    microphoneSelector?: string;
+    windowSelector: string;
+  }
 export interface ResponseStore {
   [message: string]: string;
 }
@@ -67,7 +55,7 @@ interface RuleMetadata {
   target: {
     element: string | string[];
   };
-  "success-criteria": SuccessCriteria[];
+  'success-criteria': SuccessCriteria[];
   related: string[];
   url: string;
   passed: number;
@@ -87,11 +75,11 @@ interface Rule {
   results: Result[];
 }
 
-interface Result{
+interface Result {
   attributes: string[];
   description: string;
   mapping: string;
-  elements:   [];
+  elements: [];
   resultCode: string;
   veridict: string;
 }
@@ -114,4 +102,4 @@ interface Report {
   };
 }
 
-export { Summary, Rule, RuleMetadata, Report , Result ,ElementTest};
+export { Summary, Rule, RuleMetadata, Report, Result, ElementTest };

@@ -1,5 +1,11 @@
 import { createApp } from 'vue';
-import App from "./App";
+import App from './App';
+import router from './router';
+import store from './store';
 
-/* eslint-disable no-new */
-createApp(App).mount('#app');
+const app = createApp(App);
+
+app.use(router);
+app.use(store);
+store.dispatch('loadOptions');
+app.mount('#app');

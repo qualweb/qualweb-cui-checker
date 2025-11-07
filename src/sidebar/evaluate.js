@@ -1,139 +1,38 @@
 async function startEvaluation() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "startEvaluation" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(response);
-            }
-          }
-        );
-      } else {
-        reject(new Error("No active tab found"));
-      }
-    });
-  });
-}
-
-async function startEvaluation() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(
-          tabs[0].id,
-          { action: "startEvaluation" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(response);
-            }
-          }
-        );
-      } else {
-        reject(new Error("No active tab found"));
-      }
-    });
-  });
-}
-
-async function getRoute() {
-  return new Promise((resolve) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        chrome.runtime.sendMessage(
-          {
-            action: "getRoute",
-            tabId: activeTab,
-          },
-          (response) => {
-            if (response.route) {
-              resolve(response.route);
-            }
-          }
-        );
-      });
-    });
-  });
+  return sendActionToActiveTab('startEvaluation');
 }
 
 async function evaluateACT() {
-  console.log("evaluateACT");
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateACT" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
+  return sendActionToActiveTab('evaluateACT');
 }
 
 async function evaluateWCAG() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateWCAG" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
+  return sendActionToActiveTab('evaluateWCAG');
 }
 
 async function evaluateCUI() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "evaluateCUI" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
+  let settingsStorage = await getQualWebSettings();
+  console.log('Settings Storage: ', settingsStorage);
+  return sendActionToActiveTab('evaluateCUI', {
+    settings: settingsStorage.options,
   });
 }
 
-function endingEvaluation() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "endingEvaluation" },
-        (response) => {
-          resolve(response);
-        }
-      );
-    });
-  });
+async function endingEvaluation() {
+  return sendActionToActiveTab('endingEvaluation');
 }
-
 async function getUrl() {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       resolve(tabs[0].url);
+    });
+  });
+}
+
+async function getQualWebSettings() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get('qualweb_settings', (result) => {
+      resolve(result.qualweb_settings);
     });
   });
 }

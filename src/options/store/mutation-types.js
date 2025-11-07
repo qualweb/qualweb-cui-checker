@@ -1,0 +1,5 @@
+export const SETAPIKEY = 'SETAPIKEY';
+export const SETLOCALE = 'SETLOCALE';
+export const SETFIRSTRUN = 'SETFIRSTRUN';
+export const SETOPTIONS = 'SETOPTIONS';
+export const SETLLMSERVICE = 'SETLLMSERVICE';

@@ -1,40 +1,36 @@
-import {caseHandlers, IChromeRequest} from './actions/MapperActions';
 
+import { HANDLERS, IChromeRequest } from './actions/MapperActions';
 
-// Main message listener
+// flag to indicate that the content script has loaded
+(window as any).__qwContentLoaded = true;
+
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    let action = request.action;
+  let action = request.action;
 
-    if(!action){
-      // error handling
-      console.error("Unknown case:", action);
-    }
-    let data:IChromeRequest = {request,sendResponse};
+  if (!action) {
+    // error handling
+    console.error('Unknown case:', action);
+  }
+  let data: IChromeRequest = { request, sendResponse };
 
-    if (caseHandlers[action]) {
-        const result: any = caseHandlers[action](data);
-        if(result  instanceof Promise){
-
-          result.then((response) => {
-            sendResponse(response);
-            return false;
-          });
-
-          return true;
-          
-        }
-
+  if (HANDLERS[action]) {
+    const result: any = HANDLERS[action](data);
+    if (result instanceof Promise) {
+      result.then((response) => {
+        sendResponse(response);
         return false;
-    } else {
-        console.error("No handler found for action:", action);
+      });
+
+      return true;
     }
- 
+    return false;
+  } else {
+    console.error('No handler found for action:', action);
+  }
 });
 
-
-
-// Function to send message to background 
+// Function to send message to background
 export function sendMessageToBackground(action: string, text: string): Promise<void> {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({ action, text }, () => {
@@ -42,11 +38,6 @@ export function sendMessageToBackground(action: string, text: string): Promise<v
         return reject(chrome.runtime.lastError);
       }
       resolve();
-
     });
-
   });
 }
-
-
-

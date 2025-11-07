@@ -48,35 +48,35 @@
 </template>
 
 <script>
-import Checkbox from "./Checkbox.vue";
-import { mapActions, mapGetters } from "vuex";
+import Checkbox from './Checkbox.vue';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
-  name: "ColapsibleResultFilter",
+  name: 'ColapsibleResultFilter',
   data() {
     return {
       isOpen: false,
-      passedIdValue: "PASSED",
-      passedLabel: "Passed - ",
-      failedIdValue: "FAILED",
-      failedLabel: "Failed - ",
-      warningIdValue: "WARNING",
-      warningLabel: "Warning - ",
-      inapplicableIdValue: "INAPPLICABLE",
-      inapplicableLabel: " Inapplicable - ",
-      passedColor: "#46f73f",
-      failedColor: "#ff3535",
-      warningColor: "#ffd600",
-      checkColor: "black",
-      bgColor: "white",
+      passedIdValue: 'PASSED',
+      passedLabel: 'Passed - ',
+      failedIdValue: 'FAILED',
+      failedLabel: 'Failed - ',
+      warningIdValue: 'WARNING',
+      warningLabel: 'Warning - ',
+      inapplicableIdValue: 'INAPPLICABLE',
+      inapplicableLabel: ' Inapplicable - ',
+      passedColor: '#46f73f',
+      failedColor: '#ff3535',
+      warningColor: '#ffd600',
+      checkColor: 'black',
+      bgColor: 'white',
     };
   },
   computed: mapGetters({
-    filter: "getResultFilter",
-    resultNumber: "getResultNumber",
+    filter: 'getResultFilter',
+    resultNumber: 'getResultNumber',
   }),
   methods: {
-    ...mapActions(["setResultFilter"]),
+    ...mapActions(['setResultFilter']),
     changeState() {
       this.isOpen = !this.isOpen;
     },

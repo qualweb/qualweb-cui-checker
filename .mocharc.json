@@ -1,7 +1,10 @@
 {
   "extensions": ["ts"],
-  "require": "ts-node/register",
+  "require": ["ts-node/register","test/global.ts"],
 
   "ignore": ["node_modules/**"],
   "types": ["mocha", "node"]
+
+  
+  
 }

@@ -1,20 +1,28 @@
 import { createStore } from 'vuex';
 
-import * as getters from "./getters";
-import mutations from "./mutations";
-import * as actions from "./actions";
-
-
+import * as getters from './getters';
+import mutations from './mutations';
+import * as actions from './actions';
 
 export const defaultState = {
+  storage: {
+    url: '',
+    selectors: {
+      windowsSelector: '',
+      dialogSelector: '',
+      inputSelector: '',
+      messagesSelector: '',
+      microphoneSelector: '',
+    },
+  },
   summary: {},
   chatbotSummary: {},
-  evaluated: { act: false, cui: false, css: false, html: false },
+  evaluated: { act: false, cui: false, css: false, wcag: false },
   filter: {},
   act: {},
   chatbotAct: {},
-  html: {},
-  chatbotHtml: {},
+  wcag: {},
+  chatbotWcag: {},
   cui: {},
   chatbotCui: {},
   currentRule: {},
@@ -31,14 +39,24 @@ export const defaultState = {
 
 export default new createStore({
   state: {
+    storage: {
+      url: '',
+      selectors: {
+        windowsSelector: '',
+        dialogSelector: '',
+        inputSelector: '',
+        messagesSelector: '',
+        microphoneSelector: '',
+      },
+    },
     summary: {},
     chatbotSummary: {},
-    evaluated: { act: false, cui: false, css: false, html: false },
+    evaluated: { act: false, cui: false, css: false, wcag: false },
     filter: {},
     act: {},
     chatbotAct: {},
-    html: {},
-    chatbotHtml: {},
+    wcag: {},
+    chatbotWcag: {},
     cui: {},
     chatbotCui: {},
     currentRule: {},

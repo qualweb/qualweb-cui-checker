@@ -1,6 +1,6 @@
 export const getAllRulesFromModule = (state) => (module) => state[module];
 export const getRuleWithCode = (state) => (code, module) => state[module][code];
-export const getEvaluated = (state) => state["evaluated"];
+export const getEvaluated = (state) => state['evaluated'];
 export const getCurrentRule = (state) => {
   let currentRule = state.currentRule;
   if (!!currentRule) {
@@ -16,6 +16,25 @@ export const getCurrentRule = (state) => {
     return null;
   }
 };
+
+export const getCurrentFilteredRules = (state) => {
+  //state get evaluated
+  const evaluatedState = state.evaluated; // { wcag: true, cui: false, act: true }
+  console.log(evaluatedState);
+  const evaluatedModules = Object.entries(evaluatedState)
+    .filter(([_, value]) => value === true)
+    .map(([key]) => key);
+  console.log(evaluatedModules);
+  let rules = [];
+
+  for (const module of evaluatedModules) {
+    const rulesModule = Object.values(state[module]);
+    rules.push(...rulesModule);
+  }
+
+  return rules;
+};
+
 export const getCurrentRuleResults = (state) => {
   let currentRule = state.currentRule;
   let rule = state[currentRule.module][currentRule.code];
@@ -28,6 +47,82 @@ export const getCurrentRuleResults = (state) => {
     }
   }
   return newResults;
+};
+
+export const getAllRulesAndResults = (state) => {
+  // Check evaluateChatbot state if true or false
+  const evaluateChatbot = state.evaluateChatbot;
+
+  let rules = [];
+
+  if (evaluateChatbot) {
+    const chatbotResults = {
+      act: state.chatbotAct,
+      wcag: state.chatbotWcag,
+      cui: state.chatbotCui,
+    };
+
+    const filter = state.filter;
+    for (const [module, results] of Object.entries(chatbotResults)) {
+      if (filter[module]) {
+        for (const [key, value] of Object.entries(results)) {
+          const ruleOutcome = value.metadata.outcome;
+          if (filter[ruleOutcome]) {
+            let results = value.results;
+            let newResults = [];
+            for (let result of results) {
+              if (filter[result.verdict]) {
+                newResults.push(result);
+              }
+            }
+            rules.push({
+              title: value.name,
+              code: value.code,
+              outcome: ruleOutcome,
+              module: module,
+              results: newResults,
+            });
+          }
+        }
+      }
+    }
+  } else {
+    // If false, continue as before
+    let modules = Object.keys(state.evaluated);
+    let evaluated = state.evaluated; // act/wcag modules
+    let filter = state.filter;
+    let keys, ruleOutcome;
+    let value, moduleState;
+
+    for (let module of modules) {
+      if (evaluated[module] && filter[module]) {
+        keys = Object.keys(state[module]);
+        moduleState = state[module];
+        for (let key of keys) {
+          value = moduleState[key];
+          ruleOutcome = value.metadata.outcome;
+          if (filter[ruleOutcome]) {
+            let results = value.results;
+            let newResults = [];
+            for (let result of results) {
+              if (filter[result.verdict]) {
+                newResults.push(result);
+              }
+            }
+            rules.push({
+              title: value.name,
+              code: value.code,
+              outcome: value.metadata.outcome,
+              module: module,
+              results: newResults,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return rules;
 };
 
 export const getResultNumber = (state) => {
@@ -48,7 +143,7 @@ export const getAllRuleCodeAndTitle = (state) => {
   if (evaluateChatbot) {
     const chatbotResults = {
       act: state.chatbotAct,
-      html: state.chatbotHtml,
+      wcag: state.chatbotWcag,
       cui: state.chatbotCui,
     };
 
@@ -99,9 +194,9 @@ export const getAllRuleCodeAndTitle = (state) => {
   return rules;
 };
 export const getFirstRule = (state) => {
-  let modules = Object.keys(state["evaluated"]);
-  let evaluated = state["evaluated"];
-  let filter = state["filter"];
+  let modules = Object.keys(state['evaluated']);
+  let evaluated = state['evaluated'];
+  let filter = state['filter'];
   let keys;
   let value, moduleState, result;
   let done = false;
@@ -113,9 +208,9 @@ export const getFirstRule = (state) => {
       moduleState = state[module];
       while (!done && index < keys.length) {
         value = moduleState[keys[index]];
-        ruleOutcome = value["metadata"]["outcome"];
+        ruleOutcome = value['metadata']['outcome'];
         if (filter[ruleOutcome]) {
-          result = { code: value["code"], module: module };
+          result = { code: value['code'], module: module };
           done = true;
         }
         index++;
@@ -138,8 +233,8 @@ export const getAllData = (state) => {
     chatbotAct: state.chatbotAct,
     cui: state.cui,
     chatbotCui: state.chatbotCui,
-    html: state.html,
-    chatbotHtml: state.chatbotHtml,
+    wcag: state.wcag,
+    chatbotWcag: state.chatbotWcag,
     css: state.css,
   };
 };
@@ -147,3 +242,6 @@ export const getAllData = (state) => {
 export const getEvaluateChatbot = (state) => state.evaluateChatbot;
 
 export const getDetectingChatbot = (state) => state.detectingChatbot;
+
+export const getStorage = (state) => state.storage;
+export const getSelectors = (state) => state.storage.selectors;

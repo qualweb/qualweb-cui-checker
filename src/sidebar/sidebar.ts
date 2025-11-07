@@ -1,110 +1,76 @@
-import { createApp } from "vue";
-import router from "./router";
-import App from "./App.vue";
-import { messages } from "../utils/messagesToSend";
-import store from "./store";
+import { createApp } from 'vue';
+import router from './router';
+import App from './App.vue';
+import store from './store';
 
-
-const app = createApp(App);
-
-
-app.use(router);
-app.use(store);
-
-app.mount('#app');
-
-
-
- /* const identifyButton = document.getElementById("identifyButton");
-  if (identifyButton) {
-    identifyButton.addEventListener("click", () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        if (activeTab.id) {
-          chrome.tabs.sendMessage(activeTab.id, { action: "startSelection" });
-          window.close();
-        }
-      });
+async function sendActionToActiveTab(
+  action: string,
+  payload: Record<string, any> = {},
+): Promise<any> {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        console.error(chrome.runtime.lastError);
+        return reject(chrome.runtime.lastError);
+      }
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action, ...payload }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError);
+            return reject(chrome.runtime.lastError);
+          }
+          if (response === undefined) {
+            console.warn('No response received before the message port closed.');
+            return reject(new Error('No response received before the message port closed.'));
+          }
+          resolve(response);
+        });
+      } else {
+        reject(new Error('No active tab found'));
+      }
     });
-  }
-
-  const identifyMicButton = document.getElementById("identifyMicButton");
-  if (identifyMicButton) {
-    identifyMicButton.addEventListener("click", () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        if (activeTab.id) {
-          chrome.tabs.sendMessage(activeTab.id, {
-            action: "startMicSelection",
-          });
-          window.close();
-        }
-      });
+  });
+}
+function getInitialRoute(): Promise<string> {
+  return new Promise(async (resolve) => {
+    let url: string = await getUrl();
+    let hostname = new URL(url).hostname;
+    let selectors = await chrome.storage.local.get('qualweb-selectors');
+    const selectorsForHostname = JSON.parse(
+      JSON.stringify(selectors['qualweb-selectors']?.[hostname] || {}),
+    );
+    console.log('selectors', selectorsForHostname);
+    if (selectorsForHostname && Object.keys(selectorsForHostname).length > 0) {
+      await setStoredSelectors(selectorsForHostname);
+      resolve('/ready');
+      return;
+    } else {
+      resolve('/');
+    }
+  });
+}
+async function getUrl(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs.length === 0 || !tabs[0].url) {
+        console.error('No active tab with a URL found.');
+        return reject(new Error('No URL found for the active tab'));
+      }
+      resolve(tabs[0].url);
     });
-  }
-*/
-  const voiceInputButton = document.getElementById("voiceInputButton");
-  if (voiceInputButton) {
-    voiceInputButton.addEventListener("click", () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        if (activeTab?.id) {
-          chrome.tabs.sendMessage(
-            activeTab.id!,
-            { action: "startVoiceInput", messages },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.error(
-                  "Error sending message:",
-                  chrome.runtime.lastError.message
-                );
-              } else {
-                console.log(response?.status);
-              }
-            }
-          );
-        }
-      });
+  });
+}
+async function setStoredSelectors(selectors: Record<string, any>) {
+  return sendActionToActiveTab('setStoredSelectors', {
+    element: selectors,
+  });
+}
 
-      // setTimeout(() => {
-      //   const audio = new Audio("../audio/chatbotClip1.mp3");
-      //   audio.play();
-      // }, 1500);
-    });
-  }
-/*
-  const evaluateButton = document.getElementById("evaluateButton");
-  const evaluatingDiv = document.getElementById("evaluating");
-
-  if (evaluateButton && evaluatingDiv) {
-    evaluateButton.addEventListener("click", () => {
-      evaluatingDiv.style.display = "block";
-
-      const actRulesCheckbox = document.getElementById(
-        "actRulesCheckbox"
-      ) as HTMLInputElement;
-      const wcagTechniquesCheckbox = document.getElementById(
-        "wcagTechniquesCheckbox"
-      ) as HTMLInputElement;
-      const bestPracticesCheckbox = document.getElementById(
-        "bestPracticesCheckbox"
-      ) as HTMLInputElement;
-
-      const actRules = actRulesCheckbox?.checked ?? false;
-      const wcagTechniques = wcagTechniquesCheckbox?.checked ?? false;
-      const bestPractices = bestPracticesCheckbox?.checked ?? false;
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const activeTab = tabs[0];
-        if (activeTab.id) {
-          chrome.tabs.sendMessage(activeTab.id, {
-            action: "evaluate",
-            actRules: actRules,
-            wcagTechniques: wcagTechniques,
-            bestPractices: bestPractices,
-          });
-        }
-      });
-    });
-  }
+getInitialRoute().then((initialRoute) => {
+  router.replace(initialRoute).finally(() => {
+    const app = createApp(App);
+    app.use(router);
+    app.use(store);
+    app.mount('#app');
+  });
 });
-*/

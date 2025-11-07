@@ -23,27 +23,19 @@
     </div>
     <div class="flex-container2">
       <div>
-        <i aria-label="Passed" class="material-icons passed flexElement"
-          >check_circle_outline</i
-        >
+        <i aria-label="Passed" class="material-icons passed flexElement">check_circle_outline</i>
         <span class="flexElement">{{ currentSummary.passed }}</span>
       </div>
       <div>
-        <i aria-label="Failed" class="material-icons failed flexElement"
-          >highlight_off</i
-        >
+        <i aria-label="Failed" class="material-icons failed flexElement">highlight_off</i>
         <span class="flexElement">{{ currentSummary.failed }}</span>
       </div>
       <div>
-        <i aria-label="Warning" class="material-icons warning flexElement"
-          >warning</i
-        >
+        <i aria-label="Warning" class="material-icons warning flexElement">warning</i>
         <span class="flexElement">{{ currentSummary.warning }}</span>
       </div>
       <div>
-        <i
-          aria-label="Inapplicable"
-          class="material-icons inapplicable flexElement"
+        <i aria-label="Inapplicable" class="material-icons inapplicable flexElement"
           >not_interested</i
         >
         <span class="flexElement">{{ currentSummary.inapplicable }}</span>
@@ -53,25 +45,25 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import RunAgain from "./RunAgain.vue";
-import Export from "./Export.vue";
-import HighlightAll from "./HighlightAll.vue";
+import { mapGetters } from 'vuex';
+import RunAgain from './RunAgain.vue';
+import Export from './Export.vue';
+import HighlightAll from './HighlightAll.vue';
 
 export default {
-  name: "Summary",
+  name: 'Summary',
   computed: {
     ...mapGetters({
-      summary: "getSummary",
-      chatbotSummary: "getChatbotSummary",
-      evaluateChatbot: "getEvaluateChatbot",
+      summary: 'getSummary',
+      chatbotSummary: 'getChatbotSummary',
+      evaluateChatbot: 'getEvaluateChatbot',
     }),
     currentSummary() {
       return this.evaluateChatbot ? this.chatbotSummary : this.summary;
     },
     data() {
       return {
-        title: "failed",
+        title: 'failed',
       };
     },
     components: {
@@ -86,9 +78,10 @@ export default {
 <style scoped>
 .title {
   overflow: hidden;
+  text-wrap: wrap;
 }
 .text {
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
   text-transform: lowercase;
 }
 .passed {
