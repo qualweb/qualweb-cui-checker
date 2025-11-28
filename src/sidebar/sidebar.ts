@@ -3,74 +3,62 @@ import router from './router';
 import App from './App.vue';
 import store from './store';
 
-async function sendActionToActiveTab(
-  action: string,
-  payload: Record<string, any> = {},
-): Promise<any> {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
-        return reject(chrome.runtime.lastError);
-      }
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { action, ...payload }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-            return reject(chrome.runtime.lastError);
-          }
-          if (response === undefined) {
-            console.warn('No response received before the message port closed.');
-            return reject(new Error('No response received before the message port closed.'));
-          }
-          resolve(response);
-        });
-      } else {
-        reject(new Error('No active tab found'));
-      }
-    });
-  });
-}
-function getInitialRoute(): Promise<string> {
-  return new Promise(async (resolve) => {
-    let url: string = await getUrl();
-    let hostname = new URL(url).hostname;
-    let selectors = await chrome.storage.local.get('qualweb-selectors');
-    const selectorsForHostname = JSON.parse(
-      JSON.stringify(selectors['qualweb-selectors']?.[hostname] || {}),
-    );
-    console.log('selectors', selectorsForHostname);
-    if (selectorsForHostname && Object.keys(selectorsForHostname).length > 0) {
-      await setStoredSelectors(selectorsForHostname);
-      resolve('/ready');
-      return;
-    } else {
-      resolve('/');
-    }
-  });
-}
-async function getUrl(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs.length === 0 || !tabs[0].url) {
-        console.error('No active tab with a URL found.');
-        return reject(new Error('No URL found for the active tab'));
-      }
-      resolve(tabs[0].url);
-    });
-  });
-}
-async function setStoredSelectors(selectors: Record<string, any>) {
-  return sendActionToActiveTab('setStoredSelectors', {
-    element: selectors,
-  });
+const app = createApp(App);
+app.use(router);
+app.use(store);
+app.mount('#app');
+
+//* Listen for URL update messages from content scripts */
+if (!chrome.runtime.onMessage.hasListener(handlerSidepanelMessages)) {
+  chrome.runtime.onMessage.addListener(handlerSidepanelMessages);
 }
 
-getInitialRoute().then((initialRoute) => {
-  router.replace(initialRoute).finally(() => {
-    const app = createApp(App);
-    app.use(router);
-    app.use(store);
-    app.mount('#app');
-  });
-});
+function handlerSidepanelMessages(message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
+     console.log("Sidepanel received message:",message);
+    if(message.action === "URL_UPDATE_DETECTED"){
+
+      const currentURL = store.state.sidepanelURL;
+      const currentId = store.state.tabId;
+      if(currentId !== message.tabId){
+        // not for this tab
+        return;
+      }
+      let hostname = getHostname(message.url);
+
+      if(currentId === message.tabId && currentURL !== hostname){
+        // if url has changed, close sidebar to avoid inconsistencies
+        chrome.runtime.sendMessage({
+          action: 'CLOSE_TAB_REQUEST',
+          tabId: message.tabId,
+        });
+
+      }else{
+        // if url has not changed, reinject scripts if needed
+        chrome.runtime.sendMessage({
+          action: 'REINJECT_SCRIPTS',
+          tabId: message.tabId,
+          url: currentURL
+        });
+        
+      }
+    } else if(message.action === "RESET_SIDEBAR"){
+      // reset sidebar state 
+      store.commit('SETSELECTORS', {});
+      router.replace('/').then(() => {
+        console.log("Sidebar reset to initial route");
+      });
+    }
+  
+}
+//* Utility function to extract hostname from URL */
+function getHostname(url: string): string  {
+  try {
+    const urlObject = new URL(url);
+    
+    return urlObject.hostname; 
+
+  } catch  {
+    throw new Error("Invalid URL");
+  }
+}
+

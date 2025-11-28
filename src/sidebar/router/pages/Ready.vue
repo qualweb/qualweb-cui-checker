@@ -1,26 +1,25 @@
 <template>
   <div class="bigContainer">
-    <div class="container">
-      <div>
-      <div class="position-icon-menu">
-
-        <span class="material-symbols-outlined position-icon-help rotatable" :class="{ rotated: isDropdownOpen }"  @click="toggleDropdown">
+    <div class="top-bar">
+      <span class="material-symbols-outlined position-icon-help" :class="{ 'menu-open': isDropdownOpen }" @click="toggleDropdown">
         menu
-        </span>
-  
+      </span>
+      
       <div v-if="isDropdownOpen" class="dropdown-menu">
         <ul>
           <li @click="onHelpClick">Help</li>
           <li @click="forgetSelectors">Forget Chatbot</li>
         </ul> 
-       </div>
-    </div>
+      </div>
+
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
         settings
       </span>
-      </div>
-      <h1 class="title">QUALWEB CUI CHECK</h1>
-      <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+    </div>
+
+    <div class="container">
+      <h1 class="title">QUALWEB CUI CHECKER</h1>
+      <img class="logo" :src="`/${iconFolder}/logoQWSidepanel.webp`" alt="Qualweb Logo" />
       <div class="evaluation-container">
         <Checkbox
           idValue="actRulesCheckbox"
@@ -50,15 +49,8 @@
       <hr />
 
       <div class="button-container">
-        <button @click="LLMInteraction" :disabled="generateResponsesActive">
-          Start Interaction
-        </button>
-          <button @click="LLMSoundInteraction" :disabled="generateResponsesActive">
-          Start Sound Interaction
-        </button>
-        <button id="evaluateButton" @click="onEvaluateClick" :disabled="isDisabled">
-          Evaluate Chatbot Accessibility
-        </button>
+        <ButtonStyled v-if="isCuiChecked" @click="LLMInteraction" label="Start Interaction" />
+        <ButtonStyled id="evaluateButton" @click="onEvaluateClick" :disabled="!isEvaluationReady" label="Evaluate Chatbot Accessibility" />
       </div>
     </div>
   </div>
@@ -69,6 +61,7 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import Checkbox from '../../components/Checkbox.vue';
 
+import ButtonStyled from '../../components/ButtonStyled.vue';
 const store = useStore();
 const router = useRouter();
 
@@ -81,9 +74,27 @@ const isDropdownOpen = ref(false);
 
 const evaluated = computed(() => store.getters.getEvaluated);
 
-const isDisabled = computed(() => {
-  return !(evaluated.value && (evaluated.value.act || evaluated.value.wcag || evaluated.value.cui));
+const iconFolder = APP_CONFIG.ICONS_FOLDER ;
+
+const isCuiChecked = computed(()=>{
+
+  return  (evaluated.value && (evaluated.value.cui));
 });
+
+const isEvaluationReady = computed(()=>{
+  // cui check checked
+  const cuiCheckedReady = (evaluated.value && (evaluated.value.cui));
+  const interactionComplete = store.getters.getInteractionInitialized;
+
+  const commonCheckReady = (evaluated.value && (evaluated.value.act || evaluated.value.wcag)); 
+
+
+
+  
+  return (commonCheckReady && cuiCheckedReady && interactionComplete) ||(commonCheckReady && !cuiCheckedReady) || (!commonCheckReady && cuiCheckedReady && interactionComplete);
+})
+
+
 
 const setEvaluated = async (idValue, value) => {
   await store.dispatch('setEvaluated', {
@@ -120,7 +131,8 @@ const forgetSelectors = async () => {
   await store.dispatch('forgetChatbotSelectors');
   isDropdownOpen.value = false;
   console.log("going to rest data");
-  await resetDataContentScript();
+  await resetDataContentScript( store.getters.getTabId);
+  store.dispatch('setSelectorsDetected',false)
   router.push('/');
 };
 
@@ -154,28 +166,113 @@ onBeforeUnmount(() => {
 });
 
 </script>
-
 <style scoped>
 .logo {
   width: auto;
   height: 200px;
   margin-bottom: 20px;
 }
-.position-icon-settings {
-  position: absolute;
-  top: 12px;
-  right: 20px;
-  cursor: pointer;
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #393939;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+  transition: background-color 0.2s ease;
 }
-.position-icon-menu {
-  position: absolute;
-  top: 12px;
-  left: 20px;
-  cursor: pointer;
+
+.top-bar:hover {
+  background-color: #4a4a4a;
 }
+
+.position-icon-settings,
+.position-icon-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #393939;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  font-size: 22px;
+  position: relative;
+}
+
+.top-bar:hover .position-icon-settings,
+.top-bar:hover .position-icon-help {
+  background-color: #4a4a4a;
+}
+
+.position-icon-settings:hover,
+.position-icon-help:hover {
+  background: #5a5a5a !important;
+  color: white;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.position-icon-settings:active,
+.position-icon-help:active {
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.position-icon-help.menu-open {
+  background: #4a4a4a;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  z-index: 10; 
+  background-color: #303030;
+  border: 1px solid #ccc;
+  min-width: 8rem;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+
+}
+
+.dropdown-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.dropdown-menu li:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+}
+
+.dropdown-menu li { 
+  text-align: center;
+  cursor: pointer;
+  color: white;
+  padding: 0.75rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #4a4a4a;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
 .bigContainer {
   margin: 0;
   padding: 0;
@@ -184,64 +281,14 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
 }
+
 .container {
   overflow: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  overflow: auto;
-  margin-top: 1rem;
-}
-
-
-.menu-dropdown {
-  position: relative; 
-  display: inline-block;
-}
-
-
-.rotatable {
-  display: inline-block;
-  cursor: pointer;
-  transition: transform 0.1s ease-in-out;
-}
-
-.rotatable.rotated {
-  transform: rotate(90deg);
-}
-.dropdown-menu {
-  position: absolute;
-  top: 100%; 
-  left: 0;
-  z-index: 10; 
-  background-color: #303030;
-  border: 1px solid #ccc;
-  width: 8rem;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  border-radius: 4px;
-
-}
-.dropdown-menu ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  
-}
-.dropdown-menu li:not(:last-child) {
-  border-bottom: 1px solid #ccc;
-
-}
-
-.dropdown-menu li { 
-  text-align: center;
-  cursor: pointer;
-  color: white;
-  padding: 10px;
-}
-.dropdown-menu li:hover {
-  background-color: #575757;
+  padding: 1rem;
 }
 
 .title {
@@ -249,6 +296,7 @@ onBeforeUnmount(() => {
   font-weight: 900;
   margin-bottom: 1rem;
 }
+
 .button-container {
   display: flex;
   flex-direction: column;
@@ -256,6 +304,7 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 250px;
 }
+
 .evaluation-container {
   margin-top: 20px;
   display: flex;
@@ -264,34 +313,20 @@ onBeforeUnmount(() => {
   width: 100%;
   max-width: 250px;
 }
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #e15500;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-button:hover {
-  background-color: #ff6a00;
-}
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
+
 hr {
   width: 100%;
   border: none;
   border-top: 1px solid #ffffff;
   margin: 15px 0;
 }
+
 label {
   display: flex;
   align-items: center;
   gap: 5px;
 }
+
 @media only screen and (max-width: 700px) {
   .container-1 {
     display: flex;

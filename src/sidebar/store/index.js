@@ -5,6 +5,9 @@ import mutations from './mutations';
 import * as actions from './actions';
 
 export const defaultState = {
+  selectorsDetected: false,
+  tabId: null,
+  sidepanelURL: '',
   storage: {
     url: '',
     selectors: {
@@ -26,6 +29,7 @@ export const defaultState = {
   cui: {},
   chatbotCui: {},
   currentRule: {},
+  chatbotInteractionInitialized: false,
   highlightActive: false,
   resultFilter: {
     passed: false,
@@ -39,6 +43,9 @@ export const defaultState = {
 
 export default new createStore({
   state: {
+    selectorsDetected: false,
+    tabId: null,
+    sidepanelURL: '',
     storage: {
       url: '',
       selectors: {
@@ -60,6 +67,7 @@ export default new createStore({
     cui: {},
     chatbotCui: {},
     currentRule: {},
+    chatbotInteractionInitialized: false,
     highlightActive: false,
     resultFilter: {
       passed: false,

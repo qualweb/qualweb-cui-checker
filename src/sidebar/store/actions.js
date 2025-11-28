@@ -1,5 +1,17 @@
 import * as types from './mutation-types';
 
+export const setSelectorsDetected = ({ commit }, payload) => {
+  commit(types.SETSELECTORSDETECTED, payload);
+}
+
+export const setTabId = ({ commit }, payload) => {
+  commit(types.SETTABID, payload);
+}
+
+export const setSidepanelURL = ({ commit }, payload) => {
+  commit(types.SETSIDEPANELURL, payload);
+}
+
 export const setReport = async function ({ commit }, modules) {
   let report = await evaluate(modules.act, modules.wcag, modules.css, modules.cui);
 
@@ -80,6 +92,10 @@ export const setEvaluateChatbot = ({ commit }, payload) => {
 
 export const setDetectingChatbot = ({ commit }, payload) => {
   commit(types.SETDETECTINGCHATBOT, payload);
+};
+
+export const setInteractionInitialized = ({ commit }, payload) => {
+  commit(types.SETINTERACTIONINITIALIZED, payload);
 };
 
 export const reset = ({ commit }) => {
