@@ -66,11 +66,14 @@ interface ACTReport {
   };
 }
  const APP_CONFIG: {
-    VERSION: string;
-    DIST_FOLDER: string;
-    RESOURCES_WORDS_PT: string;
-    INITIAL_INTERACTION_MESSAGE_PT: string;
-    INITIAL_INTERACTION_MESSAGE_EN: string;
+  VERSION: string;
+  DIST_FOLDER:string;
+  ICONS_FOLDER:string;
+  RESOURCES_FOLDER:string;
+  RESOURCES_WORDS_PT: string;
+  INITIAL_INTERACTION_MESSAGE_PT:string;
+  INITIAL_INTERACTION_MESSAGE_EN:string;
+  SCRIPTS_FOLDER:string;
   };
 
 }
@@ -90,6 +93,7 @@ import sinonChrome from 'sinon-chrome';
 (global as any).chrome = sinonChrome;
 //mock window dom
 (global as any).window = {};
+
 
 
 export {};
