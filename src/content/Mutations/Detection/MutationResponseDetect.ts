@@ -1,10 +1,9 @@
-import { simulateInput } from "../../interaction/message-sender";
-import { isChatBotMessage, isContainedInSelector, isNodeTypingInfo } from "../../interaction/utils";
-import { findAncestralNodeBeforeContaining, findElementByExactText, sleep } from "../../lib/DomTools";
+import { findAncestralNodeBeforeContaining } from "../../lib/DomTools";
 import AbstractMutationObserver from "../AbstractMutationManager";
 import ElementFoundManager from "../AbstractElementManager";
 import TimeoutManager from "../TimeoutManager";
 import MessagesManager from "../ElementManager/MessagesManager";
+import { findElementByExactTextContent } from '../../lib/XPathTools';
 
 // class Responsible for managing mutation observer for messages
 class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
@@ -65,7 +64,7 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
                                   continue; 
                               }
                               const AddedNodeDetection = addedNode as HTMLElement;
-                              const result = findElementByExactText(AddedNodeDetection, this.initialText);
+                              const result = findElementByExactTextContent(AddedNodeDetection, this.initialText);
           
                               const style = window.getComputedStyle(AddedNodeDetection);
                             const visible =
@@ -99,9 +98,9 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
 
     handleCharacterDataChange(mutation: MutationRecord): void {
         this.timeoutManager?.restartTimeout();
-            const ancestralNode = findAncestralNodeBeforeContaining(mutation.target, this.initialText);
+            const ancestralNode: HTMLElement= findAncestralNodeBeforeContaining(mutation.target as HTMLElement, this.initialText);
                     console.log('Text changed:', mutation.target.textContent);
-                    if(ancestralNode.textContent.trim() != this.initialText ){
+                    if(ancestralNode.textContent?.trim() != this.initialText ){
                         this.elementTracker.add(ancestralNode);
                     }
     }

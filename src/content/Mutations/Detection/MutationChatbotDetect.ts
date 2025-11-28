@@ -1,9 +1,10 @@
 import { simulateInput } from "../../interaction/message-sender";
-import { findElementByExactText, sleep } from "../../lib/DomTools";
+import { sleep } from "../../lib/DomTools";
 import AbstractMutationObserver from "../AbstractMutationManager";
 import ElementFoundManager from "../AbstractElementManager";
 import TimeoutManager from "../TimeoutManager";
 import WindowElementManager from "../ElementManager/WindowElementManager";
+import { findElementByExactTextContent } from '../../lib/XPathTools';
 
 // class Responsible for managing mutation observer for messages
 class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
@@ -12,11 +13,11 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
     initialText: string;
     ignoreInput: HTMLElement;
 
-    constructor(ignoreInput:HTMLElement) {
+    constructor(ignoreInput:HTMLElement, initialText:string) {
         super();
         this.elementTracker = new WindowElementManager();
         this.ignoreInput = ignoreInput;
-        this.initialText = APP_CONFIG.INITIAL_INTERACTION_MESSAGE_PT;
+        this.initialText = initialText;
         this.on('childList:added', this.handleAddedNodes.bind(this));
         this.on('characterData:change', this.handleCharacterDataChange.bind(this));
     }
@@ -37,8 +38,7 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
 
         await sleep(1000);
         
-        //TODO: Config Message EN or PT
-        await simulateInput(APP_CONFIG.INITIAL_INTERACTION_MESSAGE_PT);
+        await simulateInput(this.initialText);
          try{
             // Wait a bit to avoid capturing old messages
             await this.waitForObserverDisconnect();
@@ -66,7 +66,7 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
                    addedNode.contains(this.ignoreInput) ||
                     this.ignoreInput === mutation.target)) continue;          
                                // Verifica se o conteúdo de texto inclui a mensagem inicial  
-                               const result = findElementByExactText(addedNode, this.initialText);
+                               const result = findElementByExactTextContent(addedNode as HTMLElement, this.initialText);
                                if(result && (addedNode as HTMLElement).tagName != 'BUTTON'){
                                    // resolve com o nó adicionado
                                    console.log("Found ",addedNode);
