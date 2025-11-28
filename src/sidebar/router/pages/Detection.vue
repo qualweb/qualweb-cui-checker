@@ -1,107 +1,235 @@
 <template>
-  <div class="container">
-    <div v-if="getDetectingChatbot">
-      <div class="loader"></div>
-      <p class="state">{{ state }}</p>
+  
+    <div class="container" v-if="getDetectingChatbot">
+      <Loading :message="state">
+        <template v-slot:buttons>
+          <div class="button-container">
+          <ButtonStyled  :primary="false" @click="cancelDetection" label="Cancel Detection" />
+          </div>
+        </template>
+      </Loading>
     </div>
-    <div v-else>
-      <p class="state">{{ state }}</p>
-      <ActionPrompt
-        :key="currentStep"
-        :question="workflow[currentStep].question"
-        :actionYes="this.nextQuestion"
-        :actionNo="
-          () => {
-            this.requestCorrectionElementLLM(workflow[currentStep].nameElement);
-          }
-        "
-      />
-    </div>
-    <button
-      id="cancelButton"
-      class="button-cancel"
-      @click="cancelDetection"
-    >
-      Cancel
-    </button>
-  </div>
+ 
+    <div class="container" v-else>  
+      <Loading v-if="!currentAction" class="loader"></Loading> 
+      <component v-if="!isUserManualSelecting" :is="currentAction" :prompt="currentPrompt" />
+      <div class="container" v-if="isUserManualSelecting">
+        <h1>Please click on microphone button</h1>
+         <div class="button-container">
+        <ButtonStyled :primary="false" @click="cancelManualSelection" label="Cancel Selection" />
+        </div>
+      </div>
+   </div>
+
+
+ 
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import ActionPrompt from '../../components/ActionPrompt.vue';
+
+import { mapActions, mapGetters } from 'vuex'
+import ActionPrompt from '../../components/ActionPrompt.vue'
+import Loading from '../../components/Loading.vue';
+import ButtonStyled from '../../components/ButtonStyled.vue';
+
 
 export default {
   name: 'detectingPageChatbot',
-  props: [],
-  components: {
-    ActionPrompt,
-  },
-  methods: {
-    ...mapActions(['setDetectingChatbot', 'setSelectors']),
-    cancelDetection() {
-      cancelDetectionRequest();
-      this.$router.go(-1);
-    },
-    requestCorrectionElementLLM() {
-      this.state = 'Requesting Correction';
-      this.setDetectingChatbot(true);
-      startCorrectionChatbot().then((result) => {
-        if (Object.keys(result).length > 0) {
-          this.state = 'Chatbot Detected';
-
-          this.setDetectingChatbot(false);
-          startVerificationElement(this.workflow[this.currentStep].nameElement);
-        } else {
-          this.state = 'Chatbot Not Detected';
-          this.setDetectingChatbot(false);
-          setTimeout(() => {
-            this.$router.push('/failed-detection');
-          }, 2000);
-        }
-      });
-    },
-    nextQuestion() {
-      if (this.currentStep < this.workflow.length - 1) {
-        endVerificationElement(this.workflow[this.currentStep].nameElement);
-        setTimeout(() => {
-          this.currentStep++;
-          startVerificationElement(this.workflow[this.currentStep].nameElement);
-        }, 800);
-      } else {
-        this.setSelectors(this.resultSelectors);
-        endVerificationElement(this.workflow[this.currentStep].nameElement);
-        this.$router.push('/ready');
-      }
-    },
-  },
+  components: { ActionPrompt, Loading, ButtonStyled },
   computed: {
-    ...mapGetters(['getDetectingChatbot']),
+    ...mapGetters(['getDetectingChatbot','getTabId']),
   },
   data() {
     return {
       state: 'Identifying Chatbot',
       currentStep: 0,
+      counter:0,
+      isUserManualSelecting: false,
+      currentAction: null,
+      currentPrompt: null,
       resultSelectors: {},
       workflow: [
         {
           nameElement: 'windowSelector',
           question: 'Is main window of chatbot selected correctly?',
+          titlePrimary: 'Yes',
+          titleNeutral: 'No',
+          actionPrimary: async () => { await this.nextQuestion();
+            this.counter++;
+           },
+          actionNeutral: () => { this.requestCorrectionElementLLM('windowSelector') },
+          counter:0
         },
         {
           nameElement: 'messagesSelector',
           question: 'Are individual messages on chatbot app selected correctly?',
+            titlePrimary: 'Yes',
+          titleNeutral: 'No',
+           actionPrimary:  async () => { 
+                      await this.nextQuestion();
+                       this.counter = 0; },
+          actionNeutral: () => { this.requestCorrectionElementLLM('messagesSelector') },
+
         },
         {
           nameElement: 'inputSelector',
           question: 'Is selected input of chatbot correct?',
+          titlePrimary: 'Yes',
+          titleNeutral: 'No',
+          actionPrimary:  async () => { 
+                      await this.nextQuestion();
+                       this.counter = 0; },
+          actionNeutral: () => { this.requestCorrectionElementLLM('inputSelector') },
+
         },
         {
           nameElement: 'microphoneSelector',
-          question: 'Is microphone window selected correctly?',
+          question: 'Is microphone button selected correctly?',
+          titlePrimary: 'Yes',
+          titleNeutral: 'No',
+          actionPrimary: async () => { 
+            await this.nextQuestion();
+            this.counter = 0;
+           },
+          actionNeutral: async ()=>{
+            if(this.counter == 1 ){
+              this.addQuestionMicrophonePresent();
+              await this.nextQuestion();
+              
+            }else{
+
+            this.counter++;
+            this.requestCorrectionElementLLM('microphoneSelector') 
+            } 
+            }
+            ,
+    
         },
       ],
-    };
+    }
+  },
+  methods: {
+    ...mapActions(['setDetectingChatbot', 'setSelectors', 'setSelectorsDetected']),
+    removeQuestionMicrophone() {
+      this.workflow = this.workflow.filter(
+        (step) => step.nameElement !== 'microphoneSelector'
+      );
+    },
+    addQuestionIsMicrophoneCorrect(){
+         console.log("Adding microphone question");
+      this.workflow.push({
+        nameElement: 'microphoneSelector',
+          question: 'Is microphone button selected correctly?',
+          titlePrimary: 'Yes',
+          titleNeutral: 'No',
+        actionPrimary: async () => { await this.nextQuestion() },
+        actionNeutral: async () => {
+           this.addQuestionMicrophonePresent();
+          await this.nextQuestion(); },
+      });
+    },
+    addQuestionMicrophonePresent() {
+      this.workflow.push({
+        nameElement: null,
+        question: 'Does the chatbot have a microphone button that you can select?',
+        titlePrimary: 'Manually select',
+        titleNeutral: 'Not present',
+        actionPrimary: () => { this.askClickMic() },
+        actionNeutral: () => { this.finishNoMic() },
+      });
+    },
+    async cancelManualSelection(){
+      await cancelManualSelectMic(this.getTabId);
+      this.isUserManualSelecting = false;
+    },
+    cancelDetection() {
+      cancelDetectionRequest(this.getTabId)
+      this.$router.go(-1)
+    },
+    // avança a etapa
+    async nextQuestion() {
+      this.currentAction = null;
+      // fluxo normal
+      if (this.currentStep < this.workflow.length - 1) {
+        // end verification old step
+        if(this.workflow[this.currentStep].nameElement != null){
+        await endVerificationElement(this.workflow[this.currentStep].nameElement, this.getTabId);
+
+        }
+        this.currentStep++
+        if(this.workflow[this.currentStep].nameElement != null){
+        await new Promise(resolve => setTimeout(resolve, 500)); 
+        await startVerificationElement(this.workflow[this.currentStep].nameElement, this.getTabId);
+          }
+        
+        this.updatePrompt()
+        this.currentAction = 'ActionPrompt';
+      } else {
+        if(this.workflow[this.currentStep].nameElement != null){
+        await endVerificationElement(this.workflow[this.currentStep].nameElement, this.getTabId);
+        }
+       await new Promise(resolve => setTimeout(resolve, 500)); 
+       this.finishWorkflow()
+
+      }
+    },
+    // Atualiza o prompt principal com base na etapa atual
+    updatePrompt() {
+      const step = this.workflow[this.currentStep]
+      this.currentPrompt = {
+        question: step.question,
+        actionPrimary: step.actionPrimary,
+        titlePrimary: step.titlePrimary,
+        titleNeutral: step.titleNeutral,
+        actionNeutral: step.actionNeutral,
+      }
+    },
+    async reloadQuestion() {
+      this.currentAction = null;
+      
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      this.currentAction = 'ActionPrompt';
+    },
+
+    finishWorkflow() {
+      this.setSelectors(this.resultSelectors)
+      this.setSelectorsDetected(true)
+      this.$router.push('/')
+    },
+
+    async askClickMic() {
+      this.isUserManualSelecting = true;
+      const result = await manualSelectMic(this.getTabId);
+      this.isUserManualSelecting = false;
+      console.log("Result",result);
+      if(result.status=="success"){
+        this.resultSelectors = result.selectors;
+      
+        this.addQuestionIsMicrophoneCorrect();
+        
+        await this.nextQuestion();
+      }else{
+
+       await this.reloadQuestion();
+
+      }
+    },
+
+    // Terminar se não há microfone
+    finishNoMic() {
+      this.state = 'No microphone detected.'
+      this.finishWorkflow()
+    },
+
+    requestCorrectionElementLLM(nameElement) {
+      this.state = 'Requesting Correction'
+      this.setDetectingChatbot(true)
+      startCorrectionChatbot(nameElement,this.getTabId).then((result) => {
+         this.resultSelectors[nameElement] = result.selector;
+        this.setDetectingChatbot(false)
+      })
+    },
   },
   async mounted() {
     this.setDetectingChatbot(true);
@@ -109,49 +237,41 @@ export default {
     this.state = 'Detecting Chatbot';
 
     console.log('Starting chatbot detection from Detection.vue');
-    startPageChatbotProcedure()
-      .then((result) => {
+    try{
+      const result = await startPageChatbotProcedure(this.getTabId);
+      console.log('Chatbot detection result:', result);
+      if(!result.status || result.status==="error"){
+       this.$router.push('/');
+       return;
+      }
+      this.resultSelectors = result.data.selectors;
 
-          this.resultSelectors = result.chatbot;
-          this.state = 'Chatbot Detected';
-
-          this.setDetectingChatbot(false);
-          startVerificationElement(this.workflow[this.currentStep].nameElement);
-
-        })
-      .catch((error) => {
-        
-        console.error('Error during chatbot detection:', error);
-
-        this.state = 'Chatbot Not Detected';
-
-        setTimeout(() => {
-                 this.setDetectingChatbot(false);
-                  this.$router.go(-1);
-        }, 1000);
+      this.state = 'Chatbot Detected';
+      this.setDetectingChatbot(false);
       
-      });
-  },
-};
-</script>
+      await startVerificationElement(this.workflow[this.currentStep].nameElement,this.getTabId);
 
+      this.currentAction = 'ActionPrompt';
+          if (!this.resultSelectors.microphoneSelector) {
+            this.removeQuestionMicrophone();
+            this.addQuestionMicrophonePresent();
+      }
+      this.updatePrompt();
+    }catch(error){
+      console.error('Error during chatbot detection:', error);
+      this.state = 'Chatbot Not Detected';
+      setTimeout(() => {
+        this.setDetectingChatbot(false);
+        this.$router.push('/');
+      }, 1000);
+      return;
+    }
+ 
+  },
+}
+</script>
 <style scoped>
-.button-cancel {
-  background-color: #75706c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin-top: 20px;
-  cursor: pointer;
-}
-.button-cancel:hover {
-  background-color: #888481;
-}
+
 .state {
   text-align: center;
 }
@@ -165,20 +285,11 @@ export default {
   flex-direction: column;
   overflow: hidden;
 }
-.loader {
-  border: 16px solid transparent;
-  border-top: 16px solid #e15500;
-  border-radius: 50%;
-  width: 140px;
-  height: 140px;
-  animation: spin 2s linear infinite;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.button-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  width:auto;
+  gap: 10px;
 }
 </style>
