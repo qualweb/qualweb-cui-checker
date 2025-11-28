@@ -1,8 +1,9 @@
 import { locale_en } from '../../locales/en';
 import { filterResults } from '../../utils/evaluationHelpers';
 import { ChatBotSelectors, Summary } from '../../utils/types';
-import { chatbotInterface } from '../detection/Detection';
+
 import { Report } from '../../utils/types';
+import InterfaceChatbot from '../detection/InterfaceChatbot';
 
 
 
@@ -24,7 +25,7 @@ export class EvaluationRunner {
 
 
   private constructor() {
-    this.urlCommonWords = chrome.runtime.getURL(`${APP_CONFIG.DIST_FOLDER}/${APP_CONFIG.RESOURCES_WORDS_PT}`);
+    this.urlCommonWords = chrome.runtime.getURL(`${APP_CONFIG.RESOURCES_FOLDER}/${APP_CONFIG.RESOURCES_WORDS_PT}`);
     this.summary = this.createEmptySummary();
     this.chatbotSummary = this.createEmptySummary();
   }
@@ -46,16 +47,16 @@ export class EvaluationRunner {
     };
   }
 
-  startEvaluation(sendResponse: (response: any) => void) {
+  startEvaluation() {
     this.summary = this.createEmptySummary();
-    if (chatbotInterface.getWindowElement()) {
+    if (InterfaceChatbot.getInstance().getWindowElement()) {
       this.chatbotSummary = this.createEmptySummary();
     }
-    sendResponse([this.summary, this.chatbotSummary]);
+    return([this.summary, this.chatbotSummary]);
   }
 
-  endEvaluation(sendResponse: (response: any) => void) {
-    sendResponse([this.summary, this.chatbotSummary]);
+  endEvaluation() {
+    return([this.summary, this.chatbotSummary]);
   }
   
   startEvaluationACT() {
@@ -100,8 +101,8 @@ export class EvaluationRunner {
 
   async startEvaluationCUI(qualweb_settings: QWCUI_Settings) {
     const settingsQualweb: QWCUI_Settings = { locale: qualweb_settings.locale };
-    const selectors: ChatBotSelectors = chatbotInterface.getSelectors();
-
+    const selectors: ChatBotSelectors = InterfaceChatbot.getInstance().getSelectors();
+    
     this.QWCUI_Selectors['QW_CC_WINDOW'] = selectors.windowSelector;
     this.QWCUI_Selectors['QW_CC_DIALOG'] = selectors.dialogSelector;
     this.QWCUI_Selectors['QW_CC_MESSAGES'] = selectors.messagesSelector;
@@ -130,7 +131,7 @@ export class EvaluationRunner {
     }
   private filterResults(results: CUIChecksReport | ACTReport ) {
     let result = results.assertions;
-    const windowElement = chatbotInterface.getWindowElement();
+    const windowElement = InterfaceChatbot.getInstance().getWindowElement();
     let chatbotResult;
 
     if (windowElement) {
