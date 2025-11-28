@@ -1,27 +1,36 @@
 <template>
   <div class="container">
-    <div>
-      <div class="loader"></div>
-        <h2>Status</h2>
-        <p class="state">{{ isCanceled ? "" : rule }}</p>
-        <p class="state">{{ isCanceled ? "Canceling..." : state }}</p>
+      <h1>Interaction</h1>
+      <Loading :message="state">
+        <template v-slot:additional-info>
+            <p class="state">{{ isCanceled ? "" : rule }}</p>
+            <p class="state">{{ isCanceled ? "" : title }}</p>
+            <p class="state">{{ isCanceled ? "Canceling..." : '' }}</p>
+        </template>
+       <template v-slot:buttons> 
       <div class="button-container">
-      <button class="button-primary" @click="skipObjective"  :disabled="isCanceled">Skip Rule</button>
-      <button class="button-neutral" @click="cancelInteraction" :disabled="isCanceled">Cancel Interaction</button>  
-      
+      <ButtonStyled  @click="skipObjective"  :disabled="isCanceled" label="Skip Rule" />
+      <ButtonStyled :primary="false" @click="cancelInteraction" :disabled="isCanceled" label="Cancel Interaction" />
       </div>
-    </div>
+      </template>
+      </Loading>
+
+     
   </div>
 </template>
 
 <script>
-import { routerKey } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
+import Loading from '../../components/Loading.vue';
+import ButtonStyled from '../../components/ButtonStyled.vue';
 export default {
   name: 'Interaction',
+  components: { Loading , ButtonStyled},
+  computed: {
+    ...mapGetters(['getTabId']),
+  },
   methods: {
-    ...mapActions([]),
-    ...mapGetters([]),
+    ...mapActions(['setInteractionInitialized']),
     cancelInteraction() {
       if (this._port) {
         this._port.postMessage({action: "cancel_interaction"});
@@ -36,43 +45,63 @@ export default {
 
       }
 
-
     }
   },
   data() {
     return {
-      state: 'Starting evaluation',
+      state: 'Starting interaction.',
       rule: '',
+      title: '',
       isCanceled:false
     };
   },
   async mounted() {
+    this.setInteractionInitialized(true);
     this._port = await prepareCommunicationBackground();
     if (!this._port) {
       console.error('Failed to connect to background script');
+      this.state = "Failed to connect.";
+      setTimeout(() => {
+              this.$router.push({
+          path: '/error',
+          query: { error: "Failed to connect to background script" }
+});
+        }, 500);
       return;
     }
     
     // Make bi-directional connection to tab
-    const response = await startLLMInteraction();
-    console.log('LLM interaction started with status:', response.status);
-    if (response.status !== 'success') {
-      console.error('Failed to start LLM interaction', response.message);
-      router.push('/ready');
-    }
+    const response = await startLLMInteraction(this.getTabId);
+
+    if (response.status === 'error') {
+      this.state = "Failed";
+      setTimeout(() => {
+        this._port.disconnect();
+        this.$router.push('/ready');
+      }, 3000);
+      return;
+    } 
+
     this._port.onMessage.addListener((msg) => {
 
-      if(msg.action==="cancelled"){
+      if(msg.action==="end_interaction"){
         this._port.disconnect();
-        this.$router.push('/ready');
+        this.$router.push('/');            
+      }else if(msg.status==="error"){
+        this.state = "Error: " + msg.message;
+        this._port.disconnect();
+        console.error("Interaction error:", msg.message);
+        setTimeout(() => {
+              this.$router.push({
+          path: '/error',
+          query: { error: msg.message }
+});
+        }, 500);
 
-      } else if(msg.action==="end_interaction"){
-        this._port.disconnect();
-        this.$router.push('/ready');
       } else {
-      // {rule,status}
-      const { rule, status } = msg;
+      const { rule, title, status } = msg;
       this.rule = rule;
+      this.title = title;
       this.state = status;      
       }
     });
@@ -103,55 +132,7 @@ export default {
   width: 100%;
   max-width: 250px;
 }
-.button-neutral {
-  width: 100%;
-  padding: 10px;
-  background-color: #5a5654;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
 
-.button-neutral:hover {
-  background-color: #75706e;
 
-}
 
-.button-primary {
-  width: 100%;
-  padding: 10px;
-  background-color: #e15500;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.button-primary:hover {
-  background-color: #ff6a00;
-}
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.loader {
-  border: 16px solid transparent; /* Light grey */
-  border-top: 16px solid #e15500; /* Blue */
-  border-radius: 50%;
-  width: 140px;
-  height: 140px;
-  animation: spin 2s linear infinite;
-}
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 </style>

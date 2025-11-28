@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="arrow-container">
+    <TopBar >
       <button @click="goToEvaluation" class="arrow-button">
         <i class="material-icons">arrow_back</i>
       </button>
-    </div>
+    </TopBar>
     <div v-if="rule" class="text" tabindex="-1">
       <h1 class="center">{{ rule.name }}</h1>
       <p v-if="rule.mapping">
@@ -16,7 +16,7 @@
         {{ rule.metadata.url }}
       </p>
       <p>
-        <span class="strong">Description:</span>
+        <span class="strong description">Description:</span>
         {{ rule.description }}
       </p>
       <p>
@@ -40,6 +40,7 @@ import { mapGetters } from 'vuex';
 import RuleResult from '../../components/RuleResult.vue';
 import ElementNavigation from '../../components/ElementNavigation.vue';
 import ColapsibleResultFilter from '../../components/ColapsibleResultFilter.vue';
+import TopBar from '../../components/TopBar.vue';
 
 export default {
   name: 'ListContent',
@@ -47,6 +48,7 @@ export default {
     RuleResult,
     ElementNavigation,
     ColapsibleResultFilter,
+    TopBar
   },
   computed: mapGetters({
     rule: 'getCurrentRule',
@@ -71,13 +73,7 @@ a {
   padding: 1rem 1rem;
   margin: 1em;
 }
-.arrow-container {
-  z-index: 1000;
-  position: sticky;
-  background-color: #393939;
-  top: 0;
-  border-bottom: 1px solid #ccc; 
-}
+
 .arrow-button {
   background: none;
   border: none;
@@ -90,6 +86,9 @@ a {
 }
 .arrow-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+}
+.description {
+  overflow-wrap: break-word;
 }
 .strong {
   font-weight: bold;
