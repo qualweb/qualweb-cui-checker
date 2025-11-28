@@ -1,14 +1,17 @@
-async function startLLMInteraction() {
+async function startLLMInteraction(tabId) {
   let settingsStorage = await getQualWebSettings();
-  return sendActionToActiveTab('startLLMInteraction', {
+  console.log("Starting LLM Interaction with settings:", settingsStorage.options);  
+  return sendActionToBackground('START_LLM_INTERACTION', {
     settings: settingsStorage.options,
+    tabId: tabId,
   });
 }
 
-async function startLLMSoundInteraction() {
+async function startLLMSoundInteraction(tabId) {
   let settingsStorage = await getQualWebSettings();
-  return sendActionToActiveTab('startLLMSoundInteraction', {
+  return sendActionToBackground('START_LLM_SOUND_INTERACTION', {
     settings: settingsStorage.options,
+    tabId: tabId,
   });
 }
 

@@ -1,25 +1,26 @@
-async function startEvaluation() {
-  return sendActionToActiveTab('startEvaluation');
+async function startEvaluation(tabId) {
+  return sendActionToBackground('START_EVALUATION', { tabId });
 }
 
-async function evaluateACT() {
-  return sendActionToActiveTab('evaluateACT');
+async function evaluateACT(tabId) {
+  return sendActionToBackground('EVALUATE_ACT', { tabId:tabId });
 }
 
-async function evaluateWCAG() {
-  return sendActionToActiveTab('evaluateWCAG');
+async function evaluateWCAG(tabId) {
+  return sendActionToBackground('EVALUATE_WCAG', { tabId:tabId });
 }
 
-async function evaluateCUI() {
+async function evaluateCUI(tabId) {
   let settingsStorage = await getQualWebSettings();
   console.log('Settings Storage: ', settingsStorage);
-  return sendActionToActiveTab('evaluateCUI', {
+  return sendActionToBackground('EVALUATE_CUI', {
     settings: settingsStorage.options,
+    tabId: tabId,
   });
 }
 
-async function endingEvaluation() {
-  return sendActionToActiveTab('endingEvaluation');
+async function endEvaluation(tabId) {
+  return sendActionToBackground('END_EVALUATION', { tabId: tabId });
 }
 async function getUrl() {
   return new Promise((resolve, reject) => {
