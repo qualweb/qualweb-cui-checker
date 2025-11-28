@@ -9,11 +9,11 @@ class AgentWorkflow {
         this.interactionGraph = interactionGraph;
     }
 
-    static async getInstance(settings: LLM_Settings): Promise<AgentWorkflow> {
+    static  getInstance(settings: LLM_Settings): AgentWorkflow {
         if (this._instance) {
             return this._instance;
         }
-        const graph = await initiateLangraphSettings(settings);
+        const graph =  initiateLangraphSettings(settings);
 
         this._instance = new AgentWorkflow(graph);
 
@@ -28,9 +28,10 @@ class AgentWorkflow {
                     await graph.shutdown();
                 }
             } catch (err) {
-                console.warn("Erro ao destruir o grafo:", err);
+                console.warn("Error destroying graph:", err);
             } finally {
                 this.interactionGraph = null;
+                AgentWorkflow._instance = null;
             }
         }
 

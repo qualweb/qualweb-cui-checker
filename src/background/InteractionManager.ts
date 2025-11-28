@@ -4,7 +4,7 @@ import AgentWorkflow from './assistant-interaction/AgentWorkflow';
 import { FinalOutput } from './assistant-interaction/objectives';
 import { INTERRUPT_NODE_NAMES, NODE_COMPLETE_MAP, NODE_STATUS_MAP } from './States';
 import { RunnableConfig } from '@langchain/core/runnables';
-import { ACTION } from './action-type';
+import PortCommunication from './PortCommunication';
 
 interface StreamEvent {
   node: string;
@@ -16,16 +16,14 @@ interface StreamEvent {
 
 class InteractionManager {
   private static interactionManager: InteractionManager | null = null;
+  private portCommunication: PortCommunication = PortCommunication.getInstance();
   private graphExecution: any = null;
   private settings: any = null;
   private skipInterrupt: boolean = false;
-  private currentNode: string = '';
-  private lastEvent: any = null;
   private currentRule: string = '';
-  private interactionPort: chrome.runtime.Port | null = null;
+  private currentTitle: string = '';
   private config: RunnableConfig | null = null;
   private controller: AbortController | null = null;
-  private contentPort: chrome.runtime.Port | null = null;
   private running: boolean = false;
   private constructor() {
  
@@ -41,40 +39,11 @@ class InteractionManager {
   public isAgentLoaded(): boolean {
     return this.graphExecution !== undefined && this.graphExecution !== null;
   }
+ 
 
-  public isPortConnected(): boolean {
-    return this.interactionPort !== undefined && this.interactionPort !== null;
-  }
-
-  public setUIPort(port: chrome.runtime.Port) {
-    this.interactionPort = port;
-  }
-  public setContentPort(port: chrome.runtime.Port) {
-    this.contentPort = port;
-  }
-
-  public getUIPort(): chrome.runtime.Port | null {
-    return this.interactionPort;
-  }
-
-  public getContentPort(): chrome.runtime.Port | null {
-    return this.contentPort;
-  }
-
-  public async buildLanggraph(configSettings: any) {
+  public async buildLanggraph(configSettings: any){
     this.settings = configSettings;
-    this.graphExecution = (await AgentWorkflow.getInstance(this.settings)).getGraph();
-  }
-
-  public cancelInteraction() {
-    if (this.isAgentLoaded()) {
-      this.controller?.abort();
-      this.interactionPort?.postMessage({ action:'cancelled' });
-      this.contentPort?.postMessage({ action:ACTION.END_INTERACTION });
-      this.controller = null;
-      this.running = false;
-    
-    }
+    this.graphExecution =  AgentWorkflow.getInstance(this.settings).getGraph();
   }
 
   public skipInteraction() {
@@ -84,8 +53,8 @@ class InteractionManager {
   async streamEvents(messages,config): Promise<FinalOutput> {
     this.controller = new AbortController();
     this.running = true;
-    if (!this.isPortConnected()) {
-      throw new Error('Interaction port is not connected.');
+    if (!this.portCommunication.isCommunicationReady()) {
+      throw new Error('Communication Error: Ports are not connected.');
     }
     if (!this.isAgentLoaded()) {
       throw new Error('Agent graph is not loaded.');
@@ -139,14 +108,18 @@ class InteractionManager {
       }
 
       if (step.event === 'on_chain_end') {
-        if(step.name === 'objective_assigner') {  
-          this.currentRule = step.data.output.currentObjective.test.code as string;
+        if(step.name === 'objective_assigner') {
+          if(step.data.output.status !== 'completed') { 
+          this.currentRule = step.data.output.currentObjective.check as string;
+          this.currentTitle = step.data.output.currentObjective.title as string;
+          }
         }
         response = this.handleChainEnd(step);
       }
     }
 
-    this.interactionPort?.postMessage({ rule:this.currentRule, status: 'Waiting for answer' });
+    this.portCommunication.sendMessageToSidepanel({ rule:this.currentRule, title: this.currentTitle, status: 'Waiting for answer' });
+
     return { node: '', event: 'complete', result: response as FinalOutput };
   }
 
@@ -155,18 +128,17 @@ class InteractionManager {
   }
 
   private handleChainStart(step: any): void {
-    this.currentNode = step.name;
+
     const status = NODE_STATUS_MAP[step.name];
     if (status) {
-      this.interactionPort?.postMessage({ rule: this.currentRule , status });
+      this.portCommunication.sendMessageToSidepanel({ rule: this.currentRule , title: this.currentTitle, status });
     }
   }
 
   private handleChainEnd(step: any): FinalOutput | string | undefined {
-    this.lastEvent = step;
     const status = NODE_COMPLETE_MAP[step.name];
     if (status) {
-      this.interactionPort?.postMessage({ rule: this.currentRule, status });
+     this.portCommunication.sendMessageToSidepanel({ rule: this.currentRule, title: this.currentTitle, status });
     }
 
     if (step.name === 'LangGraph' && step.data?.output.finalOutput) {
@@ -175,30 +147,24 @@ class InteractionManager {
     return undefined;
   }
 
-  public setInteractionPortNull() {
-    this.interactionPort = null;
+  
+  public async cancelInteraction() {
+    if (this.isAgentLoaded()) {
+      this.controller?.abort();
+      this.portCommunication.endInteraction();
+      await AgentWorkflow.getInstance(this.settings).destroy();
+    }
   }
 
-  public setContentPortNull() {
-    this.contentPort = null;
-  }
-
-  public clearInteractionManager() {
+  public cleanInteractionManager() {
     // if any port is connected, disconnect
-    if (this.interactionPort) {
-      this.interactionPort.disconnect();
-    }
-    if (this.contentPort) {
-      this.contentPort.disconnect();
-    }
+    this.portCommunication.closePorts();
     this.controller = null;
     this.running = false;
     this.settings = null;
     this.skipInterrupt = false;
     this.graphExecution = null;
-    this.contentPort = null;
     this.config = null;
-    this.interactionPort = null;
   
   }
 }

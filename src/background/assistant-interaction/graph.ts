@@ -11,7 +11,7 @@ export const Settings: LLM_Settings = {
 };
 export let LLM:ChatOpenAI;
 
-export async function initiateLangraphSettings(settings: LLM_Settings) {
+export  function initiateLangraphSettings(settings: LLM_Settings) {
   
   Settings.apiKey = settings.apiKey;
   Settings.LLMService = settings.LLMService;

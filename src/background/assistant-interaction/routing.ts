@@ -17,13 +17,14 @@ export const routing = async (state: typeof GraphState.State) => {
 
 
     } else {
-        /* TODO: ,Logic for agent_reviewer
+        /* TODO: ,Logic for agent_reviewer meanwhile it will pass to next objective
         if( state.currentObjective.counter > 2){
           // If the current objective has been attempted 2 times, escalate to agent
           // Agent will review objective last messages and provide feedback
 
           return "agent_reviewer";
         }*/
+
     }
 
     return "objective_achiever";
