@@ -2,6 +2,7 @@ import { ChatBotSelectors } from "../../utils/types";
 import { ChatbotInputElement } from "../interaction/message-sender";
 
 class InterfaceChatbot {
+    private static _instance: InterfaceChatbot;
     private windowElement: HTMLElement | null;
     private inputElement: ChatbotInputElement | null;
     private messagesSelector: string;
@@ -10,7 +11,7 @@ class InterfaceChatbot {
     private selectors: ChatBotSelectors;
     private documentOwner: Document;
 
-    constructor(){
+    private constructor(){
         this.windowElement = null;
         this.inputElement = null;
         this.messagesSelector = '';
@@ -25,6 +26,13 @@ class InterfaceChatbot {
         this.documentOwner = undefined as unknown as Document;
   
     }
+
+    public static getInstance(): InterfaceChatbot {
+        if (!InterfaceChatbot._instance) {
+            InterfaceChatbot._instance = new InterfaceChatbot();
+        }
+        return InterfaceChatbot._instance;
+    }
     /**
      * 
      * @param chatBotSelectors 
@@ -34,6 +42,12 @@ class InterfaceChatbot {
         this.documentOwner = document;
         this._initiateElements();
     }
+
+    public updateSelector(key: keyof ChatBotSelectors, value: string): void {
+        this.selectors[key] = value;
+        this._initiateElements();
+    }
+
     /**
      * 
      */
@@ -90,6 +104,7 @@ class InterfaceChatbot {
     
 
     public getSelectors(): ChatBotSelectors {
+
         return this.selectors;
     }
 
@@ -110,6 +125,9 @@ class InterfaceChatbot {
         };
     }
 
+    public isIframeChatbot(): boolean {
+        return this.selectors.iframeSelector !== undefined && this.selectors.iframeSelector !== '';
+    }
     // Getters
     public getWindowElement(): HTMLElement | null {
         if(this.isSelectorsSet() && !this.isElementsLoaded())  this._initiateElements();
