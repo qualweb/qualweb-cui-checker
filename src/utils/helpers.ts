@@ -1,10 +1,7 @@
-export function showMessage(message: string): void {
-  const existingMessageElement = document.getElementById('selection-message');
-  if (existingMessageElement) {
-    existingMessageElement.remove();
-  }
+export function showMessage(message: string,timeOut:number=5000): void {
+  hideMessage();
   const messageElement = document.createElement('div');
-  messageElement.id = 'selection-message';
+  messageElement.id = 'QW_selection-message';
   messageElement.style.pointerEvents = 'none'; // Make it non-interactable
 
   messageElement.style.position = 'fixed';
@@ -18,7 +15,7 @@ export function showMessage(message: string): void {
   messageElement.style.fontWeight = '900';
   messageElement.style.textAlign = 'center';
   messageElement.style.borderRadius = '5px';
-  messageElement.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+  messageElement.style.boxShadow = '0 0 10px rgba(133, 89, 89, 0.1)';
   messageElement.style.zIndex = '10000';
 
   messageElement.textContent = message;
@@ -26,7 +23,14 @@ export function showMessage(message: string): void {
 
   setTimeout(() => {
     if (messageElement) {
-      document.body.removeChild(messageElement);
+      hideMessage();
     }
-  }, 5000);
+  }, timeOut);
+}
+
+export function hideMessage(){
+    const existingMessageElement = document.getElementById('QW_selection-message');
+  if (existingMessageElement) {
+    existingMessageElement.remove();
+  }
 }

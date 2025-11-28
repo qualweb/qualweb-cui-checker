@@ -16,12 +16,12 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         if (chatbotElement.querySelector(element) !== null) {
           return true;
         }
-      } catch (e) {
+      } catch {
         console.warn(`Invalid selector: ${element}`);
       }
       return false;
     });
-    const ignoreSelectors = ['extension'];
+
     if (isRelevant) {
       let filteredResults: Result[] = [];
       (rule.results as Result[]).forEach((result) => {
@@ -29,13 +29,15 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         let elements: ElementTest[];
 
         elements = (result.elements as ElementTest[]).filter((element) => {
-          if (element.pointer.includes('extension')) {
-            return false;
-          }
-          let elementToFilter = document.querySelector(element.pointer);
 
+          try {
+          let elementToFilter = document.querySelector(element.pointer);
           if (elementToFilter !== null && chatbotElement.contains(elementToFilter)) {
             return element;
+          }
+          } catch (e) {
+            console.warn(`Invalid selector in result: ${element.pointer} , error: ${e}`);
+            return false;
           }
         });
 
