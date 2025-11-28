@@ -1,5 +1,5 @@
 import { sendMessageToBackground } from '../content';
-import { chatbotInterface } from '../detection/Detection';
+import InterfaceChatbot from '../detection/InterfaceChatbot';
 
 
 export type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement ;
@@ -14,7 +14,7 @@ export async function inputVoiceMessage(
   message: string,
 ): Promise<void> {
 
-    let microphoneElement = chatbotInterface.getMicrophoneElement();
+    let microphoneElement = InterfaceChatbot.getInstance().getMicrophoneElement();
     if(microphoneElement){
       microphoneElement.click();
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -30,23 +30,13 @@ export async function inputMessage(
   message: string
 ) {
   // reload input field
-  let inputField: ChatbotInputElement  | null = chatbotInterface.getInputElement();
-
+  let inputField: ChatbotInputElement | null  = InterfaceChatbot.getInstance().getInputElement();
+  console.log("Inputing message to field:", inputField, "Message:", message);
   if (!inputField) {
     console.error('Input field not found.');
     return;
   }
-  // if inputFields is not DIV, INPUT or TEXTAREA, find nested input
-  if (
-    inputField?.tagName !== 'DIV' &&
-    inputField?.tagName !== 'INPUT' && 
-    inputField?.tagName !== 'TEXTAREA'
-  ) {
-    inputField = inputField.querySelector(
-      'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
-    );
-  }
-
+  
   if (inputField?.tagName === 'DIV') {
     if (message != '') {
       inputField.innerHTML = message;
@@ -80,22 +70,11 @@ export function dispatchEvents(element: HTMLElement) {
 }
 
 export async function sendMessage() {
-  let inputField: HTMLElement | null = chatbotInterface.getInputElement();
-  
-  inputField = chatbotInterface.getInputElement();
+  const inputField: HTMLElement | null = InterfaceChatbot.getInstance().getInputElement();
+
   if (!inputField) {
     console.error('Input field not found.');
     return;
-  }
-  // if inputField is not DIV content editable, INPUT or TEXTAREA, input should be nested
-  if (
-    inputField.tagName !== 'DIV' &&
-    inputField.tagName !== 'INPUT' &&
-    inputField.tagName !== 'TEXTAREA'
-  ) {
-    inputField = inputField.querySelector(
-      'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
-    );
   }
 
   const textEditor = inputField as HTMLInputElement | HTMLTextAreaElement | HTMLDivElement;
