@@ -4,13 +4,13 @@
   "version": "1.0",
   "description": "An evaluation tool to check the accessibility of the current conversational AI interface.",
   "background": {
-    "service_worker": "dist/background.bundle.js"
+    "service_worker": "./background.bundle.js"
 
   },
-  "options_page": "dist/options/options.html",
+  "options_page": "./options/options.html",
   
   "action": {
-    "default_title": "Click to open Qualweb CUI Checker"
+    "default_title": "Click to open panel"
     
   },
   "permissions": [
@@ -28,8 +28,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-      "dist/common-words-pt.txt",
-      "dist/icons/icon_settings.svg"],
+      "resources/common-words-pt.txt",
+      "icons/icon_settings.svg"],
       "matches": ["http://*/*", "https://*/*"]
     }
   ]
