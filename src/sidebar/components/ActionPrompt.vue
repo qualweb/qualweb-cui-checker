@@ -1,29 +1,44 @@
 <template>
   <div class="div-container-questions">
-    <span class="span-question">{{ question }}</span>
+    <span class="span-question">{{ prompt.question }}</span>
     <div class="button-container">
-      <button class="button-primary" @click="actionYes()">Yes</button>
-      <button class="button-neutral" @click="actionNo()">No</button>
+
+        <ButtonStyled  @click="prompt.actionPrimary" :label="prompt.titlePrimary"/>
+        <ButtonStyled :primary=false @click="prompt.actionNeutral" :label="prompt.titleNeutral"/>
+
     </div>
   </div>
 </template>
 
 <script>
+import ButtonStyled from './ButtonStyled.vue';
+
+
 export default {
   name: 'ActionPrompt',
+  components: { ButtonStyled },
   props: {
+    prompt: {
     question: {
       type: String,
       required: true,
     },
-    actionYes: {
+    titlePrimary: {
+      type: String,
+      required: true  },
+    actionPrimary: {
       type: Function,
       required: true,
     },
-    actionNo: {
-      type: Function,
-      required: true,
+    titleNeutral: {
+      type: String,
+      required: false,
+      default: 'Cancel',
     },
+    actionNeutral: {
+      type: Function,
+      required: false,
+    }},
   },
   data() {
     return {};
@@ -53,10 +68,14 @@ export default {
   width: 100%;
   max-width: 250px;
 }
+
+.button-primary:hover {
+  background-color: #ff6a00;
+}
 .button-primary {
   width: 100%;
   padding: 10px;
-  background-color: #5a5654;
+  background-color: #e15500;
   color: white;
   border: none;
   border-radius: 5px;
@@ -66,12 +85,15 @@ export default {
 .button-neutral {
   width: 100%;
   padding: 10px;
-  background-color: #e15500;
+  background-color: #5a5654;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+}
+.button-neutral:hover {
+  background-color: #888481;
 }
 .div-btn-actions {
   display: flex;

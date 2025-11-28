@@ -8,7 +8,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 const fs = require('node:fs');
-const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
+const definitions = JSON.parse(fs.readFileSync("./definitions-dev.json", "utf-8"));
 
 const config = {
   mode: 'development',
@@ -115,6 +115,9 @@ const config = {
   plugins: [
      new webpack.DefinePlugin({
       APP_CONFIG: JSON.stringify(definitions),
+       '__VUE_OPTIONS_API__': JSON.stringify(true),
+      '__VUE_PROD_DEVTOOLS__': JSON.stringify(false),
+      '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false),
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].css' }),
@@ -127,7 +130,6 @@ const config = {
       { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'cui.js' },
       { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
       { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'common-words-pt.txt' },
-      //{ from: 'src/locales/en.js', to: 'locales/en.js' },
       { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
       { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
       { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
@@ -148,12 +150,6 @@ const config = {
   }),
    ],
 };
-new webpack.DefinePlugin({
-  '__VUE_OPTIONS_API__': JSON.stringify(true),
-  '__VUE_PROD_DEVTOOLS__': JSON.stringify(false),
-  '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(false),
-}),
-
 
   config.plugins.push(
     new webpack.DefinePlugin({

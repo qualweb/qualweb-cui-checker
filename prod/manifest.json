@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Accessibility Evaluation Tool",
+  "version": "1.0",
+  "description": "An evaluation tool to check the accessibility of the current conversational AI interface.",
+  "background": {
+    "service_worker": "./background.bundle.js"
+
+  },
+  "options_page": "./options/options.html",
+  
+  "action": {
+    "default_title": "Click to open panel"
+    
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "sidePanel",
+    "activeTab",
+    "scripting",
+    "tts"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+},
+"host_permissions": ["https://api.openai.com/*"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+      "resources/common-words-pt.txt",
+      "icons/icon_settings.svg"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
+}

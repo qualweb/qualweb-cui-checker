@@ -1,32 +1,31 @@
 <template>
-  <div class="bigContainer">
-    <div class="container">
-       <div>
-      <div class="position-icon-menu">
-
-        <span class="material-symbols-outlined position-icon-help rotatable" :class="{ rotated: isDropdownOpen }"  @click="toggleDropdown">
+ <div class="bigContainer">
+    <div class="top-bar">
+      <span class="material-symbols-outlined position-icon-help" :class="{ 'menu-open': isDropdownOpen }" @click="toggleDropdown">
         menu
-        </span>
-  
+      </span>
+      
       <div v-if="isDropdownOpen" class="dropdown-menu">
         <ul>
           <li @click="onHelpClick">Help</li>
         </ul> 
-       </div>
-    </div>
+      </div>
+
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
         settings
       </span>
-      </div>
+    </div>
+    <div class="container">
+     
 
-      <h1 class="title">QUALWEB CUI CHECK</h1>
-      <img class="logo" src="/dist/icons/logoQW.png" alt="Qualweb Logo" />
+      <h1 class="title">QUALWEB CUI CHECKER </h1>
+      <img class="logo" :src="`/${iconFolder}/logoQWSidepanel.webp`" alt="Qualweb Logo" />
       <p class="initial-text">
         Selectors not in memory<br />
         please detect Chatbot
       </p>
       <div class="button-container">
-        <button @click="onDetectChatbot">Detect Chatbot</button>
+        <ButtonStyled @click="onDetectChatbot" label="Detect Chatbot" />
       </div>
     </div>
   </div>
@@ -34,8 +33,9 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+import ButtonStyled from '../../components/ButtonStyled.vue';
 
-
+const iconFolder = APP_CONFIG.ICONS_FOLDER ;
 const router = useRouter();
 const isDropdownOpen = ref(false);
 const onSettingsClick = () => {
@@ -82,16 +82,107 @@ const onHelpClick = () => {
   margin-bottom: 20px;
 }
 
-.position-icon-settings {
-  position: absolute;
-  top: 12px;
-  right: 20px;
+
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #393939;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+  transition: background-color 0.2s ease;
+}
+
+.top-bar:hover {
+  background-color: #4a4a4a;
+}
+
+.position-icon-settings,
+.position-icon-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #393939;
+  color: #ccc;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  font-size: 22px;
+  position: relative;
+}
+
+.top-bar:hover .position-icon-settings,
+.top-bar:hover .position-icon-help {
+  background-color: #4a4a4a;
+}
+
+.position-icon-settings:hover,
+.position-icon-help:hover {
+  background: #5a5a5a !important;
+  color: white;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.position-icon-settings:active,
+.position-icon-help:active {
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.position-icon-help.menu-open {
+  background: #4a4a4a;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  z-index: 10; 
+  background-color: #303030;
+  border: 1px solid #ccc;
+  min-width: 8rem;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 4px;
+
+}
+
+.dropdown-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.dropdown-menu li:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+}
+
+.dropdown-menu li { 
+  text-align: center;
+  cursor: pointer;
+  color: white;
+  padding: 0.75rem 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #4a4a4a;
 }
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
+} 
+
 .bigContainer {
   margin: 0;
   padding: 0;
@@ -100,13 +191,14 @@ const onHelpClick = () => {
   display: flex;
   flex-direction: column;
 }
+
 .container {
   overflow: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  overflow: auto;
+  padding: 1rem;
 }
 
 .title {
@@ -129,76 +221,13 @@ const onHelpClick = () => {
   width: 100%;
   max-width: 250px;
 }
-.position-icon-menu {
-  position: absolute;
-  top: 12px;
-  left: 20px;
-  cursor: pointer;
-}.menu-dropdown {
+
+.menu-dropdown {
   position: relative; 
   display: inline-block;
 }
 
 
-.rotatable {
-  display: inline-block;
-  cursor: pointer;
-  transition: transform 0.1s ease-in-out;
-}
-
-.rotatable.rotated {
-  transform: rotate(90deg);
-}
-.dropdown-menu {
-  position: absolute;
-  top: 100%; 
-  left: 0;
-  z-index: 10; 
-  background-color: #303030;
-  border: 1px solid #ccc;
-  width: 8rem;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  border-radius: 4px;
-
-}
-.dropdown-menu ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  
-}
-.dropdown-menu li:not(:last-child) {
-  border-bottom: 1px solid #ccc;
-
-}
-
-.dropdown-menu li { 
-  text-align: center;
-  cursor: pointer;
-  color: white;
-  padding: 10px;
-}
-.dropdown-menu li:hover {
-  background-color: #575757;
-}
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #e15500;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-button:hover {
-  background-color: #ff6a00;
-}
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
 hr {
   width: 100%;
   border: none;

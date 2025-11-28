@@ -6,6 +6,7 @@ import * as actions from './actions';
 
 export const defaultState = {
   firstRun: false,
+  mappedKey:'',
   options: {
     LLMService: '',
     apiKey: '',
@@ -16,6 +17,7 @@ export const defaultState = {
 export default new createStore({
   state: {
     firstRun: false,
+    mappedKey:'',
     options: {
       LLMService: '',
       apiKey: '',

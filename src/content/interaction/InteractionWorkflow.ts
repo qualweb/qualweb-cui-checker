@@ -1,7 +1,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import InterfaceChatbot from '../detection/InterfaceChatbot';
-import { chatbotInterface } from '../detection/Detection';
 import { markQuestion, markResponses, normalizeText } from './utils';
 import { FinalOutput } from '../../background/assistant-interaction/objectives';
 import { ACTION } from '../../background/action-type';
@@ -28,13 +27,7 @@ class InteractionWorkflow {
   private counter: number = 0;
   private lastAnswersElements: HTMLElement[] = [];
   private mutationManager: MutationInteractionDetect;
-  /*
-  private captureNewMessages: (
-    message: string,
-    maxWaitTime: number,
-    chatbotInterface?: InterfaceChatbot,
-  ) => Promise<HTMLElement[]>;
-   */
+
   private backgroundPort: chrome.runtime.Port | null = null;
 
 
@@ -42,12 +35,7 @@ class InteractionWorkflow {
     initialMsg: HTMLElement[],
     setMessage: (message: string) => Promise<void>,
     sendMessage: () => Promise<void>,
-   /* captureNewMessages: (
-      message: string,
-      maxWaitTime: number,
-      chatbotInterface?: InterfaceChatbot,
-    ) => Promise<HTMLElement[]>,*/
-    backgroundPort: chrome.runtime.Port,
+    backgroundPort: chrome.runtime.Port
   ) {
     this.configContract = {
       configurable: {
@@ -120,7 +108,7 @@ class InteractionWorkflow {
           this.mutationManager.setLastUserMessage(question.response);
          this.lastAnswersElements = await this.mutationManager.init();
        // mark numbers
-         markQuestion(chatbotInterface.getOwnerDocument(), question.response, this.counter);
+         markQuestion(InterfaceChatbot.getInstance().getOwnerDocument(), question.response, this.counter);
          markResponses(this.lastAnswersElements,this.counter);
 
         // send responses to background

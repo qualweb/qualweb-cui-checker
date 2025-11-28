@@ -15,3 +15,15 @@ export const NODE_COMPLETE_MAP: Record<string, string> = {
   question_formulator: 'Question Ready',
   qw_browser_test: 'Browser Test Complete',
 };
+
+type TypeCommunication = 'REQUEST' | 'RESPONSE';
+type StatusCommunication = 'PENDING' | 'SUCCESS' | 'ERROR';
+
+export interface PortResponse {
+  type: TypeCommunication;       
+  action: string;        
+  tabId?: number;      
+  payload?: any;
+  status: StatusCommunication;       
+  error?: { message: string };
+}

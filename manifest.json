@@ -10,7 +10,8 @@
   "options_page": "dist/options/options.html",
   
   "action": {
-    "default_title": "Click to open panel"
+    "default_title": "Click to open Qualweb CUI Checker"
+    
   },
   "permissions": [
     "storage",
@@ -18,36 +19,18 @@
     "sidePanel",
     "activeTab",
     "scripting",
-    "audioCapture",
-    "debugger",
-    "tts",
-    "ttsEngine"
+    "tts"
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
 },
-"host_permissions": ["*:/*/*"],
-  "content_scripts": [
-    {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": [
-        "dist/qwPage.js",
-        "dist/util.js",
-
-        "dist/act.js", 
-        "dist/cui.js", 
-        "dist/content.bundle.js", 
-        "dist/wcag.js"
-      ],
-      "run_at": "document_end"
-    }
-  ],
+"host_permissions": ["https://api.openai.com/*"],
   "web_accessible_resources": [
     {
       "resources": [
       "dist/common-words-pt.txt",
       "dist/icons/icon_settings.svg"],
-      "matches": ["<all_urls>"]
+      "matches": ["http://*/*", "https://*/*"]
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { getUniqueSelector, getGroupSelectorRelative } from '../src/content/lib/DomTools';
+import { getUniqueSelector, getGroupSelectorRelative,isNonAIInput,detectChatbotInputCrossOrigin } from '../src/content/lib/DomTools';
+import * as sinon from 'sinon';
 
 declare const global: any;
 
@@ -100,13 +101,169 @@ global.Node = global.Node || { ELEMENT_NODE: 1 };
                     { name: 'data-a', value: 'one' },
                     { name: 'data-b', value: 'two' },
                     { name: 'data-c', value: 'three' },
+                    { name: 'data-d', value: 'four' },
+            
                 ],
                 classList: [],
             };
 
             const sel = getGroupSelectorRelative(el);
         
-            // only first two data-* attributes should be used
-            expect(sel).to.equal('div[data-a="one"][data-b="two"]');
+            // only first three  data-* attributes should be used
+            expect(sel).to.equal('div[data-a="one"][data-b="two"][data-c="three"]');
         });
+
+
+     
     });
+
+        describe('detectChatbotInputCrossOrigin',  () => {
+            let originalDocument: Document;
+            let originalWindow: Window;
+
+            beforeEach(() => {
+                originalDocument = global.document;
+                originalWindow = global.window;
+            });
+
+            afterEach(() => {
+                global.document = originalDocument;
+                global.window = originalWindow;
+            });
+
+            it('returns null when no inputs are found', async () => {
+                const mockDoc = {
+                    querySelectorAll: sinon.stub().returns([]),
+                };
+                const showMessageStub = sinon.stub();
+                 global.showMessage = showMessageStub;
+                global.document = mockDoc as any;
+                
+                global.window = { innerWidth: 1024, innerHeight: 768, top: global.window } as any;
+               
+                const result = await detectChatbotInputCrossOrigin();
+                expect(result).to.equal(null);
+            });
+
+            it('returns highest scoring visible input from main document', async () => {
+                const mockInput = {
+                    getBoundingClientRect: () => ({ right: 1000, bottom: 70, top: 0, left: 0, width: 100, height: 70 }),
+                    offsetParent: { innerWidth: 1024, innerHeight: 768 },
+                    attributes: [{ name: 'placeholder', value: 'Type here' }],
+                    ownerDocument: { defaultView: {} },
+                };
+
+                const mockDoc = {
+                    querySelectorAll: sinon.stub().withArgs('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]').returns([mockInput]),
+                    getElementById: sinon.stub(),
+                    createElement: sinon.stub(),
+                };
+                global.document = mockDoc as any;
+                global.document = mockDoc as any;
+                global.window = { innerWidth: 1024, innerHeight: 768, top: global.window } as any;
+        
+                const result = await detectChatbotInputCrossOrigin();
+                expect(result).to.equal(mockInput);
+            });
+          
+
+            
+               
+                
+        });
+
+        describe('isNonAIInput', () => {
+                it('returns false when element has no attributes', () => {
+                    const mockEl = {
+                        attributes: [],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(false);
+                });
+
+                it('returns true when attribute contains a non-AI keyword', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: 'email' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+
+                it('returns true when attribute contains keyword in mixed case', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'data-field', value: 'PASSWORD' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+
+                it('returns true when keyword appears as a word in multi-word attribute', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'aria-label', value: 'enter your email address' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+
+                it('returns false when attribute contains substring but not exact keyword match', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: 'username123' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(false);
+                });
+
+                it('returns true when multiple attributes exist and one contains keyword', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'class', value: 'input-field' },
+                            { name: 'placeholder', value: 'phone' },
+                            { name: 'id', value: 'contact' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+
+                it('returns false when all attributes contain no non-AI keywords', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: 'type your message' },
+                            { name: 'aria-label', value: 'chat box' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(false);
+                });
+                    it('returns true when string contains a substring Portuguese non-AI keyword', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: 'Insira o texto a pesquisar' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+
+                it('returns true for Portuguese non-AI keyword', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: 'morada' },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(true);
+                });
+                
+
+           
+
+                it('returns false when attribute value is null or undefined', () => {
+                    const mockEl = {
+                        attributes: [
+                            { name: 'placeholder', value: null },
+                        ],
+                    } as any;
+                    expect(isNonAIInput(mockEl)).to.equal(false);
+                });
+
+            });

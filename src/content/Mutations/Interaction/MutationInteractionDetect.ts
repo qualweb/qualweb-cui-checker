@@ -3,7 +3,8 @@ import AbstractMutationManager from "../AbstractMutationManager";
 import ElementFoundManager from "../AbstractElementManager";
 import TimeoutManager from "../TimeoutManager";
 import MessagesManager from "../ElementManager/MessagesManager";
-import { chatbotInterface } from "../../detection/Detection";
+import InterfaceChatbot from "../../detection/InterfaceChatbot";
+
 
 // class Responsible for managing mutation observer for messages
 class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
@@ -16,7 +17,7 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
     constructor() {
         super();
         this.elementTracker = new MessagesManager();
-        this.selectorMessage = chatbotInterface.getMessagesSelector() || '';
+        this.selectorMessage = InterfaceChatbot.getInstance().getMessagesSelector() || '';
         this.on('childList:added', this.handleAddedNodes.bind(this));
         this.on('childList:removed', this.handleRemovedNodes.bind(this));
         this.on('attributes:change', this.handleAttributeChange.bind(this));
@@ -30,7 +31,7 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
         // reset previous elements from manager
         this.elementTracker.clear();
         this.observer = new MutationObserver(this.mutationCallback);
-        const observedNode: Node | null = chatbotInterface.getWindowElement()
+        const observedNode: Node | null = InterfaceChatbot.getInstance().getWindowElement()
         if(!observedNode){
             throw new Error("No observed node found");
         }

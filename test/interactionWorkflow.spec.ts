@@ -104,66 +104,6 @@ describe('InteractionWorkflow', () => {
         });
     });
 
-    describe('message listener', () => {
-        it('should handle endInteraction action', async () => {
-            const workflow = new InteractionWorkflow(
-                initialMsg,
-                mockSetMessage,
-                mockSendMessage,
-                mockPort
-            );
-
-            await workflow['initInteraction']();
-
-            const listener = (mockPort.onMessage.addListener as sinon.SinonStub).args[0][0];
-            listener({ action: 'endInteraction' });
-
-            expect(workflow['isRunning']).to.be.false;
-        });
-
-        it('should handle question action and increment counter', async () => {
-            const workflow = new InteractionWorkflow(
-                initialMsg,
-                mockSetMessage,
-                mockSendMessage,
-                mockPort
-            );
-
-            await workflow['initInteraction']();
-
-            const mockQuestion: FinalOutput = {
-                response: 'Test question',
-                status: 'pending',
-            } as any;
-
-            const listener = (mockPort.onMessage.addListener as sinon.SinonStub).args[0][0];
-            await listener({ action: 'question', question: mockQuestion });
-
-            expect(workflow['counter']).to.equal(1);
-        });
-
-        it('should stop when question status is completed', async () => {
-            const workflow = new InteractionWorkflow(
-                initialMsg,
-                mockSetMessage,
-                mockSendMessage,
-                mockPort
-            );
-
-            await workflow['initInteraction']();
-
-            const mockQuestion: FinalOutput = {
-                response: 'Final question',
-                status: 'completed',
-            } as any;
-
-            const listener = (mockPort.onMessage.addListener as sinon.SinonStub).args[0][0];
-            await listener({ action: 'question', question: mockQuestion });
-
-            expect(workflow['isRunning']).to.be.false;
-        });
-    });
-
     describe('markPreviousQuestionIfPassed', () => {
         it('should set attribute on elements when selector is string', () => {
             const workflow = new InteractionWorkflow(

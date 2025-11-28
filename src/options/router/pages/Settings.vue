@@ -38,11 +38,11 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue';
+import { computed,ref } from 'vue';
 import { useStore } from 'vuex';
 import { z } from 'zod';
 import Modal from '../../components/Modal.vue';
-import { ref } from 'vue';
+
 const showModal = ref(false);
 
 function startModal() {
@@ -59,16 +59,24 @@ const locale = computed({
   get: () => store.getters.getLocale,
   set: (value) => store.commit('SETLOCALE', value),
 });
-
+const mappedKey = computed({
+  get: () => store.getters.getMappedApiKey,
+});
 const apiKey = computed({
-  get: () => store.getters.getApiKey,
-  set: (value) => store.commit('SETAPIKEY', value),
+   get: () => store.getters.getMappedApiKey,
+  
+  set: (value) =>{
+    if(value === mappedKey.value) return;
+    store.commit('SETAPIKEY', value)
+
+  } ,
 });
 
 const LLMService = computed({
   get: () => store.getters.getLLMService,
   set: (value) => store.commit('SETLLMSERVICE', value),
 });
+
 
 const onClickCancelSettings = () => {
   window.close();
@@ -78,6 +86,7 @@ const onSubmit = () => {
   const data = {
     locale: locale.value,
     apiKey: apiKey.value,
+    mappedKey: mappedKey.value
 
   };
 

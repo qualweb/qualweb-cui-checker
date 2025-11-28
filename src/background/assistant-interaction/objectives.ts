@@ -22,6 +22,10 @@ interface QwBrowserTest {
 }
 
 export interface Objective {
+    // Check Name of Objective for identification of current test for UI status
+    check: string;
+    // Title of Objective
+    title: string;
     // Text explaining objective
     objective: string;
     // requirements to pass objective

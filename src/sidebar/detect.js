@@ -1,69 +1,80 @@
-async function sendActionToActiveTab(action, payload = {}) {
+setInterval(() => {
+  chrome.runtime.sendMessage({ action: 'SIDEPANEL_ALIVE_CHECK' });
+}, 10000);
+
+async function sendActionToBackground(action, payload = {}) {
   return new Promise((resolve, reject) => {
+    // Primeiro obtemos o tab ativo
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
         console.error(chrome.runtime.lastError);
         return reject(chrome.runtime.lastError);
       }
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { action, ...payload }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.error(chrome.runtime.lastError);
-          
 
-            return reject(chrome.runtime.lastError);
-          }
-          if (response.status === 'error') {
-            return reject(new Error(response.message));
-          }
-          resolve(response);
-        });
-      } else {
-        reject(new Error('No active tab found'));
+      const activeTab = tabs[0];
+      if (!activeTab || activeTab.id === undefined) {
+        return reject(new Error('Nenhuma tab ativa encontrada'));
       }
+
+      chrome.runtime.sendMessage({ action, tabId: activeTab.id, ...payload }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error(chrome.runtime.lastError);
+          return reject(chrome.runtime.lastError);
+        }
+        if (response?.status === 'error') {
+          return reject(new Error(response.message));
+        }
+        resolve(response);
+      });
     });
   });
 }
-async function startDetectingChatbot() {
-  return sendActionToActiveTab('detectChatbot');
+
+
+async function cancelDetectionRequest(tabId) {
+  return sendActionToBackground('CANCEL_DETECTION', { tabId: tabId });
 }
 
-async function cancelDetectionRequest(){
-  return sendActionToActiveTab('cancelDetection')
+async function startPageChatbotProcedure(tabId) {
+  const settings = await getQualWebSettings();
+  console.log('Locale in startPageChatbotProcedure:', settings.options.locale);
+  return sendActionToBackground('PAGE_CHATBOT_PROCEDURE', { tabId: tabId, locale: settings.options.locale });
 }
 
-async function startPageChatbotProcedure() {
-  return sendActionToActiveTab('pageChatbotProcedure');
-}
 
-async function startIdentifySelectorsChatbot() {
-  return sendActionToActiveTab('identifySelectors');
-}
-
-async function startDetectingChatbotPage() {
-  return sendActionToActiveTab('requestElementLLMPage');
-}
-
-async function startCorrectionChatbot(elementName) {
-  return sendActionToActiveTab('correctElementSelection', {
+async function startCorrectionChatbot(elementName, tabId) {
+    const settings = await getQualWebSettings();
+  console.log('Locale in startCorrectionChatbot:', settings.options.locale);
+  return sendActionToBackground('CORRECT_ELEMENT_SELECTION', {
     element: elementName,
+    tabId: tabId,
+    locale: settings.options.locale
   });
 }
 
-async function startVerificationElement(elementName) {
-  return sendActionToActiveTab('startVerification', { element: elementName });
+async function startVerificationElement(elementName, tabId) {
+  return sendActionToBackground('START_VERIFICATION', { element: elementName, tabId: tabId });
 }
 
-async function endVerificationElement(elementName) {
-  return sendActionToActiveTab('endSuccessfulVerification', {
+async function endVerificationElement(elementName, tabId) {
+  return sendActionToBackground('END_SUCCESSFUL_VERIFICATION', {
     element: elementName,
+    tabId: tabId,
   });
 }
 
-async function setStoredChatbotSelectors(elementName) {
-  return sendActionToActiveTab('setStoredSelectors', { element: elementName });
+async function loadStoredChatbotSelectors(selectors, tabId) {
+  return sendActionToBackground('SET_STORED_SELECTORS', { selectors: selectors, tabId: tabId });
 }
 
-async function resetDataContentScript() {
-  return sendActionToActiveTab('resetData');
+async function resetDataContentScript(tabId) {
+  return sendActionToBackground('RESET_DATA', { tabId: tabId });
+}
+
+async function manualSelectMic(tabId) {
+  return sendActionToBackground('MANUAL_SELECT_MIC', { tabId: tabId });
+}
+
+async function cancelManualSelectMic(tabId) {
+  return sendActionToBackground('CANCEL_MANUAL_SELECT_MIC', { tabId: tabId });
 }

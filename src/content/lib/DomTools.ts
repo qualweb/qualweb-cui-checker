@@ -1,5 +1,6 @@
-
-import { ChatbotInputElement } from "../interaction/message-sender";
+import { IframeNotAccessibleError } from '../detection/Errors';
+import { ChatbotInputElement } from '../interaction/message-sender';
+import { containsExactTextXPath } from './XPathTools';
 
 export function getUniqueSelector(element: Element): string | null {
   if (!element) return null;
@@ -26,18 +27,13 @@ export function getUniqueSelector(element: Element): string | null {
 
   return path.join(' > ');
 }
-function isRandomValue(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value) // UUID
-    || /^[0-9a-f]{16,}$/i.test(value) // hashes longos
-    || /^\d{10,}$/.test(value);       // timestamps longos
-}
 
 
 export function isInsideIframe(element: Element): boolean {
   let currentWindow: Window | null = element.ownerDocument.defaultView;
 
   while (currentWindow && currentWindow !== window.top) {
-    if (currentWindow.frameElement && currentWindow.frameElement.tagName === 'IFRAME') {
+    if (currentWindow.frameElement?.tagName === 'IFRAME') {
       return true;
     }
     currentWindow = currentWindow.parent;
@@ -61,10 +57,9 @@ export function findDeepestNodeWithoutSibling(
   }
 
   // Percorrer caminho de root para baixo
-  for (let i = 0; i < path.length; i++) {
-    const node = path[i];
-    if (!node.contains(sibling)) {
-      return node;
+  for (const p of path) {
+    if (!p.contains(sibling)) {
+      return p;
     }
   }
 
@@ -91,9 +86,22 @@ export function findLowestCommonAncestorDOM(elem1: Element, elem2: Element): Ele
   return null;
 }
 
+// Verify if element is visible 
 function isVisible(el: Element | null): boolean {
   return !!(el && (el as HTMLElement).offsetParent !== null);
 }
+
+function isElementInViewport(el: Element): boolean {
+  const rect = el.getBoundingClientRect();
+
+  return (
+    rect.top >= 0 && 
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+
 
 export function getFirstElementVisibleFromArray(elements: Element[]): Element | null {
   for (const el of elements) {
@@ -105,19 +113,11 @@ export function getFirstElementVisibleFromArray(elements: Element[]): Element | 
 }
 
 
-// TODO: Afinar o regex para remover apenas os caracteres especiais necessários de acordo com regras de seletores CSS
-// esta a remover > e outros caracteres que não são necessários
-export function escapeCssSelector(selector: string): string {
-  return selector.replace(/([,\/:;?@^`{|}~])/g, '\\$1');
-}
-
-export function clearDotIfCustomTagSelector(selector: string): string {
-  if (selector.startsWith('.')) {
-    return selector.slice(1);
-  }
-  return selector;
-}
-
+/** Function to pause execution for a given number of milliseconds
+ * 
+ * @param ms  milliseconds to sleep
+ * @returns 
+ */
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -145,38 +145,137 @@ export function findScrollable(element) {
 
   return null; 
 }
-
-
-export function detectChatbotInputCrossOrigin():ChatbotInputElement | null {
-  function isCandidateIframe(iframe) {
-    const style = window.getComputedStyle(iframe);
-    return isVisible(iframe) && /fixed|sticky/.test(style.position);
+/** Function to prioritize text input elements (div, input, textarea)
+ *   
+ * @param elements Array of elements to prioritize 
+ * @returns  The element with highest priority (div > input > textarea)
+ */
+function priorityTextInput(elements: Element[]): Element {
+  const priorityTags = ['TEXTAREA','INPUT','DIV'];
+  let topElement: Element | null = null;
+  let topPriority = -1;
+  for (const element of elements) {
+    const tag = element.tagName;
+    const priority = priorityTags.indexOf(tag);
+    if (priority > topPriority) {
+      topPriority = priority;
+      topElement = element;
+    }
   }
+  return topElement ?? elements[0];
+}
 
-  // Inputs do documento principal
-  let topInput:Element|null = null;
-  let topScore = -Infinity;
-  const nonAIInputKeywords = [
-    "email", "username", "user", "login", "password", "pin", "token",
-    "first name", "last name", "full name", "dob", "date of birth",
-    "address", "street", "city", "state", "zip", "postcode",
-    "phone", "mobile", "fax", "contact number",
-    "credit card", "cvv", "expiry", "paypal", "billing",
-    "subscribe", "newsletter", "coupon", "promo", "discount",
-    "search", "find", "filter", "query", "sort",
-    "captcha", "recaptcha", "verification code", "security code",
-    "submit", "feedback", "comment",
-    "upload", "file", "attachment",
-    "url", "website", "link",
-    "rating", "stars", "vote", "review","list",'date'
-  ];
-function isNonAIInput(el) {
+
+const nonAIInputKeywords = new Set([
+  // -----------------------------------------
+  //  ENGLISH
+  // -----------------------------------------
+  "address", "billing", "city", "comment", "contact", "number", "coupon", "credit",
+  "card", "cvv", "date", "dob", "email", "expiry", "fax", "feedback",
+  "find", "first", "name", "last", "link", "list", "login", 
+  "password", "phone", "pin", "postcode", "promo", "recaptcha", "review",
+  "search", "state", "street","tel", "time",
+   "url", "user", "username", "website", "zip",
+
+  // -----------------------------------------
+  // 🇵🇹 PORTUGUÊS (PT-PT)
+  // -----------------------------------------
+  "cartão", "crédito", "cidade", "código", "postal",
+  "comentário", "consulta","cupão", "data", "nascimento", "desconto", "distrito",
+  "filtrar", "lista", "morada", "número", "contacto", "palavra-passe",
+  "pesquisa","pesquisar", "primeiro","procura", "procurar", "promoção", "rua", "telemóvel", "telefone", "último",
+  "utilizador", "validade", "nome",
+
+]);
+export async function detectChatbotInputCrossOrigin():Promise<ChatbotInputElement | null> {
+
+
+  const inputs = [...document.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
+  console.log("inputs detected",inputs);
+  const inputsFiltered = inputs.filter(isElementInViewport).filter(input => !isNonAIInput(input));
+  console.log("inputs filtered",inputsFiltered);
+  const result  = inputsFiltered.length > 0 ? priorityTextInput(inputsFiltered) as ChatbotInputElement : null;
+  if(result){
+    console.log("Detected chatbot input element:", result);
+    return result;
+  }
+  // Inputs "prováveis" dentro de iframes cross-origin
+ const iframes = [...document.querySelectorAll('iframe')];
+  console.log("Found Iframes", iframes);
+  let foundClosedIframe = false;
+  const inputsFoundInIframes: Element[] = [];
+  for (const iframe of iframes) {
+    let documentIframe:Document|null = null;
+    try{
+    documentIframe = iframe.contentDocument || iframe.contentWindow!.document;
+    // check if iframe is accessible
+    if(!documentIframe || !documentIframe.body){
+
+      throw new Error('Iframe not accessible');
+    }
+    }catch{
+      //TODO: Logic to send to devtools chrome extension
+      console.log("Cannot access iframe due to cross-origin restrictions:", iframe);
+      foundClosedIframe = true;
+      continue;
+    }
+  
+  const inputs = [...documentIframe.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
+  console.log("inputs detected",inputs);
+    const inputsFiltered = inputs.filter(isElementInViewport).filter(input => !isNonAIInput(input));
+    inputsFoundInIframes.push(...inputsFiltered);
+  }
+  if(inputsFoundInIframes.length > 0){
+    const resultIframe  = priorityTextInput(inputsFoundInIframes) as ChatbotInputElement;
+    console.log("Detected chatbot input element in iframe:", resultIframe);
+    return resultIframe;
+  }else{
+    if(foundClosedIframe){
+      console.log("Some iframes were not accessible due to cross-origin restrictions.");
+      throw new IframeNotAccessibleError('Some iframes were not accessible due to cross-origin restrictions.');
+     
+    }
+    return null;
+  }
+}
+
+
+/** Function to check if an element is likely NOT an AI chatbot input
+ * 
+ * @param el  Element to check
+ * @returns  boolean  True if element is likely NOT an AI chatbot input
+ */
+
+export function isNonAIInput(el: Element): boolean {
+  const allAttributesText = Array.from(el.attributes)
+    .map(attr => attr.value)
+    .join(' ')
+    .toLowerCase();
+
+  const words = allAttributesText.split(/[\s.\-]+/);
+  
+  for (const word of words) {
+    if (nonAIInputKeywords.has(word)) {
+      console.log(`Found keyword "${word}" in attributes`);
+      return true;
+    }
+  }
+  
+  return false;
+}
+/** Function to check if an element is likely NOT an AI chatbot input
+ * 
+ * @param el  Element to check
+ * @returns  boolean  True if element is likely NOT an AI chatbot input
+ */
+/*
+ export function isNonAIInput(el:Element): boolean {
   return Array.from(el.attributes).some(attr => {
     const val = (attr as any).value;
     return (
       val &&
       nonAIInputKeywords.some(keyword => {
-        const found = val.toLowerCase().includes(keyword);
+        const found = val.toLowerCase().split(/[\s.\-]+/).includes(keyword);
         if (found) {
           console.log(`Found keyword "${keyword}" in attribute: ${val}`);
         }
@@ -185,63 +284,7 @@ function isNonAIInput(el) {
     );
   });
 }
-  const inputs = [...document.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
-  console.log("inputs detected",inputs);
-  for (const input of inputs) {
-    const rect = input.getBoundingClientRect();
-    const distance = Math.hypot(window.innerWidth - rect.right, window.innerHeight - rect.bottom);
-    const score = -distance / 1000; // só posição
-    console.log("distance input",input, " = ", distance," score= ",score);
-
-     
-    const finalScore = isNonAIInput(input) ? score - 1000 : score + 1000; // penaliza se não for candidato
-    console.log("Score of ", input, " = ", finalScore);
-  if (finalScore > topScore) {
-    topScore = finalScore;
-    topInput = input;
-  }
-  }
-
-  // Inputs "prováveis" dentro de iframes cross-origin
-  const iframes = [...document.querySelectorAll('iframe')];
-  console.log("Found Iframes", iframes);
-  for (const iframe of iframes) {
-    let documentIframe:Document|null = null;
-    try{
-    documentIframe = iframe.contentDocument || iframe.contentWindow!.document;
-    }catch(e){
-      // Logic to send to devtools chrome extension
-      continue;
-    }
-      const inputs = [...documentIframe.querySelectorAll('input[type="text"], input:not([type]), textarea, div[contenteditable="true"]')].filter(isVisible);
-  console.log("inputs detected",inputs);
-  for (const input of inputs) {
-    const rect = input.getBoundingClientRect();
-    const distance = Math.hypot(window.innerWidth - rect.right, window.innerHeight - rect.bottom);
-    const score = -distance / 1000; // só posição
-
-     
-    const finalScore = isNonAIInput(input) ? score - 1000 : score + 1000; 
-
-    if (finalScore > 0) {
-      console.log("Score of ", input, " = ", finalScore);
-    }
-  if (finalScore > topScore) {
-    topScore = finalScore;
-    topInput = input;
-  }
-  }
-  }
-  if(topScore > 0){
-    console.log("Existe  um input com mais de 0")
-    return topInput as ChatbotInputElement;
-  }else{
-    return null;
-  }
-}
-
-
-
+*/
 /**
  * Gera um seletor CSS para agrupamento (classes, atributos).
  * 
@@ -260,13 +303,13 @@ export function getGroupSelectorRelative(element) {
   let counterData = 0;
   // first try data-* attributes
   Object.values(element.attributes).forEach((attr:any) => {
-  if (attr.name.startsWith('data-')) {
+  if (attr.name.startsWith('data-') || attr.name.startsWith('aria-')) {
     const key = attr.name;  
     const value = attr.value; 
-     if(!isAutoGeneratedValue(value) && value !== "true" && value !== "false" && !/\d/.test(value) && counterData <2 ){
+     if(!isAutoGeneratedValue(value) && value !== "true" && value !== "false" && !/\d/.test(value) && counterData <3){
       selector += `[${key}="${value}"]`;
       counterData++;
-    }else if(/\d/.test(value) && counterData <2 ){
+    }else if(/\d/.test(value) && counterData <3 ){
       selector += `[${key}]`; 
        counterData++;
     }
@@ -327,40 +370,13 @@ function escapeCSS(str) {
 }
 
 
-
-export function findElementByExactText(container,text) {
-    // Converte o texto para minúsculas e escapa aspas simples, se necessário
-  
-     const xpath = `.//*[normalize-space() = '${text}']`;
-  
-    const result = container.ownerDocument.evaluate(
-        xpath,
-        container,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    ).singleNodeValue;
-
-    return result; 
-}
-
-export function findMicrophoneButton(container) {
-
-    const xpath = `//button[@*[contains(., 'Dictate')] or @*[contains(., 'mic')]]`;
-  
-    const result = container.ownerDocument.evaluate(
-        xpath,
-        container,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    ).singleNodeValue;
-    
-    return result; 
-}
-
-
-export function findAncestralNodeBeforeContaining(node, ignoreText) {
+/**
+ * Finds the closest ancestor of a node that does not contain the specified text.
+ * @param node  The starting node.
+ * @param ignoreText  The text to ignore when searching ancestors.
+ * @returns  The closest ancestor element that does not contain the specified text.
+ */
+export function findAncestralNodeBeforeContaining(node: HTMLElement, ignoreText: string): HTMLElement {
     let current = node;
   let parent = node.parentElement;
  console.log("Antes iteração");
@@ -379,23 +395,6 @@ export function findAncestralNodeBeforeContaining(node, ignoreText) {
   return current; // último ancestral que não contém o texto
 }
 
-
-export function containsExactTextXPath(container, text) {
-  if (!container) return false;
-
-  // XPath para procurar qualquer nó de texto descendente igual a text
-  const xpath = `.//text()[normalize-space() = ${JSON.stringify(text)}]`;
-
-  const result = container.ownerDocument.evaluate(
-    xpath,
-    container,
-    null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
-  ).singleNodeValue;
-
- return !!result;; // true se encontrou, false caso contrário
-}
 
 export function  getParentIframeElement(element: HTMLElement | null): HTMLElement | null {
     if (!element) return null;
@@ -417,3 +416,56 @@ export function  getParentIframeElement(element: HTMLElement | null): HTMLElemen
     const iframe = getParentIframeElement(inputElement);
     return iframe ? getUniqueSelector(iframe) : null;
   }
+
+
+export function findButton(element: HTMLElement, clickX: number, clickY: number): HTMLElement | null {
+  // Check if element is clickable
+  function isClickable(el: HTMLElement): boolean {
+    const tag = el.tagName.toLowerCase();
+
+    
+    // Common clickable elements
+    if (tag === 'button' || tag === 'a') return true;
+    
+    
+    return false;
+  }
+
+  // Check if visible
+  function isVisible(el: HTMLElement): boolean {
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  let current: HTMLElement | null = element;
+  let depth = 0;
+  const MAX_DEPTH = 5;
+  const MAX_DISTANCE = 100; // pixels
+  
+  while (current && depth < MAX_DEPTH) {
+    if (isClickable(current) && isVisible(current)) {
+      const rect = current.getBoundingClientRect();
+      
+      // Check if click was reasonably close to the button
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.sqrt(
+        Math.pow(clickX - centerX, 2) + 
+        Math.pow(clickY - centerY, 2)
+      );
+      
+      if (distance <= MAX_DISTANCE) {
+        console.log("Found clickable element at depth", depth, "distance", distance.toFixed(2), current);
+        return current;
+      } else {
+        console.log("Found clickable but too far:", distance.toFixed(2), "px");
+      }
+    }
+    
+    current = current.parentElement;
+    depth++;
+  }
+
+  console.log("No clickable element found nearby");
+  return null;
+}

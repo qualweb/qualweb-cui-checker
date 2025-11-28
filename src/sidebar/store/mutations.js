@@ -1,6 +1,15 @@
 import * as types from './mutation-types';
 
 export default {
+  [types.SETSELECTORSDETECTED](state, payload) {
+    state.selectorsDetected = payload;
+  },
+  [types.SETTABID](state, payload) {
+    state.tabId = payload;
+  },
+  [types.SETSIDEPANELURL](state, payload) {
+    state.sidepanelURL = payload;
+  },
   [types.SETACT](state, payload) {
     state.act = payload;
   },
@@ -93,5 +102,9 @@ export default {
   },
   [types.SETSELECTORS](state, payload) {
     state.storage.selectors = payload;
+  },
+
+  [types.SETINTERACTIONINITIALIZED](state, payload) {
+    state.chatbotInteractionInitialized = payload;
   },
 };

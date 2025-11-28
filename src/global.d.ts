@@ -68,9 +68,12 @@ interface ACTReport {
 declare const APP_CONFIG: {
   VERSION: string;
   DIST_FOLDER:string;
+  ICONS_FOLDER:string;
+  RESOURCES_FOLDER:string;
   RESOURCES_WORDS_PT: string;
   INITIAL_INTERACTION_MESSAGE_PT:string;
   INITIAL_INTERACTION_MESSAGE_EN:string;
+  SCRIPTS_FOLDER:string;
 };
 }
 export {};

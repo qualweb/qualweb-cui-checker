@@ -43,11 +43,27 @@ export const domain_obtainer = async (state: typeof GraphState.State) => {
         Output:
         ${formatInstructions}`
     };
+    const MAX_RETRIES = 2;
+    let resultContent: any = null;
+     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+     try {
     const result = await LLM.invoke([systemMessage, lastMessageHuman as HumanMessage]);
     // TODO: treat execptions on Invalid JSON Schemma
     const content = typeof result.content === "string" ? result.content : result.content?.toString()
 
-    const resultContent: any = await parser.parse(content);
+    resultContent = await parser.parse(content);
+     } catch (e) {
+        console.warn(`domain_obtainer: Attempt ${attempt + 1} failed. Error: ${e}`);
+        if( attempt === MAX_RETRIES) throw e;
+        systemMessage.content += `
+        Note: Previous response was invalid. Please ensure the output strictly follows the specified format.`;
+        continue; // retry
+     }
+     if (resultContent) {
+        break;
+     }
+    }
+    
     // Extract Fields
     const entityName = resultContent["entity"] || null;
     const shortDescription = resultContent["description"] || null;
@@ -69,10 +85,6 @@ export const QwBrowserTest = async (state: typeof GraphState.State) => {
     const currentObjective = currentEvaluationObjective?.objective;
     const lastMessage = currentEvaluationObjective?.message;
 
-    /*interface EvaluationTest{
-      message: BaseMessage,
-      objective:Objective,
-    }*/
     // expect last message to be human message
     if (!currentObjective) {
         return {status: "completed"};
@@ -112,7 +124,7 @@ export const QwBrowserTest = async (state: typeof GraphState.State) => {
     try {
         const parsed = JSON.parse(result.content as string);
         outcomeResult = parsed.outcome;
-    } catch (e) {
+    } catch  {
         // fallback se o modelo não devolver JSON válido
         const content = String(result.content).toLowerCase();
         if (content.includes("passed")) {
@@ -208,7 +220,7 @@ export const objectiveAchiever = async (state: typeof GraphState.State) => {
     try {
         const parsed = JSON.parse(result.content as string);
         achieved = !!parsed.achieved;
-    } catch (e) {
+    } catch {
         // fallback se o modelo não devolver JSON válido
         achieved = String(result.content).toLowerCase().includes("true");
     }
@@ -244,6 +256,18 @@ export const objectiveAchiever = async (state: typeof GraphState.State) => {
     } else {
 
         updatedObjectives[currentObjectiveKey!].status.counter += 1;
+
+        if(updatedObjectives[currentObjectiveKey!].status.counter >= 3){
+            // Max attempts reached, mark as completed to avoid infinite loop
+            updatedObjectives[currentObjectiveKey!].status.completed = true;
+            return {
+                objectives: updatedObjectives,
+                currentObjectiveMessages: [],
+                currentObjective: null,
+                objectiveAchieved: null,
+                status: "running",
+            };
+        }
 
         return {
             objectives: updatedObjectives,

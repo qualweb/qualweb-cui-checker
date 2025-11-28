@@ -5,16 +5,16 @@
       {{ result.verdict }}
     </p>
     <p v-if="result.description">
-      <span class="strong">Description:</span>
+      <span class="strong description">Description:</span>
       {{ result.description }}
     </p>
     <div v-for="element in result.elements" :key="element.pointer">
       <p v-if="element.htmlCode">
-        <span class="strong">Code:</span>
+        <span class="strong result">Code:</span>
         <highlight-code lang="html">{{ element.htmlCode }}</highlight-code>
       </p>
       <p v-if="element.pointer">
-        <span class="strong">Pointer:</span>
+        <span class="strong result">Pointer:</span>
         <highlight-code lang="css">{{ element.pointer }}</highlight-code>
       </p>
     </div>
@@ -38,6 +38,9 @@ export default {
 .result {
   padding: 0.8rem;
   overflow-wrap: anywhere;
-  word-break: break-all;
+
+}
+.description {
+  overflow-wrap: break-word !important;
 }
 </style>

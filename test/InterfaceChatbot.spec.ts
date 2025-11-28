@@ -74,7 +74,7 @@ describe('InterfaceChatbot', function() {
     describe('Initiating Object', () => {
         it('should initialize with default values', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             //assert
             expect(chatbot.getWindowElement()).to.be.null;
             expect(chatbot.getMessagesSelector()).to.equal('');
@@ -83,7 +83,7 @@ describe('InterfaceChatbot', function() {
 
         it('should initialize selectors with empty strings', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const selectors = chatbot.getSelectors();
 
             //assert
@@ -97,7 +97,7 @@ describe('InterfaceChatbot', function() {
     describe('Loading elements from chatbot Interface', () => {
         it('should set selectors and initiate elements', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -116,7 +116,7 @@ describe('InterfaceChatbot', function() {
         });
           it('iframe - should set selectors and initiate elements', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const testSelectors: ChatBotSelectors = {
                 iframeSelector: '#myFrame',
                 inputSelector: '#input',
@@ -139,7 +139,7 @@ describe('InterfaceChatbot', function() {
     describe('isElementsLoaded', () => {
         it('should return true when all elements are loaded', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -154,7 +154,7 @@ describe('InterfaceChatbot', function() {
         });
              it('should return true when all elements are loaded with mic', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -172,7 +172,7 @@ describe('InterfaceChatbot', function() {
     describe('getters and setters', () => {
         it('should get and set selectors', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const newSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -188,7 +188,7 @@ describe('InterfaceChatbot', function() {
         });
          it('should get inputElement', () => {
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const newSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -210,7 +210,7 @@ describe('InterfaceChatbot', function() {
         it('should reset all properties to initial state', () => {
 
             // act
-            chatbot = new InterfaceChatbot();
+            chatbot = InterfaceChatbot.getInstance();
             const testSelectors: ChatBotSelectors = {
                   inputSelector: '#input',
                 messagesSelector: '.messages',
