@@ -11,9 +11,12 @@ export default {
     state.firstRun = firstRun;
   },
   [types.SETOPTIONS](state, options) {
-    Object.assign(state, options);
+    state.options = options;
   },
   [types.SETLLMSERVICE](state, LLMService) {
     state.options.LLMService = LLMService;
   },
+  [types.SETMAPPEDAPIKEY](state, mappedKey){
+    state.mappedKey = mappedKey;
+  }
 };
