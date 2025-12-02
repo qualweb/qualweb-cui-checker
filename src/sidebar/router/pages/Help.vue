@@ -62,7 +62,7 @@ const sections = [
         <li><a href="https://qualweb.io/support" target="_blank" rel="noopener noreferrer">Qualweb Support</a></li>
       </ul>
       <p>If you have further questions or need personalized assistance, feel free to reach out to our support team through the support page.</p>
-    `
+    `,
   },
   {
     title: 'Instructions of Use',
@@ -75,15 +75,15 @@ const sections = [
         <li>4. Follow the prompts and provide any necessary permissions for the extension to interact with the webpage.</li>
         <li>5. Review the evaluation results and take action based on the findings.</li>
       </ul>
-    `
+    `,
   },
   {
     title: 'Acknowledgements',
     content: `
       <p>Thank you for using the Qualweb CUI Checker extension!</p>
       <p>© 2025 Qualweb. All rights reserved.</p>
-    `
-  }
+    `,
+  },
 ];
 
 const toggleSection = (index) => {
@@ -99,7 +99,7 @@ const isOpen = (index) => openSection.value === index;
   position: sticky;
   background-color: #393939;
   top: 0;
-  border-bottom: 1px solid #ccc; 
+  border-bottom: 1px solid #ccc;
 }
 .arrow-button {
   background: none;
@@ -223,17 +223,20 @@ const isOpen = (index) => openSection.value === index;
 }
 
 /* Animação da abertura */
-.accordion-enter-active, .accordion-leave-active {
+.accordion-enter-active,
+.accordion-leave-active {
   transition: max-height 0.4s ease, opacity 0.4s ease;
 }
 
-.accordion-enter-from, .accordion-leave-to {
+.accordion-enter-from,
+.accordion-leave-to {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
 }
 
-.accordion-enter-to, .accordion-leave-from {
+.accordion-enter-to,
+.accordion-leave-from {
   max-height: 1000px; /* valor alto para garantir que o conteúdo cabe */
   opacity: 1;
   overflow: visible;

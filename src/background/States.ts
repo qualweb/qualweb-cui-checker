@@ -1,5 +1,7 @@
-
-export const INTERRUPT_NODE_NAMES = ['human_skip_interrupt_question', 'human_skip_interrupt_strategy'];
+export const INTERRUPT_NODE_NAMES = [
+  'human_skip_interrupt_question',
+  'human_skip_interrupt_strategy',
+];
 
 export const NODE_STATUS_MAP: Record<string, string> = {
   domain_obtainer: 'Obtaining Initial Context',
@@ -20,10 +22,10 @@ type TypeCommunication = 'REQUEST' | 'RESPONSE';
 type StatusCommunication = 'PENDING' | 'SUCCESS' | 'ERROR';
 
 export interface PortResponse {
-  type: TypeCommunication;       
-  action: string;        
-  tabId?: number;      
+  type: TypeCommunication;
+  action: string;
+  tabId?: number;
   payload?: any;
-  status: StatusCommunication;       
+  status: StatusCommunication;
   error?: { message: string };
 }

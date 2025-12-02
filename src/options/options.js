@@ -9,4 +9,3 @@ app.use(router);
 app.use(store);
 store.dispatch('loadOptions');
 app.mount('#app');
-

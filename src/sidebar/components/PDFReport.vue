@@ -1,8 +1,6 @@
 <template>
   <div>
-        <a href="#" @click.prevent="generateReport">
-          <span class="icon">📄</span> PDF
-        </a>
+    <a href="#" @click.prevent="generateReport"> <span class="icon">📄</span> PDF </a>
     <iframe
       :id="'pdfFrame'"
       ref="pdfFrame"
@@ -233,7 +231,7 @@ async function generateReport() {
       })
       .from(frame.contentDocument.documentElement)
       .save(`accessibility_report_${today}.pdf`);
-      emit('buttonClicked');
+    emit('buttonClicked');
   };
 }
 </script>
@@ -265,6 +263,6 @@ iframe {
 }
 
 .dropdown-menu .icon {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 </style>

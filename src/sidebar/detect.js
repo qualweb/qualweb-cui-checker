@@ -30,7 +30,6 @@ async function sendActionToBackground(action, payload = {}) {
   });
 }
 
-
 async function cancelDetectionRequest(tabId) {
   return sendActionToBackground('CANCEL_DETECTION', { tabId: tabId });
 }
@@ -38,17 +37,19 @@ async function cancelDetectionRequest(tabId) {
 async function startPageChatbotProcedure(tabId) {
   const settings = await getQualWebSettings();
   console.log('Locale in startPageChatbotProcedure:', settings.options.locale);
-  return sendActionToBackground('PAGE_CHATBOT_PROCEDURE', { tabId: tabId, locale: settings.options.locale });
+  return sendActionToBackground('PAGE_CHATBOT_PROCEDURE', {
+    tabId: tabId,
+    locale: settings.options.locale,
+  });
 }
 
-
 async function startCorrectionChatbot(elementName, tabId) {
-    const settings = await getQualWebSettings();
+  const settings = await getQualWebSettings();
   console.log('Locale in startCorrectionChatbot:', settings.options.locale);
   return sendActionToBackground('CORRECT_ELEMENT_SELECTION', {
     element: elementName,
     tabId: tabId,
-    locale: settings.options.locale
+    locale: settings.options.locale,
   });
 }
 

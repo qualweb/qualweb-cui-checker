@@ -1,4 +1,3 @@
-
 const STYLE_ID = 'chatbot-green-style';
 const OVERLAY_CLASS = 'chatbot-element-overlay';
 
@@ -8,7 +7,7 @@ const activeElements = new Set<HTMLElement>();
 function updateOverlayPosition(
   element: HTMLElement,
   overlay: HTMLElement,
-  limitElement?: HTMLElement
+  limitElement?: HTMLElement,
 ) {
   const rect = element.getBoundingClientRect();
 
@@ -20,13 +19,12 @@ function updateOverlayPosition(
   if (limitElement) {
     const limitRect = limitElement.getBoundingClientRect();
 
-
     if (top < limitRect.top) {
-      height -= (limitRect.top - top);
+      height -= limitRect.top - top;
       top = limitRect.top;
     }
     if (left < limitRect.left) {
-      width -= (limitRect.left - left);
+      width -= limitRect.left - left;
       left = limitRect.left;
     }
 
@@ -55,12 +53,10 @@ function updateOverlayPosition(
   overlay.style.height = `${height}px`;
 }
 
-
-
 export function setGreen(element: HTMLElement, limitElement?: HTMLElement): void {
   if (!element) return;
   const documentToOverlay = element.ownerDocument;
-  
+
   if (!documentToOverlay.getElementById(STYLE_ID)) {
     const styleEl = documentToOverlay.createElement('style');
     styleEl.id = STYLE_ID;
@@ -88,11 +84,7 @@ export function setGreen(element: HTMLElement, limitElement?: HTMLElement): void
   const flashOverlay = documentToOverlay.createElement('div');
   flashOverlay.className = `${OVERLAY_CLASS} chatbot-green-heartbeat`;
 
-
-
-
   documentToOverlay.body.appendChild(flashOverlay);
-
 
   const update = () => updateOverlayPosition(element, flashOverlay, limitElement);
 
@@ -111,18 +103,17 @@ export function setGreen(element: HTMLElement, limitElement?: HTMLElement): void
   });
 }
 export async function unsetGreen(element: HTMLElement): Promise<void> {
+  const doc = element.ownerDocument;
+  const overlays = doc.querySelectorAll(`.${OVERLAY_CLASS}`);
 
-    const doc = element.ownerDocument;
-    const overlays = doc.querySelectorAll(`.${OVERLAY_CLASS}`);
-    
-   const removePromises = Array.from(overlays).map(overlay => {
+  const removePromises = Array.from(overlays).map((overlay) => {
     (overlay as HTMLElement).style.animation = 'none';
-    
+
     return new Promise<void>((resolve) => {
       (overlay as HTMLElement).style.opacity = '0';
       setTimeout(() => {
         overlay.remove();
-        resolve(); 
+        resolve();
       }, 500);
     });
   });
@@ -136,6 +127,6 @@ export async function unsetGreen(element: HTMLElement): Promise<void> {
       listenersMap.delete(el);
     }
   }
-  
+
   await Promise.all(removePromises);
 }

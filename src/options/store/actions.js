@@ -1,18 +1,18 @@
 import * as types from './mutation-types';
 function maskApiKey(apiKey, leadingChars = 10, trailingChars = 4) {
-    if (!apiKey || apiKey.length < (leadingChars + trailingChars)) {
-        throw new Error("Invalid Key for Mapping");
-    }
+  if (!apiKey || apiKey.length < leadingChars + trailingChars) {
+    throw new Error('Invalid Key for Mapping');
+  }
 
-    const start = apiKey.substring(0, leadingChars);
-    
-    const end = apiKey.substring(apiKey.length - trailingChars);
+  const start = apiKey.substring(0, leadingChars);
 
-    const maskLength = apiKey.length - leadingChars - trailingChars;
-    
-    const mask = '*'.repeat(maskLength);
+  const end = apiKey.substring(apiKey.length - trailingChars);
 
-    return start + mask + end;
+  const maskLength = apiKey.length - leadingChars - trailingChars;
+
+  const mask = '*'.repeat(maskLength);
+
+  return start + mask + end;
 }
 
 export const loadOptions = async function ({ commit }, modules) {
@@ -25,11 +25,14 @@ export const loadOptions = async function ({ commit }, modules) {
 
   let settings = await getStorage('qualweb_settings');
 
-
-  if (settings.qualweb_settings && settings.qualweb_settings.options && settings.qualweb_settings.options.apiKey) {
+  if (
+    settings.qualweb_settings &&
+    settings.qualweb_settings.options &&
+    settings.qualweb_settings.options.apiKey
+  ) {
     let mappedKey = maskApiKey(settings.qualweb_settings.options.apiKey);
     console.log(mappedKey);
-    
+
     commit(types.SETOPTIONS, settings.qualweb_settings.options);
     commit(types.SETMAPPEDAPIKEY, mappedKey);
     commit(types.SETFIRSTRUN, false);

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <TopBar >
+    <TopBar>
       <button @click="goToEvaluation" class="arrow-button">
         <i class="material-icons">arrow_back</i>
       </button>
@@ -48,7 +48,7 @@ export default {
     RuleResult,
     ElementNavigation,
     ColapsibleResultFilter,
-    TopBar
+    TopBar,
   },
   computed: mapGetters({
     rule: 'getCurrentRule',

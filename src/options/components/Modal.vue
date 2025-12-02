@@ -1,7 +1,6 @@
 <template>
   <div class="modal-overlay">
     <div class="modal-content">
-  
       <h2 class="title">Settings Saved</h2>
       <div class="modal-body">
         <p>Settings saved successfully.</p>

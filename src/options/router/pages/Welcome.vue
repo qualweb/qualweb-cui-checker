@@ -20,7 +20,7 @@ const store = useStore();
 const router = useRouter();
 
 const firstRun = computed(() => store.getters.getFirstRun);
-const iconFolder = APP_CONFIG.ICONS_FOLDER ;
+const iconFolder = APP_CONFIG.ICONS_FOLDER;
 onMounted(() => {
   store.dispatch('loadOptions');
 });

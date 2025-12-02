@@ -4,23 +4,23 @@
       <button @click="returnToMain()" class="arrow-button">
         <i class="material-icons">arrow_back</i>
       </button>
-   <div class="download-dropdown">
-      <button 
-  class="download-button" 
-  :class="{ 'dropdown-open': isDropdownOpen }"
-  @click="toggleDropdown"
->
-  Download
-  <span class="dropdown-arrow">▼</span>
-</button>
-      <div v-if="isDropdownOpen" class="dropdown-menu">
-        <ul>
-          <li><PDFReport @buttonClicked="toggleDropdown"></PDFReport></li>
-          <li><CSVReport @buttonClicked="toggleDropdown"></CSVReport></li>
-        </ul>
-       </div>
-    </div>
-   </TopBar>
+      <div class="download-dropdown">
+        <button
+          class="download-button"
+          :class="{ 'dropdown-open': isDropdownOpen }"
+          @click="toggleDropdown"
+        >
+          Download
+          <span class="dropdown-arrow">▼</span>
+        </button>
+        <div v-if="isDropdownOpen" class="dropdown-menu">
+          <ul>
+            <li><PDFReport @buttonClicked="toggleDropdown"></PDFReport></li>
+            <li><CSVReport @buttonClicked="toggleDropdown"></CSVReport></li>
+          </ul>
+        </div>
+      </div>
+    </TopBar>
 
     <Summary></Summary>
     <ColapsibleFilter></ColapsibleFilter>
@@ -52,7 +52,7 @@ export default {
     Summary,
     ListOfRules,
     FilterByResult,
-    TopBar
+    TopBar,
   },
   data: () => ({
     isDropdownOpen: false,
@@ -73,20 +73,20 @@ export default {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
-    handleClickOutside(event){
-  const dropdown = document.querySelector('.dropdown-menu');
-  const menuIcon = document.querySelector('.download-button');
-  if (dropdown && !dropdown.contains(event.target) && !menuIcon.contains(event.target)) {
-    this.isDropdownOpen = false;
-  }
-  },
+    handleClickOutside(event) {
+      const dropdown = document.querySelector('.dropdown-menu');
+      const menuIcon = document.querySelector('.download-button');
+      if (dropdown && !dropdown.contains(event.target) && !menuIcon.contains(event.target)) {
+        this.isDropdownOpen = false;
+      }
+    },
   },
   mounted() {
-    document.addEventListener('click', this.handleClickOutside)
-},
+    document.addEventListener('click', this.handleClickOutside);
+  },
   beforeUnmount() {
-    document.removeEventListener('click', this.handleClickOutside)
-  }
+    document.removeEventListener('click', this.handleClickOutside);
+  },
 };
 </script>
 
@@ -105,7 +105,7 @@ export default {
   flex-direction: column;
   background-color: #303030;
 }
-.navigation-bar{
+.navigation-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,7 +145,7 @@ export default {
   overflow-y: auto;
 }
 .download-dropdown {
-  position: relative; 
+  position: relative;
   display: inline-block;
 }
 
@@ -179,13 +179,13 @@ export default {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%; 
+  top: 100%;
   right: 0;
-  z-index: 10; 
+  z-index: 10;
   background-color: #303030;
   border: 1px solid #ccc;
   min-width: 8rem;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
 
@@ -200,7 +200,7 @@ export default {
   border-bottom: 1px solid #ccc;
 }
 
-.dropdown-menu li { 
+.dropdown-menu li {
   text-align: center;
   cursor: pointer;
   color: white;
@@ -240,6 +240,4 @@ export default {
     flex: 1;
   }
 }
-
-
 </style>

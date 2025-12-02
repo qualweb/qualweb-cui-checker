@@ -38,7 +38,6 @@ export default {
 .result {
   padding: 0.8rem;
   overflow-wrap: anywhere;
-
 }
 .description {
   overflow-wrap: break-word !important;
