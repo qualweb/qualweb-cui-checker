@@ -36,7 +36,8 @@ class PortCommunication {
         if (this.portSidepanel) {
             this.portSidepanel.postMessage(message);
         } else {
-            console.error("Port to sidepanel is not initialized.");
+            // TODO: Handle uninitialized port appropriately
+            console.log("Port to sidepanel is not initialized.");
         }
     }
 
@@ -44,7 +45,8 @@ class PortCommunication {
         if (this.portContent) {
             this.portContent.postMessage(message);
         } else {
-            console.error("Port to content is not initialized.");
+            // TODO: Handle uninitialized port appropriately
+            console.log("Port to content is not initialized.");
         }
     }
 

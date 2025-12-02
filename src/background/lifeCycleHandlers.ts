@@ -51,14 +51,14 @@ function handleActionClick(tab){
   console.log("Passed is SidebarOpen");
 
   if (!tab.url || isRestrictedUrl(tab.url)) {
-    console.error('Cannot open side panel on this URL:', tab.url);
+    console.log('Cannot open side panel on this URL:', tab.url);
     return;
   }
 
   console.log("Passed restrictedURL");
 
   if (!tab.id) {
-    console.error("Tab ID not found.");
+    console.log("Tab ID not found.");
     return;
   }
 
@@ -99,28 +99,42 @@ function handleOnMessage(request: any, sender: chrome.runtime.MessageSender, sen
           };
 
   }).catch( (error) => {
-    console.error("Error injecting scripts on tab update for tab:",tabId,error);
+    //TODO: Handle error appropriately
+    console.log("Error injecting scripts on tab update for tab:",tabId,error);
   });
     
   }else  if (request.action === 'SIDEPANEL_ALIVE_CHECK') {
-      console.log("Received sidepanel alive check from tab:",request.tabId);
-    }
+      console.log("Sending alive response to side panel");
+      // Send response back to side panel
+      sendResponse({status: 'alive'});
+
+  }else if (request.action === 'URL_UPDATE_DETECTED') {
+    // Ignore messages originating from the background script itself
+    console.log("Background Emmited URL update message for tab:",request.tabId," new URL:",request.url);
+    return;
+
+  }
 } 
 
 
 function handleTabUpdate(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab): void {
     console.log("ONUpdated ", tabId,changeInfo,tab.url);
     
+    
     if( changeInfo.status === 'loading' ){
 
-      console.log("Tab is loading new URL:",tab.url ," for tab:",tabId,"sending URL update message to sidepanel.");
       const url = changeInfo.url || tab.url ;
       chrome.runtime.sendMessage({
         tabId: tabId,
         action: 'URL_UPDATE_DETECTED',
         url: tab.url
+      },(response) => {
+        if (chrome.runtime.lastError) {
+          console.log('Sidepanel not open for URL update notification:', chrome.runtime.lastError.message);
+          return;
+        }
+        console.log('URL update notification sent successfully');
       });
-    // if only loading 
     }
   };
 

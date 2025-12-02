@@ -93,7 +93,7 @@ const onSubmit = () => {
   try {
     schema.parse(data);
   } catch (error) {
-    console.error('Validation error:', error.errors);
+    console.log('Validation error:', error.errors);
     return;
   }
 

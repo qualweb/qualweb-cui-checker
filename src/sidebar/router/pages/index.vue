@@ -22,7 +22,7 @@ const isSelectorsDetected = computed(() => store.getters.selectorsDetected);
 onMounted(async () => {
   const tabInfo = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
   if (!tabInfo) {
-    console.error("No active tab found.");
+    console.log("No active tab found.");
     router.push('/error', { query: { error: "No active tab found" } });
     return;
   };

@@ -59,7 +59,7 @@ export default {
     this.setInteractionInitialized(true);
     this._port = await prepareCommunicationBackground();
     if (!this._port) {
-      console.error('Failed to connect to background script');
+      console.log('Failed to connect to background script');
       this.state = "Failed to connect.";
       setTimeout(() => {
               this.$router.push({
@@ -90,7 +90,7 @@ export default {
       }else if(msg.status==="error"){
         this.state = "Error: " + msg.message;
         this._port.disconnect();
-        console.error("Interaction error:", msg.message);
+        console.log("Interaction error:", msg.message);
         setTimeout(() => {
               this.$router.push({
           path: '/error',

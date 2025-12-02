@@ -258,7 +258,7 @@ export default {
       }
       this.updatePrompt();
     }catch(error){
-      console.error('Error during chatbot detection:', error);
+      console.log('Error during chatbot detection:', error);
       this.state = 'Chatbot Not Detected';
       setTimeout(() => {
         this.setDetectingChatbot(false);

@@ -13,7 +13,8 @@ function handleMessagesContentScript(request: any, sender: chrome.runtime.Messag
 
   if (!action) {
     // error handling
-    console.error('Unknown case:', action);
+    console.log('Unknown case:', action);
+    return;
   }
   let data: IChromeRequest = { request, sendResponse };
 
@@ -29,7 +30,8 @@ function handleMessagesContentScript(request: any, sender: chrome.runtime.Messag
     }
     return false;
   } else {
-    console.error('No handler found for action:', action);
+    //TODO: Handle unknown action appropriately
+    console.log('No handler found for action:', action);
   }
 }
 

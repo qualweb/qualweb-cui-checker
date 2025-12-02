@@ -44,7 +44,8 @@ export function containsExactTextXPath(container: HTMLElement, text: string): bo
 
     return result;
   } catch (error) {
-    console.error('XPath evaluation error:', error);
+    // TODO: Handle error appropriately
+    console.log('XPath evaluation error:', error);
     return false;
   }
 }

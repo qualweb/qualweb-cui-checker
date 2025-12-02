@@ -91,7 +91,7 @@ function handleContentPort(port: chrome.runtime.Port) {
           PortCommunication.getInstance().sendMessageToSidepanel({ status:'ready' });
           
         }).catch(error => {
-          console.error("Error building Langgraph:", error);
+          console.log("Error building Langgraph:", error);
           PortCommunication.getInstance().sendMessageToSidepanel(ERROR.LANGGRAPH_BUILD_ERROR);
           endInteractionAndCleanup(); 
         });
@@ -120,7 +120,7 @@ function handleContentPort(port: chrome.runtime.Port) {
           }else{
             PortCommunication.getInstance().sendMessageToSidepanel(ERROR.UNKNOWN_ERROR);
           }
-          console.error("Error during interaction:", error);
+          console.log("Error during interaction:", error);
           endInteractionAndCleanup();
 
        

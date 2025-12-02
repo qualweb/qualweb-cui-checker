@@ -47,7 +47,8 @@ function handleProxyMessage(request: any, sender: chrome.runtime.MessageSender, 
     
       if (!action) {
         // error handling
-        console.error('Unknown case for proxy from background to content script:', action);
+        console.log('Unknown case for proxy from background to content script:', action);
+        return;
       }
       
       console.log('Received action in background:',JSON.stringify(request));

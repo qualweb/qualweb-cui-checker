@@ -7,7 +7,7 @@ async function sendActionToBackground(action, payload = {}) {
     // Primeiro obtemos o tab ativo
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
+        console.log(chrome.runtime.lastError);
         return reject(chrome.runtime.lastError);
       }
 
@@ -18,7 +18,7 @@ async function sendActionToBackground(action, payload = {}) {
 
       chrome.runtime.sendMessage({ action, tabId: activeTab.id, ...payload }, (response) => {
         if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError);
+          console.log(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
         }
         if (response?.status === 'error') {

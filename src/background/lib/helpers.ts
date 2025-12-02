@@ -19,7 +19,7 @@ export function getHostname(url: string): string  {
 
 export async function isContentScriptsLoaded(tabId:number): Promise<boolean> {
   if (!tabId) {
-    console.error("Tab ID not found for script check.");
+    console.log("Tab ID not found for script check.");
     return false;
   }
 
@@ -31,14 +31,14 @@ export async function isContentScriptsLoaded(tabId:number): Promise<boolean> {
 
     return results[0]?.result || false;
   } catch (error) {
-    console.error('Error checking if content scripts are loaded:', error);
+    console.log('Error checking if content scripts are loaded:', error);
     return false;
   }
 }
 
 export async function injectScriptsIfAbsent(tabId:number): Promise<boolean> {
   if (!tabId) {
-    console.error("Tab ID not found for script injection.");
+    console.log("Tab ID not found for script injection.");
     return false;
   }
 
@@ -63,7 +63,7 @@ export async function injectScriptsIfAbsent(tabId:number): Promise<boolean> {
       return true;
     } 
   } catch (error) {
-    console.error('Error checking/injecting scripts:', error);
+    console.log('Error checking/injecting scripts:', error);
     return false;
   }
   return false;
