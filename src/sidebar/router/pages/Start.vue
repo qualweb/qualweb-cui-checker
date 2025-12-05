@@ -1,14 +1,18 @@
 <template>
- <div class="bigContainer">
+  <div class="bigContainer">
     <div class="top-bar">
-      <span class="material-symbols-outlined position-icon-help" :class="{ 'menu-open': isDropdownOpen }" @click="toggleDropdown">
+      <span
+        class="material-symbols-outlined position-icon-help"
+        :class="{ 'menu-open': isDropdownOpen }"
+        @click="toggleDropdown"
+      >
         menu
       </span>
-      
+
       <div v-if="isDropdownOpen" class="dropdown-menu">
         <ul>
           <li @click="onHelpClick">Help</li>
-        </ul> 
+        </ul>
       </div>
 
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
@@ -16,9 +20,7 @@
       </span>
     </div>
     <div class="container">
-     
-
-      <h1 class="title">QUALWEB CUI CHECKER </h1>
+      <h1 class="title">QUALWEB CUI CHECKER</h1>
       <img class="logo" :src="`/${iconFolder}/logoQWSidepanel.webp`" alt="Qualweb Logo" />
       <p class="initial-text">
         Selectors not in memory<br />
@@ -35,7 +37,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import ButtonStyled from '../../components/ButtonStyled.vue';
 
-const iconFolder = APP_CONFIG.ICONS_FOLDER ;
+const iconFolder = APP_CONFIG.ICONS_FOLDER;
 const router = useRouter();
 const isDropdownOpen = ref(false);
 const onSettingsClick = () => {
@@ -43,18 +45,18 @@ const onSettingsClick = () => {
 };
 
 const toggleDropdown = () => {
-      isDropdownOpen.value = !isDropdownOpen.value;
-    };
-  
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
 const onDetectChatbot = () => {
   router.push('/detecting-chatbot');
 };
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', handleClickOutside);
 });
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', handleClickOutside);
 });
 
 const handleClickOutside = (event) => {
@@ -67,7 +69,6 @@ const handleClickOutside = (event) => {
 const onHelpClick = () => {
   router.push('/help');
 };
-
 </script>
 
 <style scoped>
@@ -81,7 +82,6 @@ const onHelpClick = () => {
   height: 200px;
   margin-bottom: 20px;
 }
-
 
 .top-bar {
   position: sticky;
@@ -133,7 +133,6 @@ const onHelpClick = () => {
 
 .position-icon-settings:active,
 .position-icon-help:active {
-
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -145,15 +144,14 @@ const onHelpClick = () => {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%; 
+  top: 100%;
   left: 0;
-  z-index: 10; 
+  z-index: 10;
   background-color: #303030;
   border: 1px solid #ccc;
   min-width: 8rem;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-
 }
 
 .dropdown-menu ul {
@@ -167,7 +165,7 @@ const onHelpClick = () => {
   border-bottom: 1px solid #ccc;
 }
 
-.dropdown-menu li { 
+.dropdown-menu li {
   text-align: center;
   cursor: pointer;
   color: white;
@@ -181,7 +179,7 @@ const onHelpClick = () => {
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-} 
+}
 
 .bigContainer {
   margin: 0;
@@ -223,10 +221,9 @@ const onHelpClick = () => {
 }
 
 .menu-dropdown {
-  position: relative; 
+  position: relative;
   display: inline-block;
 }
-
 
 hr {
   width: 100%;

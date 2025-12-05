@@ -2,10 +2,8 @@
   <div class="div-container-questions">
     <span class="span-question">{{ prompt.question }}</span>
     <div class="button-container">
-
-        <ButtonStyled  @click="prompt.actionPrimary" :label="prompt.titlePrimary"/>
-        <ButtonStyled :primary=false @click="prompt.actionNeutral" :label="prompt.titleNeutral"/>
-
+      <ButtonStyled @click="prompt.actionPrimary" :label="prompt.titlePrimary" />
+      <ButtonStyled :primary="false" @click="prompt.actionNeutral" :label="prompt.titleNeutral" />
     </div>
   </div>
 </template>
@@ -13,32 +11,33 @@
 <script>
 import ButtonStyled from './ButtonStyled.vue';
 
-
 export default {
   name: 'ActionPrompt',
   components: { ButtonStyled },
   props: {
     prompt: {
-    question: {
-      type: String,
-      required: true,
+      question: {
+        type: String,
+        required: true,
+      },
+      titlePrimary: {
+        type: String,
+        required: true,
+      },
+      actionPrimary: {
+        type: Function,
+        required: true,
+      },
+      titleNeutral: {
+        type: String,
+        required: false,
+        default: 'Cancel',
+      },
+      actionNeutral: {
+        type: Function,
+        required: false,
+      },
     },
-    titlePrimary: {
-      type: String,
-      required: true  },
-    actionPrimary: {
-      type: Function,
-      required: true,
-    },
-    titleNeutral: {
-      type: String,
-      required: false,
-      default: 'Cancel',
-    },
-    actionNeutral: {
-      type: Function,
-      required: false,
-    }},
   },
   data() {
     return {};

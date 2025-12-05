@@ -1,38 +1,34 @@
-<template>  
- <div class="arrow-container">
-      <button @click="goHome" class="arrow-button">
-        <i class="material-icons">home</i>
-      </button>
-    </div>
+<template>
+  <div class="arrow-container">
+    <button @click="goHome" class="arrow-button">
+      <i class="material-icons">home</i>
+    </button>
+  </div>
   <div class="bigContainer">
     <div class="container">
- 
- <div class="error-icon">
-     
+      <div class="error-icon"></div>
+      <div class="error-title-container">
+        <span class="error-icon material-symbols-outlined"> error </span>
+        <h1 class="error-title">Error</h1>
       </div>
-      <div class="error-title-container"> 
-      <span class="error-icon material-symbols-outlined">
-error
-</span> <h1 class="error-title">Error </h1>
-</div>
-      
+
       <div class="message-error-container">
-        <h1>{{ errorMessage.split(':')[0] }}<br v-if="errorMessage.includes(':')" />{{ errorMessage.split(':')[1]?.trim() }}</h1>
+        <h1>
+          {{ errorMessage.split(':')[0] }}<br v-if="errorMessage.includes(':')" />{{
+            errorMessage.split(':')[1]?.trim()
+          }}
+        </h1>
       </div>
 
       <div class="error-actions">
         <ButtonStyled :primary="false" @click="goHome" label="Return Main" />
-     
-
-
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref,  onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
 import ButtonStyled from '../../components/ButtonStyled.vue';
@@ -40,38 +36,31 @@ import ButtonStyled from '../../components/ButtonStyled.vue';
 const store = useStore();
 const router = useRouter();
 const route = useRoute();
-const errorMessage = ref('')
+const errorMessage = ref('');
 
 onMounted(() => {
   errorMessage.value = route.query.error || 'Ocorreu um erro desconhecido';
-})
-
+});
 
 const goHome = () => {
   router.push('/ready');
 };
-
 </script>
 
 <style scoped>
-
 .error-title-container {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  margin-top:20px;
+  margin-top: 20px;
 }
 
 .material-symbols-outlined {
   color: #eb5523;
   font-size: 80px;
-  font-variation-settings:
-  'FILL' 1,
-  'wght' 600,
-  'GRAD' 0,
-  'opsz' 48;
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 48;
 }
 
 .initial-text {
@@ -79,7 +68,6 @@ const goHome = () => {
   font-weight: 900;
   margin-bottom: 1rem;
 }
-
 
 .bigContainer {
   margin: 0;
@@ -111,13 +99,12 @@ const goHome = () => {
   max-width: 250px;
 }
 
-
 .arrow-container {
   z-index: 1000;
   position: sticky;
   background-color: #393939;
   top: 0;
-  border-bottom: 1px solid #ccc; 
+  border-bottom: 1px solid #ccc;
 }
 .arrow-button {
   background: none;
@@ -132,10 +119,10 @@ const goHome = () => {
 .arrow-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
-.message-error-container{
+.message-error-container {
   margin-top: 20px;
   margin-bottom: 20px;
-  width: 80% ;
+  width: 80%;
   word-wrap: break-word;
 }
 @media only screen and (max-width: 700px) {
@@ -151,25 +138,20 @@ const goHome = () => {
   }
 }
 
-
 /* Ícone de erro */
 .error-icon {
   animation: pulse 2s infinite;
 }
 
-
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
-    transform: scale(1.10);
+    transform: scale(1.1);
   }
 }
-
-
-
-
 
 .btn-restart {
   display: inline-flex;
@@ -196,7 +178,6 @@ const goHome = () => {
 .btn-restart:active {
   transform: translateY(0);
 }
-
 
 /* Responsivo */
 @media only screen and (max-width: 700px) {

@@ -1,18 +1,21 @@
 <template>
+  <div
+    class="loader-wrapper"
+    :style="{ height: sizeCircle, width: sizeCircle }"
+    v-if="isActiveCircle"
+  >
+    <div class="loader" :style="{ height: sizeCircle, width: sizeCircle }"></div>
+  </div>
+  <slot name="additional-info"></slot>
+  <p class="state" :style="{ fontSize: sizeStateText }">{{ message }}</p>
 
-    <div class="loader-wrapper" :style="{ height: sizeCircle, width: sizeCircle }" v-if="isActiveCircle">
-      <div class="loader" :style="{ height: sizeCircle, width: sizeCircle }"></div>
-    </div>
-     <slot name="additional-info"></slot>
-    <p class="state" :style="{ fontSize: sizeStateText }">{{ message }}</p>
-    
-    <div class="progress-dots" v-if="isActiveDots">
-      <div class="dot dot-1" :style="{ height: sizeDots, width: sizeDots }"></div>
-      <div class="dot dot-2" :style="{ height: sizeDots, width: sizeDots }"></div>
-      <div class="dot dot-3" :style="{ height: sizeDots, width: sizeDots }"></div>
-    </div>
+  <div class="progress-dots" v-if="isActiveDots">
+    <div class="dot dot-1" :style="{ height: sizeDots, width: sizeDots }"></div>
+    <div class="dot dot-2" :style="{ height: sizeDots, width: sizeDots }"></div>
+    <div class="dot dot-3" :style="{ height: sizeDots, width: sizeDots }"></div>
+  </div>
 
-    <slot name="buttons"></slot>
+  <slot name="buttons"></slot>
 </template>
 
 <script>
@@ -21,40 +24,37 @@ export default {
   props: {
     message: {
       type: String,
-      default: 'Loading...'
+      default: 'Loading...',
     },
     isActiveCircle: {
       type: Boolean,
-      default: true
+      default: true,
     },
     sizeCircle: {
       type: String,
-      default: '100px'
+      default: '100px',
     },
     sizeDots: {
       type: String,
-      default: '8px'
+      default: '8px',
     },
     isActiveDots: {
       type: Boolean,
-      default: true
+      default: true,
     },
     sizeStateText: {
       type: String,
-      default: '1.25rem'
-    }
-  }
-}
+      default: '1.25rem',
+    },
+  },
+};
 </script>
 
 <style scoped>
-
-
 .loader-wrapper {
   margin-top: 1rem;
   position: relative;
 }
-
 
 .loader {
   position: relative;
@@ -74,7 +74,6 @@ export default {
   animation: pulse 2s ease-in-out infinite;
 }
 
-
 .progress-dots {
   display: flex;
   gap: 0.5rem;
@@ -83,7 +82,6 @@ export default {
 }
 
 .dot {
-
   border-radius: 50%;
   background: #e15500;
   animation: bounce 1.4s ease-in-out infinite;
@@ -111,9 +109,9 @@ export default {
   }
 }
 
-
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -122,7 +120,9 @@ export default {
 }
 
 @keyframes bounce {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
   }
   40% {

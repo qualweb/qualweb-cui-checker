@@ -1,4 +1,4 @@
-import { ACTION_HANDLERS} from '../action';
+import { ACTION_HANDLERS } from '../action';
 import {
   actionCorrectElementSelection,
   actionEndSuccessfulVerification,
@@ -10,11 +10,14 @@ import {
   resetDataContentScript,
   startPageChatbotProcedure,
 } from './ActionsDetection';
-import { actionEndEvaluation, actionEvaluateACT, actionEvaluateCUI, actionEvaluateWCAG, actionStartEvaluation } from './ActionsEvaluation';
 import {
-  actionLLMInteraction,
-  actionStartVoiceInput,
-} from './ActionsInteraction';
+  actionEndEvaluation,
+  actionEvaluateACT,
+  actionEvaluateCUI,
+  actionEvaluateWCAG,
+  actionStartEvaluation,
+} from './ActionsEvaluation';
+import { actionLLMInteraction, actionStartVoiceInput } from './ActionsInteraction';
 
 export interface IChromeRequest {
   sendResponse: (response: any) => void;
@@ -35,8 +38,8 @@ const DETECTION_HANDLERS: Record<string, (data: IChromeRequest) => void | Promis
   [ACTION_HANDLERS.SET_STORED_SELECTORS.action]: actionSetStoredSelectors,
   [ACTION_HANDLERS.RESET_DATA.action]: resetDataContentScript,
   [ACTION_HANDLERS.CANCEL_DETECTION.action]: cancelDetection,
-  [ACTION_HANDLERS.MANUAL_SELECT_MIC.action]:requestManualSelectionMic,
-  [ACTION_HANDLERS.CANCEL_MANUAL_SELECT_MIC.action]:cancelManualDetection
+  [ACTION_HANDLERS.MANUAL_SELECT_MIC.action]: requestManualSelectionMic,
+  [ACTION_HANDLERS.CANCEL_MANUAL_SELECT_MIC.action]: cancelManualDetection,
 };
 
 // handlers for the evaluation actions

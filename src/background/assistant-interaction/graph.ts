@@ -6,21 +6,20 @@ import { ChatOpenAI } from '@langchain/openai';
 export const Settings: LLM_Settings = {
   apiKey: null,
   LLMService: 'openai',
-  locale:""
+  locale: '',
 };
-export let LLM:ChatOpenAI;
+export let LLM: ChatOpenAI;
 
-export  function initiateLangraphSettings(settings: LLM_Settings) {
-  
+export function initiateLangraphSettings(settings: LLM_Settings) {
   Settings.apiKey = settings.apiKey;
   Settings.LLMService = settings.LLMService;
   Settings.locale = settings.locale;
   if (settings.LLMService !== 'openai') {
-  LLM = new ChatOpenAI({
+    LLM = new ChatOpenAI({
       apiKey: settings.apiKey!,
     });
   } else {
-  LLM = new ChatOpenAI({
+    LLM = new ChatOpenAI({
       apiKey: settings.apiKey!,
     });
   }
@@ -28,6 +27,3 @@ export  function initiateLangraphSettings(settings: LLM_Settings) {
     checkpointer: new MemorySaver(),
   });
 }
-
-
-

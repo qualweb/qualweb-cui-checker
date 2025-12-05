@@ -1,19 +1,20 @@
-
 import { HANDLERS, IChromeRequest } from './actions/MapperActions';
-
-
 
 if (!chrome.runtime.onMessage.hasListener(handleMessagesContentScript)) {
   chrome.runtime.onMessage.addListener(handleMessagesContentScript);
 }
 
-function handleMessagesContentScript(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) {
-
+function handleMessagesContentScript(
+  request: any,
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: any) => void,
+) {
   let action = request.action;
 
   if (!action) {
     // error handling
-    console.error('Unknown case:', action);
+    console.log('Unknown case:', action);
+    return;
   }
   let data: IChromeRequest = { request, sendResponse };
 
@@ -29,10 +30,10 @@ function handleMessagesContentScript(request: any, sender: chrome.runtime.Messag
     }
     return false;
   } else {
-    console.error('No handler found for action:', action);
+    //TODO: Handle unknown action appropriately
+    console.log('No handler found for action:', action);
   }
 }
-
 
 // Function to send message to background
 export function sendMessageToBackground(action: string, text: string): Promise<void> {

@@ -1,5 +1,3 @@
-
-
 export interface ChatResponse {
   message: string;
   response: string[];
@@ -12,26 +10,24 @@ export interface QWCUI_Settings {
 export interface LLM_Settings {
   LLMService: string;
   apiKey: string | null;
-  locale:string;
+  locale: string;
 }
 
 export interface ResponsesSelectors {
   [rule: string]: string[];
 }
 
-
-
 // Selectors for the chatbot elements
 // first index in each array is the current selector for the chatbot element
 // more selectors are added when the makes new requests for the chatbot elements, saving possible correct selectors
 export interface ChatBotSelectors {
-    iframeSelector?: string;
-    inputSelector: string;
-    messagesSelector: string;
-    dialogSelector: string;
-    microphoneSelector?: string;
-    windowSelector: string;
-  }
+  iframeSelector?: string;
+  inputSelector: string;
+  messagesSelector: string;
+  dialogSelector: string;
+  microphoneSelector?: string;
+  windowSelector: string;
+}
 export interface ResponseStore {
   [message: string]: string;
 }

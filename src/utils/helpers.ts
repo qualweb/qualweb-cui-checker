@@ -1,4 +1,4 @@
-export function showMessage(message: string,timeOut:number=5000): void {
+export function showMessage(message: string, timeOut: number = 5000): void {
   hideMessage();
   const messageElement = document.createElement('div');
   messageElement.id = 'QW_selection-message';
@@ -28,8 +28,8 @@ export function showMessage(message: string,timeOut:number=5000): void {
   }, timeOut);
 }
 
-export function hideMessage(){
-    const existingMessageElement = document.getElementById('QW_selection-message');
+export function hideMessage() {
+  const existingMessageElement = document.getElementById('QW_selection-message');
   if (existingMessageElement) {
     existingMessageElement.remove();
   }

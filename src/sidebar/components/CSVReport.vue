@@ -1,8 +1,6 @@
 <template>
   <div>
-    <a href="#" @click.prevent="generateReport">
-          <span class="icon">📊</span> CSV
-      </a>
+    <a href="#" @click.prevent="generateReport"> <span class="icon">📊</span> CSV </a>
   </div>
 </template>
 
@@ -89,5 +87,6 @@ async function generateReport() {
 }
 
 .dropdown-menu .icon {
-    margin-right: 8px;
-}</style>
+  margin-right: 8px;
+}
+</style>

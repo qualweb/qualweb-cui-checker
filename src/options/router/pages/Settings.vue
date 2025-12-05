@@ -18,10 +18,8 @@
             </select>
           </div>
           <div v-if="LLMService === 'openai'" class="settings-container">
-          
             <label for="apiKey">API KEY:</label>
             <input type="text" id="apiKey" v-model="apiKey" placeholder="API Key" required />
-           
           </div>
         </div>
         <div class="button-container">
@@ -38,7 +36,7 @@
   </div>
 </template>
 <script setup>
-import { computed,ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { z } from 'zod';
 import Modal from '../../components/Modal.vue';
@@ -52,7 +50,7 @@ const store = useStore();
 
 const schema = z.object({
   locale: z.string(),
-  apiKey: z.string().nullable()
+  apiKey: z.string().nullable(),
 });
 
 const locale = computed({
@@ -63,20 +61,18 @@ const mappedKey = computed({
   get: () => store.getters.getMappedApiKey,
 });
 const apiKey = computed({
-   get: () => store.getters.getMappedApiKey,
-  
-  set: (value) =>{
-    if(value === mappedKey.value) return;
-    store.commit('SETAPIKEY', value)
+  get: () => store.getters.getMappedApiKey,
 
-  } ,
+  set: (value) => {
+    if (value === mappedKey.value) return;
+    store.commit('SETAPIKEY', value);
+  },
 });
 
 const LLMService = computed({
   get: () => store.getters.getLLMService,
   set: (value) => store.commit('SETLLMSERVICE', value),
 });
-
 
 const onClickCancelSettings = () => {
   window.close();
@@ -86,14 +82,13 @@ const onSubmit = () => {
   const data = {
     locale: locale.value,
     apiKey: apiKey.value,
-    mappedKey: mappedKey.value
-
+    mappedKey: mappedKey.value,
   };
 
   try {
     schema.parse(data);
   } catch (error) {
-    console.error('Validation error:', error.errors);
+    console.log('Validation error:', error.errors);
     return;
   }
 

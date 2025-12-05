@@ -5,8 +5,6 @@ import { ChatBotSelectors, Summary } from '../../utils/types';
 import { Report } from '../../utils/types';
 import InterfaceChatbot from '../detection/InterfaceChatbot';
 
-
-
 interface QWCUI_Selectors {
   [key: string]: string;
 }
@@ -16,21 +14,22 @@ interface QWCUI_Settings {
 }
 
 export class EvaluationRunner {
-    static instance: EvaluationRunner;
+  static instance: EvaluationRunner;
   private summary: Summary;
   private chatbotSummary: Summary;
   public rulesTested: RuleTest[] = [];
   private QWCUI_Selectors: QWCUI_Selectors = {};
   private urlCommonWords: string;
 
-
   private constructor() {
-    this.urlCommonWords = chrome.runtime.getURL(`${APP_CONFIG.RESOURCES_FOLDER}/${APP_CONFIG.RESOURCES_WORDS_PT}`);
+    this.urlCommonWords = chrome.runtime.getURL(
+      `${APP_CONFIG.RESOURCES_FOLDER}/${APP_CONFIG.RESOURCES_WORDS_PT}`,
+    );
     this.summary = this.createEmptySummary();
     this.chatbotSummary = this.createEmptySummary();
   }
 
-    public static getInstance(): EvaluationRunner {
+  public static getInstance(): EvaluationRunner {
     if (!EvaluationRunner.instance) {
       EvaluationRunner.instance = new EvaluationRunner();
     }
@@ -52,18 +51,24 @@ export class EvaluationRunner {
     if (InterfaceChatbot.getInstance().getWindowElement()) {
       this.chatbotSummary = this.createEmptySummary();
     }
-    return([this.summary, this.chatbotSummary]);
+    return [this.summary, this.chatbotSummary];
   }
 
   endEvaluation() {
-    return([this.summary, this.chatbotSummary]);
+    return [this.summary, this.chatbotSummary];
   }
-  
+
   startEvaluationACT() {
     console.log('Evaluating ACT');
     const excludedRules = [
-      'QW-ACT-R1','QW-ACT-R2','QW-ACT-R3','QW-ACT-R4',
-      'QW-ACT-R5','QW-ACT-R6','QW-ACT-R7','QW-ACT-R8',
+      'QW-ACT-R1',
+      'QW-ACT-R2',
+      'QW-ACT-R3',
+      'QW-ACT-R4',
+      'QW-ACT-R5',
+      'QW-ACT-R6',
+      'QW-ACT-R7',
+      'QW-ACT-R8',
     ];
     const actResult = this.executeEvalACT();
 
@@ -71,10 +76,17 @@ export class EvaluationRunner {
     return this.filterResults(actResult);
   }
 
-   startEvaluationWCAG() {
+  startEvaluationWCAG() {
     const excludedTechniques = [
-      'QW-WCAG-T14','QW-WCAG-T15','QW-WCAG-T16','QW-WCAG-T17',
-      'QW-WCAG-T18','QW-WCAG-T19','QW-WCAG-T20','QW-WCAG-T21','QW-WCAG-T22'
+      'QW-WCAG-T14',
+      'QW-WCAG-T15',
+      'QW-WCAG-T16',
+      'QW-WCAG-T17',
+      'QW-WCAG-T18',
+      'QW-WCAG-T19',
+      'QW-WCAG-T20',
+      'QW-WCAG-T21',
+      'QW-WCAG-T22',
     ];
 
     const htmlResult = this.executeEvalWCAG();
@@ -82,27 +94,24 @@ export class EvaluationRunner {
 
     return this.filterResults(htmlResult);
   }
-    private executeEvalWCAG() {
+  private executeEvalWCAG() {
     const sourceHtml = document.documentElement.outerHTML;
-    window.wcag = new WCAGTechniquesRunner( { translate: locale_en, fallback:locale_en });
+    window.wcag = new WCAGTechniquesRunner({ translate: locale_en, fallback: locale_en });
     window.wcag.test({ sourceHtml });
     return window.wcag.getReport();
   }
 
-
   private executeEvalACT() {
     const sourceHtml = document.documentElement.outerHTML;
-    window.act = new ACTRulesRunner( { translate: locale_en, fallback: locale_en });
+    window.act = new ACTRulesRunner({ translate: locale_en, fallback: locale_en });
     window.act.test({ sourceHtml });
     return window.act.getReport();
   }
 
- 
-
   async startEvaluationCUI(qualweb_settings: QWCUI_Settings) {
     const settingsQualweb: QWCUI_Settings = { locale: qualweb_settings.locale };
     const selectors: ChatBotSelectors = InterfaceChatbot.getInstance().getSelectors();
-    
+
     this.QWCUI_Selectors['QW_CC_WINDOW'] = selectors.windowSelector;
     this.QWCUI_Selectors['QW_CC_DIALOG'] = selectors.dialogSelector;
     this.QWCUI_Selectors['QW_CC_MESSAGES'] = selectors.messagesSelector;
@@ -117,19 +126,19 @@ export class EvaluationRunner {
     return this.filterResults(cuiResult);
   }
 
-  private addValuesToSummary( report: Report) {
-  this.summary.passed += report.metadata.passed;
-  this.summary.failed += report.metadata.failed;
-  this.summary.warning += report.metadata.warning;
-  this.summary.inapplicable += report.metadata.inapplicable;
+  private addValuesToSummary(report: Report) {
+    this.summary.passed += report.metadata.passed;
+    this.summary.failed += report.metadata.failed;
+    this.summary.warning += report.metadata.warning;
+    this.summary.inapplicable += report.metadata.inapplicable;
   }
-  private addValuesToChatbotSummary( report: Report) {
+  private addValuesToChatbotSummary(report: Report) {
     this.chatbotSummary.passed += report.metadata.passed;
     this.chatbotSummary.failed += report.metadata.failed;
     this.chatbotSummary.warning += report.metadata.warning;
     this.chatbotSummary.inapplicable += report.metadata.inapplicable;
-    }
-  private filterResults(results: CUIChecksReport | ACTReport ) {
+  }
+  private filterResults(results: CUIChecksReport | ACTReport) {
     let result = results.assertions;
     const windowElement = InterfaceChatbot.getInstance().getWindowElement();
     let chatbotResult;
@@ -159,15 +168,15 @@ export class EvaluationRunner {
   }
 
   addSelectors(selectors: QWCUI_Selectors) {
-    Object.keys(selectors).forEach(key => {
+    Object.keys(selectors).forEach((key) => {
       this.QWCUI_Selectors[key] = selectors[key];
     });
   }
 
   getSummary() {
     console.log('Getting summary');
-    console.log("geral",this.summary);
-    console.log("chatbot",this.chatbotSummary);
+    console.log('geral', this.summary);
+    console.log('chatbot', this.chatbotSummary);
     return [this.summary, this.chatbotSummary];
   }
 }

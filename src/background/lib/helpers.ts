@@ -1,25 +1,23 @@
 const RESTRICTED_SCHEMES = ['chrome:', 'about:', 'data:', 'file:', 'chrome-extension:'];
 
-export function isRestrictedUrl(url:string):boolean {
+export function isRestrictedUrl(url: string): boolean {
   // Check if the URL starts with a restricted scheme
-  return RESTRICTED_SCHEMES.some(scheme => url.startsWith(scheme));
+  return RESTRICTED_SCHEMES.some((scheme) => url.startsWith(scheme));
 }
 
-export function getHostname(url: string): string  {
+export function getHostname(url: string): string {
   try {
     const urlObject = new URL(url);
-    
-    return urlObject.hostname; 
 
+    return urlObject.hostname;
   } catch (e) {
-    throw new Error("Invalid URL");
+    throw new Error('Invalid URL');
   }
 }
 
-
-export async function isContentScriptsLoaded(tabId:number): Promise<boolean> {
+export async function isContentScriptsLoaded(tabId: number): Promise<boolean> {
   if (!tabId) {
-    console.error("Tab ID not found for script check.");
+    console.log('Tab ID not found for script check.');
     return false;
   }
 
@@ -31,14 +29,14 @@ export async function isContentScriptsLoaded(tabId:number): Promise<boolean> {
 
     return results[0]?.result || false;
   } catch (error) {
-    console.error('Error checking if content scripts are loaded:', error);
+    console.log('Error checking if content scripts are loaded:', error);
     return false;
   }
 }
 
-export async function injectScriptsIfAbsent(tabId:number): Promise<boolean> {
+export async function injectScriptsIfAbsent(tabId: number): Promise<boolean> {
   if (!tabId) {
-    console.error("Tab ID not found for script injection.");
+    console.log('Tab ID not found for script injection.');
     return false;
   }
 
@@ -61,11 +59,10 @@ export async function injectScriptsIfAbsent(tabId:number): Promise<boolean> {
       });
       console.log('Scripts injected successfully.');
       return true;
-    } 
+    }
   } catch (error) {
-    console.error('Error checking/injecting scripts:', error);
+    console.log('Error checking/injecting scripts:', error);
     return false;
   }
   return false;
 }
-

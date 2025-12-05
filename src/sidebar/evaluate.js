@@ -3,11 +3,11 @@ async function startEvaluation(tabId) {
 }
 
 async function evaluateACT(tabId) {
-  return sendActionToBackground('EVALUATE_ACT', { tabId:tabId });
+  return sendActionToBackground('EVALUATE_ACT', { tabId: tabId });
 }
 
 async function evaluateWCAG(tabId) {
-  return sendActionToBackground('EVALUATE_WCAG', { tabId:tabId });
+  return sendActionToBackground('EVALUATE_WCAG', { tabId: tabId });
 }
 
 async function evaluateCUI(tabId) {

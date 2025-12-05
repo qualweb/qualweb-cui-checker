@@ -1,15 +1,19 @@
 <template>
   <div class="bigContainer">
     <div class="top-bar">
-      <span class="material-symbols-outlined position-icon-help" :class="{ 'menu-open': isDropdownOpen }" @click="toggleDropdown">
+      <span
+        class="material-symbols-outlined position-icon-help"
+        :class="{ 'menu-open': isDropdownOpen }"
+        @click="toggleDropdown"
+      >
         menu
       </span>
-      
+
       <div v-if="isDropdownOpen" class="dropdown-menu">
         <ul>
           <li @click="onHelpClick">Help</li>
           <li @click="forgetSelectors">Forget Chatbot</li>
-        </ul> 
+        </ul>
       </div>
 
       <span @click="onSettingsClick" class="material-symbols-outlined position-icon-settings">
@@ -50,7 +54,12 @@
 
       <div class="button-container">
         <ButtonStyled v-if="isCuiChecked" @click="LLMInteraction" label="Start Interaction" />
-        <ButtonStyled id="evaluateButton" @click="onEvaluateClick" :disabled="!isEvaluationReady" label="Evaluate Chatbot Accessibility" />
+        <ButtonStyled
+          id="evaluateButton"
+          @click="onEvaluateClick"
+          :disabled="!isEvaluationReady"
+          label="Evaluate Chatbot Accessibility"
+        />
       </div>
     </div>
   </div>
@@ -74,27 +83,25 @@ const isDropdownOpen = ref(false);
 
 const evaluated = computed(() => store.getters.getEvaluated);
 
-const iconFolder = APP_CONFIG.ICONS_FOLDER ;
+const iconFolder = APP_CONFIG.ICONS_FOLDER;
 
-const isCuiChecked = computed(()=>{
-
-  return  (evaluated.value && (evaluated.value.cui));
+const isCuiChecked = computed(() => {
+  return evaluated.value && evaluated.value.cui;
 });
 
-const isEvaluationReady = computed(()=>{
+const isEvaluationReady = computed(() => {
   // cui check checked
-  const cuiCheckedReady = (evaluated.value && (evaluated.value.cui));
+  const cuiCheckedReady = evaluated.value && evaluated.value.cui;
   const interactionComplete = store.getters.getInteractionInitialized;
 
-  const commonCheckReady = (evaluated.value && (evaluated.value.act || evaluated.value.wcag)); 
+  const commonCheckReady = evaluated.value && (evaluated.value.act || evaluated.value.wcag);
 
-
-
-  
-  return (commonCheckReady && cuiCheckedReady && interactionComplete) ||(commonCheckReady && !cuiCheckedReady) || (!commonCheckReady && cuiCheckedReady && interactionComplete);
-})
-
-
+  return (
+    (commonCheckReady && cuiCheckedReady && interactionComplete) ||
+    (commonCheckReady && !cuiCheckedReady) ||
+    (!commonCheckReady && cuiCheckedReady && interactionComplete)
+  );
+});
 
 const setEvaluated = async (idValue, value) => {
   await store.dispatch('setEvaluated', {
@@ -116,8 +123,8 @@ const onEvaluateClick = () => {
 };
 
 const toggleDropdown = () => {
-      isDropdownOpen.value = !isDropdownOpen.value;
-    }
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
 
 const LLMInteraction = () => {
   router.push('/interaction');
@@ -130,9 +137,9 @@ const LLMSoundInteraction = () => {
 const forgetSelectors = async () => {
   await store.dispatch('forgetChatbotSelectors');
   isDropdownOpen.value = false;
-  console.log("going to rest data");
-  await resetDataContentScript( store.getters.getTabId);
-  store.dispatch('setSelectorsDetected',false)
+  console.log('going to rest data');
+  await resetDataContentScript(store.getters.getTabId);
+  store.dispatch('setSelectorsDetected', false);
   router.push('/');
 };
 
@@ -159,12 +166,11 @@ onMounted(() => {
     wcagValue.value = evaluated.value.wcag || false;
     cuiValue.value = evaluated.value.cui || false;
   }
-  document.addEventListener('click', handleClickOutside)
+  document.addEventListener('click', handleClickOutside);
 });
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('click', handleClickOutside);
 });
-
 </script>
 <style scoped>
 .logo {
@@ -223,7 +229,6 @@ onBeforeUnmount(() => {
 
 .position-icon-settings:active,
 .position-icon-help:active {
-
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -235,15 +240,14 @@ onBeforeUnmount(() => {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%; 
+  top: 100%;
   left: 0;
-  z-index: 10; 
+  z-index: 10;
   background-color: #303030;
   border: 1px solid #ccc;
   min-width: 8rem;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-
 }
 
 .dropdown-menu ul {
@@ -257,7 +261,7 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid #ccc;
 }
 
-.dropdown-menu li { 
+.dropdown-menu li {
   text-align: center;
   cursor: pointer;
   color: white;

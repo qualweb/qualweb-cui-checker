@@ -1,15 +1,15 @@
 declare global {
-  interface RuleTest{
-    code:string;
-    selector:string;
-    result:string;
+  interface RuleTest {
+    code: string;
+    selector: string;
+    result: string;
   }
   class CUIChecksRunner {
     constructor(
       moduleOptions: ModuleOptions,
       translationOptions: { translate: any; fallback: any },
       filePath?: string,
-      rules?:RuleTest[]
+      rules?: RuleTest[],
     );
     test(data: TestingData): any;
     executeTests(): Promise<any>;
@@ -46,34 +46,34 @@ declare global {
     webkitAudioContext: typeof AudioContext;
   }
 
-interface CUIChecksReport {
-  assertions: Record<string, CUIRule>;
-  metadata: {
-    passed: number;
-    warning: number;
-    failed: number;
-    inapplicable: number;
-  };
-}
-interface ACTReport {
-  assertions: Record<string, ACTRule>; // Specify the type of assertions
-  metadata: {
-    passed: number;
-    failed: number;
-    warning: number;
-    inapplicable: number;
-  };
-}
+  interface CUIChecksReport {
+    assertions: Record<string, CUIRule>;
+    metadata: {
+      passed: number;
+      warning: number;
+      failed: number;
+      inapplicable: number;
+    };
+  }
+  interface ACTReport {
+    assertions: Record<string, ACTRule>; // Specify the type of assertions
+    metadata: {
+      passed: number;
+      failed: number;
+      warning: number;
+      inapplicable: number;
+    };
+  }
 
-declare const APP_CONFIG: {
-  VERSION: string;
-  DIST_FOLDER:string;
-  ICONS_FOLDER:string;
-  RESOURCES_FOLDER:string;
-  RESOURCES_WORDS_PT: string;
-  INITIAL_INTERACTION_MESSAGE_PT:string;
-  INITIAL_INTERACTION_MESSAGE_EN:string;
-  SCRIPTS_FOLDER:string;
-};
+  declare const APP_CONFIG: {
+    VERSION: string;
+    DIST_FOLDER: string;
+    ICONS_FOLDER: string;
+    RESOURCES_FOLDER: string;
+    RESOURCES_WORDS_PT: string;
+    INITIAL_INTERACTION_MESSAGE_PT: string;
+    INITIAL_INTERACTION_MESSAGE_EN: string;
+    SCRIPTS_FOLDER: string;
+  };
 }
 export {};

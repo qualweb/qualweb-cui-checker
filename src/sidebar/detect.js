@@ -7,7 +7,7 @@ async function sendActionToBackground(action, payload = {}) {
     // Primeiro obtemos o tab ativo
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError);
+        console.log(chrome.runtime.lastError);
         return reject(chrome.runtime.lastError);
       }
 
@@ -18,7 +18,7 @@ async function sendActionToBackground(action, payload = {}) {
 
       chrome.runtime.sendMessage({ action, tabId: activeTab.id, ...payload }, (response) => {
         if (chrome.runtime.lastError) {
-          console.error(chrome.runtime.lastError);
+          console.log(chrome.runtime.lastError);
           return reject(chrome.runtime.lastError);
         }
         if (response?.status === 'error') {
@@ -30,7 +30,6 @@ async function sendActionToBackground(action, payload = {}) {
   });
 }
 
-
 async function cancelDetectionRequest(tabId) {
   return sendActionToBackground('CANCEL_DETECTION', { tabId: tabId });
 }
@@ -38,17 +37,19 @@ async function cancelDetectionRequest(tabId) {
 async function startPageChatbotProcedure(tabId) {
   const settings = await getQualWebSettings();
   console.log('Locale in startPageChatbotProcedure:', settings.options.locale);
-  return sendActionToBackground('PAGE_CHATBOT_PROCEDURE', { tabId: tabId, locale: settings.options.locale });
+  return sendActionToBackground('PAGE_CHATBOT_PROCEDURE', {
+    tabId: tabId,
+    locale: settings.options.locale,
+  });
 }
 
-
 async function startCorrectionChatbot(elementName, tabId) {
-    const settings = await getQualWebSettings();
+  const settings = await getQualWebSettings();
   console.log('Locale in startCorrectionChatbot:', settings.options.locale);
   return sendActionToBackground('CORRECT_ELEMENT_SELECTION', {
     element: elementName,
     tabId: tabId,
-    locale: settings.options.locale
+    locale: settings.options.locale,
   });
 }
 

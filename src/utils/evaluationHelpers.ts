@@ -1,6 +1,4 @@
-import {  Rule, Report, Result, ElementTest } from './types';
-
-
+import { Rule, Report, Result, ElementTest } from './types';
 
 function filterResults(result: Report, chatbotElement: HTMLElement): Report {
   let filteredAssertions: { [rule: string]: Rule } = {};
@@ -29,12 +27,11 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
         let elements: ElementTest[];
 
         elements = (result.elements as ElementTest[]).filter((element) => {
-
           try {
-          let elementToFilter = document.querySelector(element.pointer);
-          if (elementToFilter !== null && chatbotElement.contains(elementToFilter)) {
-            return element;
-          }
+            let elementToFilter = document.querySelector(element.pointer);
+            if (elementToFilter !== null && chatbotElement.contains(elementToFilter)) {
+              return element;
+            }
           } catch (e) {
             console.warn(`Invalid selector in result: ${element.pointer} , error: ${e}`);
             return false;
@@ -65,4 +62,4 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
   };
 }
 
-export {  filterResults };
+export { filterResults };

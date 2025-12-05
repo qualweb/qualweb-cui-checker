@@ -2,15 +2,15 @@ import * as types from './mutation-types';
 
 export const setSelectorsDetected = ({ commit }, payload) => {
   commit(types.SETSELECTORSDETECTED, payload);
-}
+};
 
 export const setTabId = ({ commit }, payload) => {
   commit(types.SETTABID, payload);
-}
+};
 
 export const setSidepanelURL = ({ commit }, payload) => {
   commit(types.SETSIDEPANELURL, payload);
-}
+};
 
 export const setReport = async function ({ commit }, modules) {
   let report = await evaluate(modules.act, modules.wcag, modules.css, modules.cui);
@@ -120,7 +120,9 @@ export const loadSelectors = async function ({ commit }) {
 };
 
 export const setSelectors = async function ({ commit }, payload) {
-  let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))['qualweb-selectors'];
+  let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))[
+    'qualweb-selectors'
+  ];
   if (qualweb_selectors === undefined) {
     qualweb_selectors = {};
   }
@@ -137,7 +139,9 @@ export const setSelectors = async function ({ commit }, payload) {
 };
 
 export const forgetChatbotSelectors = async function ({ commit }) {
-let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))['qualweb-selectors'];
+  let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))[
+    'qualweb-selectors'
+  ];
   if (qualweb_selectors === undefined) {
     qualweb_selectors = {};
   }

@@ -3,7 +3,7 @@
     <div class="container">
       <h1 class="title">QUALWEB CUI CHECK INSTALLED SUCCESSFULLY!</h1>
       <img class="logo" :src="`/${iconFolder}/logoQW.png`" alt="Qualweb Logo" />
-      <p>Thank your for installing qualweb cui check extension.</p>
+      <p>Thank your for installing qualweb cui checker extension.</p>
       <p>To get started, please configure settings of app to start using it</p>
       <div class="button-container">
         <button @click="onClickConfigure">Configure</button>
@@ -20,7 +20,7 @@ const store = useStore();
 const router = useRouter();
 
 const firstRun = computed(() => store.getters.getFirstRun);
-const iconFolder = APP_CONFIG.ICONS_FOLDER ;
+const iconFolder = APP_CONFIG.ICONS_FOLDER;
 onMounted(() => {
   store.dispatch('loadOptions');
 });

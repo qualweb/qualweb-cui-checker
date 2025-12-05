@@ -1,42 +1,34 @@
 import { sendMessageToBackground } from '../content';
 import InterfaceChatbot from '../detection/InterfaceChatbot';
 
+//TODO: Treat Exceptions when elements are not found
+export type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement;
 
-export type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement ;
-
-export async function simulateInput(
-  message: string
-) {
+export async function simulateInput(message: string) {
   await inputMessage(message);
   await sendMessage();
 }
-export async function inputVoiceMessage(
-  message: string,
-): Promise<void> {
-
-    let microphoneElement = InterfaceChatbot.getInstance().getMicrophoneElement();
-    if(microphoneElement){
-      microphoneElement.click();
+export async function inputVoiceMessage(message: string): Promise<void> {
+  let microphoneElement = InterfaceChatbot.getInstance().getMicrophoneElement();
+  if (microphoneElement) {
+    microphoneElement.click();
     await new Promise((resolve) => setTimeout(resolve, 500));
     // Logic for voice input
     await sendMessageToBackground('speakText', message);
     await new Promise((resolve) => setTimeout(resolve, 500));
     microphoneElement.click();
-    }
-
+  }
 }
 
-export async function inputMessage(
-  message: string
-) {
+export async function inputMessage(message: string) {
   // reload input field
-  let inputField: ChatbotInputElement | null  = InterfaceChatbot.getInstance().getInputElement();
-  console.log("Inputing message to field:", inputField, "Message:", message);
+  let inputField: ChatbotInputElement | null = InterfaceChatbot.getInstance().getInputElement();
+  console.log('Inputing message to field:', inputField, 'Message:', message);
   if (!inputField) {
-    console.error('Input field not found.');
+    console.log('Input field not found.');
     return;
   }
-  
+
   if (inputField?.tagName === 'DIV') {
     if (message != '') {
       inputField.innerHTML = message;
@@ -46,7 +38,7 @@ export async function inputMessage(
       (inputField as HTMLInputElement | HTMLTextAreaElement).value = message;
     }
   } else {
-    console.error('Input field or rich text editor not found.');
+    console.log('Input field or rich text editor not found.');
   }
 }
 
@@ -73,7 +65,7 @@ export async function sendMessage() {
   const inputField: HTMLElement | null = InterfaceChatbot.getInstance().getInputElement();
 
   if (!inputField) {
-    console.error('Input field not found.');
+    console.log('Input field not found.');
     return;
   }
 
@@ -87,6 +79,6 @@ export async function sendMessage() {
 
     dispatchEvents(textEditor);
   } else {
-    console.error('Input field or rich text editor not found.');
+    console.log('Input field or rich text editor not found.');
   }
 }

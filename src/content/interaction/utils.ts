@@ -1,5 +1,3 @@
-
-
 export function isNodeTypingInfo(node: Node): boolean {
   return document.evaluate(
     `boolean(.//*[contains(@*, "typing")  or contains(@*, "loading") ] | self::*[contains(@*, "typing") or contains(@*, "loading")])`,
@@ -10,24 +8,28 @@ export function isNodeTypingInfo(node: Node): boolean {
   ).booleanValue;
 }
 
-function hasExactText(el: HTMLElement, text: string):boolean {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
-    let currentNode;
-    while (currentNode = walker.nextNode()) {
-      if (currentNode.textContent && currentNode.textContent.trim() === text) {
-        return true;
-      }
+function hasExactText(el: HTMLElement, text: string): boolean {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+  let currentNode;
+  while ((currentNode = walker.nextNode())) {
+    if (currentNode.textContent && currentNode.textContent.trim() === text) {
+      return true;
     }
-    return false;
   }
+  return false;
+}
 
 /** Function that checks if Element contains chatbot Response
  *
  * @param node element to check
  * @param selectorMessage selector of chatbot responses
  */
-export function isChatBotMessage(node: HTMLElement, selectorMessage: string,lastMessageUser:string): boolean {
-    if (lastMessageUser) {
+export function isChatBotMessage(
+  node: HTMLElement,
+  selectorMessage: string,
+  lastMessageUser: string,
+): boolean {
+  if (lastMessageUser) {
     var test = lastMessageUser && hasExactText(node, lastMessageUser);
     if (test) {
       return false;
@@ -39,12 +41,9 @@ export function isChatBotMessage(node: HTMLElement, selectorMessage: string,last
 
 export function isContainedInSelector(node: HTMLElement, selector: string): boolean {
   return (
-    node instanceof HTMLElement &&
-    (node.matches(selector) || node.querySelector(selector) !== null)
+    node instanceof HTMLElement && (node.matches(selector) || node.querySelector(selector) !== null)
   );
 }
-
-
 
 /**  Function to normalize the text
  *
@@ -57,9 +56,8 @@ export function normalizeText(text: string): string {
     .trim();
 }
 
-
-export function markQuestion(ownerDocument:Document,question: string,counter:number): void {
-  const end = Math.min(100, question.length)
+export function markQuestion(ownerDocument: Document, question: string, counter: number): void {
+  const end = Math.min(100, question.length);
   const slicedQuestion = question.slice(0, end);
   const textNodeResult = document.evaluate(
     `//*[contains(text(), "${slicedQuestion}")]`,
@@ -80,6 +78,6 @@ export function markQuestion(ownerDocument:Document,question: string,counter:num
   }
 }
 
-export function markResponses(responses: HTMLElement[],counter:number): void {
-  responses.forEach((el) =>  el.setAttribute('qw-cui-response', counter.toString()));
+export function markResponses(responses: HTMLElement[], counter: number): void {
+  responses.forEach((el) => el.setAttribute('qw-cui-response', counter.toString()));
 }

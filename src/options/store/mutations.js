@@ -16,7 +16,7 @@ export default {
   [types.SETLLMSERVICE](state, LLMService) {
     state.options.LLMService = LLMService;
   },
-  [types.SETMAPPEDAPIKEY](state, mappedKey){
+  [types.SETMAPPEDAPIKEY](state, mappedKey) {
     state.mappedKey = mappedKey;
-  }
+  },
 };

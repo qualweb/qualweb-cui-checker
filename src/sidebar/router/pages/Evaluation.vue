@@ -61,7 +61,7 @@ export default {
       cssResult,
       summary,
       chatbotSummary;
-     await startEvaluation(this.getTabId);
+    await startEvaluation(this.getTabId);
     if (modules.act) {
       this.state = 'Evaluating ACT module';
       if (this.cancel) return;
@@ -102,14 +102,12 @@ export default {
 </script>
 
 <style scoped>
-
 .button-container {
   margin-top: 20px;
   width: 50%;
   display: flex;
   justify-content: center;
 }
-
 
 .container {
   min-height: 50vh;

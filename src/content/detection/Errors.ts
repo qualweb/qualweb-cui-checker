@@ -1,6 +1,6 @@
 export class IframeNotAccessibleError extends Error {
-     constructor(message) {
+  constructor(message) {
     super(message);
-    this.name = 'IframeNotAccessibleError'; 
+    this.name = 'IframeNotAccessibleError';
   }
 }

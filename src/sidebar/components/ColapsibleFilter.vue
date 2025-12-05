@@ -6,10 +6,7 @@
       <i v-else class="material-icons dropdownIcon">arrow_drop_down</i>
     </button>
 
-    <transition
-      @enter="enter"
-      @leave="leave"
-    >
+    <transition @enter="enter" @leave="leave">
       <div v-show="isOpen" class="content">
         <div class="column-outcome border">
           <p>Outcome</p>
@@ -164,12 +161,12 @@ const enter = (el) => {
   el.style.opacity = '0';
   el.offsetHeight; // trigger reflow
   el.style.transition = 'height 0.4s ease, opacity 0.4s ease';
-  el.style.height = (el.scrollHeight+10) + 'px';
+  el.style.height = el.scrollHeight + 10 + 'px';
   el.style.opacity = '1';
 };
 
 const leave = (el) => {
-  el.style.height = (el.scrollHeight+10) + 'px';
+  el.style.height = el.scrollHeight + 10 + 'px';
   el.offsetHeight; // trigger reflow
   el.style.transition = 'height 0.4s ease, opacity 0.4s ease';
   el.style.height = '0';
@@ -221,11 +218,19 @@ const leave = (el) => {
   flex-grow: 1;
 }
 
-.column-outcome { width: 38%; }
-.column-module { width: 35%; }
-.column-eval { width: 27%; }
+.column-outcome {
+  width: 38%;
+}
+.column-module {
+  width: 35%;
+}
+.column-eval {
+  width: 27%;
+}
 
-.border { border-right: 0.01em solid white; }
+.border {
+  border-right: 0.01em solid white;
+}
 
 p {
   font-size: 1rem;
