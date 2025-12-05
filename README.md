@@ -1,4 +1,4 @@
-# Qualweb Cui Checker
+# Qualweb CUI Checker
 
 Browser extension for evaluating the accessibility of Conversational User Interfaces (CUI).  
 
@@ -12,7 +12,7 @@ Browser extension for evaluating the accessibility of Conversational User Interf
 ---
 
 ## Description
-**Qualweb Cui Checker** is a Chrome browser extension that interacts with AI assistants by generating context-aware questions and analyzing their responses to evaluate the assistant’s accessibility. It also detects the assistant’s interface, enabling interaction and evaluation of chatbot answers, as well as performing additional tests based on ACT, WCAG, and CUI guidelines.
+**Qualweb CUI Checker** is a Chrome browser extension that interacts with AI assistants by generating context-aware questions and analyzing their responses to evaluate the assistant’s accessibility. It also detects the assistant’s interface, enabling interaction and evaluation of chatbot answers, as well as performing additional tests based on ACT, WCAG, and CUI guidelines.
 ## Installation
 
 1. Clone the repository:
