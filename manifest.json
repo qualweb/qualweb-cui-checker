@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Qualweb CUI Checker",
   "version": "1.0",
-  "description": "A evaluation tool to check the Accessibility of Conversational AI Interfaces.",
+  "description": "An evaluation tool to check the Accessibility of Conversational AI Interfaces.",
   "background": {
     "service_worker": "dist/background.bundle.js"
 
