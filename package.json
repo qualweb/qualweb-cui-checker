@@ -1,7 +1,7 @@
 {
   "name": "chatbot-cui-checker-extension",
   "version": "1.0.0",
-  "description": "A evaluation tool to check the Accessibility of Conversational AI Interfaces.",
+  "description": "An evaluation tool to check the Accessibility of Conversational AI Interfaces.",
   "engines": {
     "node": ">=10"
   },
