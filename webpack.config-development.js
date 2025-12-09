@@ -8,7 +8,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json');
 const TerserPlugin = require('terser-webpack-plugin');
 const fs = require('node:fs');
-const definitions = JSON.parse(fs.readFileSync("./definitions-dev.json", "utf-8"));
+const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
 
 const config = {
   mode: 'development',
@@ -27,10 +27,6 @@ const config = {
   resolve: {
     alias: {
    'vue': 'vue/dist/vue.esm-bundler.js',
-     "@microsoft/recognizers-text-number-with-unit": path.resolve(
-        __dirname,
-        "node_modules/@microsoft/recognizers-text-number-with-unit/dist/recognizers-text-number-with-unit.es5.js"
-      ),
     },
     extensions: ['.ts', '.js', '.vue'],
   },
@@ -41,9 +37,7 @@ const config = {
         enforce: 'pre',
         test: /\.js$/,
         loader: 'source-map-loader',
-          exclude: [
-          /node_modules\/@microsoft\/recognizers-text-number-with-unit/,
-/node_modules\/html2pdf\.js/,
+          exclude: [/node_modules\/html2pdf\.js/,
         ],
       },
       {
@@ -123,18 +117,18 @@ const config = {
     new MiniCssExtractPlugin({ filename: '[name].css' }),
     new CopyPlugin({
       patterns: [
-      // { from: 'devtools.html', to: 'devtools.html', transform: transformHtml },
-      { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'qwPage.js' },
-      { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'util.js' },
-      { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'act.js' },
-      { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'cui.js' },
-      { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'wcag.js' },
-      { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'common-words-pt.txt' },
-      { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
-      { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
-      { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
-      { from: 'src/sidebar/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
-      { from: 'src/options/options.html', to: 'options/options.html', transform: transformHtml },
+                 { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'scripts/qwPage.js' },
+                { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'scripts/util.js' },
+                { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'scripts/act.js' },
+                { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'scripts/cui.js' },
+                { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'scripts/wcag.js' },
+                { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'resources/common-words-pt.txt' },
+                
+                { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
+                { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
+                { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
+                { from: 'src/sidebar/sidebar.html', to: 'sidebar.html', transform: transformHtml },
+                { from: 'src/options/options.html', to: 'options.html', transform: transformHtml },
       { 
         from: 'src/icons', 
         to: 'icons', 

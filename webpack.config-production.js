@@ -7,7 +7,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json'); 
 const TerserPlugin = require('terser-webpack-plugin');
 const fs = require('node:fs');
-const definitions = JSON.parse(fs.readFileSync("./definitions-prod.json", "utf-8"));
+const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
 
 // --- Configuration Object for Production ---
 const config = {
@@ -35,8 +35,7 @@ const config = {
         extensions: ['.ts', '.js', '.vue'],
     },
     optimization :{
-        minimize: true,
-    minimizer: [
+        minimizer: [
         new TerserPlugin({
           exclude: /cui\.js$|act\.js$|wcag\.js$|qwPage\.js$|util\.js$/,
           terserOptions: {
@@ -141,8 +140,8 @@ const config = {
                 { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
                 { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
                 { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
-                { from: 'prod/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
-                { from: 'prod/options.html', to: 'options/options.html', transform: transformHtml },
+                { from: 'src/sidebar/sidebar.html', to: 'sidebar.html', transform: transformHtml },
+                { from: 'src/options/options.html', to: 'options.html', transform: transformHtml },
                 
                 { 
                     from: 'src/icons', 
@@ -151,7 +150,7 @@ const config = {
                         ignore: ['**/icon.xcf'] 
                     } 
                 },
-                { from: './prod/manifest.json', to: 'manifest.json' }
+                { from: './manifest.json', to: 'manifest.json' }
             ]
         }),
     ],

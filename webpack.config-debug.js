@@ -7,7 +7,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json'); 
 const TerserPlugin = require('terser-webpack-plugin');
 const fs = require('node:fs');
-const definitions = JSON.parse(fs.readFileSync("./definitions-prod.json", "utf-8"));
+const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
 
 // --- Configuration Object for Production ---
 const config = {
@@ -128,12 +128,12 @@ const config = {
                 { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'scripts/wcag.js' },
                 { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'resources/common-words-pt.txt' },
                 
+                
                 { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
                 { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
                 { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
-                { from: 'prod/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
-                { from: 'prod/options.html', to: 'options/options.html', transform: transformHtml },
-                
+                { from: 'src/sidebar/sidebar.html', to: 'sidebar.html', transform: transformHtml },
+                { from: 'src/options/options.html', to: 'options.html', transform: transformHtml },
                 { 
                     from: 'src/icons', 
                     to: 'icons', 
@@ -141,7 +141,7 @@ const config = {
                         ignore: ['**/icon.xcf'] 
                     } 
                 },
-                { from: './prod/manifest.json', to: 'manifest.json' }
+                { from: './manifest.json', to: 'manifest.json' }
             ]
         }),
     ],
