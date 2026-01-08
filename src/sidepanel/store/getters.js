@@ -2,6 +2,7 @@ export const selectorsDetected = (state) => state.selectorsDetected;
 export const getAllRulesFromModule = (state) => (module) => state[module];
 export const getRuleWithCode = (state) => (code, module) => state[module][code];
 export const getEvaluated = (state) => state['evaluated'];
+export const isCuiSpeechTestsEnabled = (state) => state.cuiSpeechTests;
 export const getCurrentRule = (state) => {
   let currentRule = state.currentRule;
   if (!!currentRule) {
@@ -249,3 +250,7 @@ export const getSelectors = (state) => state.storage.selectors;
 export const getInteractionInitialized = (state) => state.chatbotInteractionInitialized;
 export const getTabId = (state) => state.tabId;
 export const getSidepanelURL = (state) => state.sidepanelURL;
+export const getIsMicrophoneAvailable = (state) => {
+  const selectors = state.storage.selectors;
+  return (selectors && selectors.microphoneSelector && selectors.microphoneSelector.trim() !== '') || false;
+}

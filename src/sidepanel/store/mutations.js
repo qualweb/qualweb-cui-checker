@@ -34,6 +34,9 @@ export default {
   [types.SETCSS](state, payload) {
     state.css = payload;
   },
+  [types.SETCUISPEECHTESTS](state, payload) {
+    state.cuiSpeechTests = payload;
+  },
   [types.SETSUMMARY](state, payload) {
     state.summary = payload;
   },
@@ -90,6 +93,7 @@ export default {
       warning: false,
       inapplicable: false,
     };
+    state.cuiSpeechTests = false;
   },
   [types.SETEVALUATECHATBOT](state, payload) {
     state.evaluateChatbot = payload;
@@ -107,4 +111,5 @@ export default {
   [types.SETINTERACTIONINITIALIZED](state, payload) {
     state.chatbotInteractionInitialized = payload;
   },
+
 };

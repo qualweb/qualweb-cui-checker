@@ -11,6 +11,7 @@ export const defaultState = {
   storage: {
     url: '',
     selectors: {
+      iframeSelector: '',
       windowsSelector: '',
       dialogSelector: '',
       inputSelector: '',
@@ -39,6 +40,7 @@ export const defaultState = {
   },
   evaluateChatbot: false,
   detectingChatbot: false,
+  cuiSpeechTests: false,
 };
 
 export default new createStore({
@@ -49,6 +51,7 @@ export default new createStore({
     storage: {
       url: '',
       selectors: {
+        iframeSelector: '',
         windowsSelector: '',
         dialogSelector: '',
         inputSelector: '',
@@ -77,6 +80,7 @@ export default new createStore({
     },
     evaluateChatbot: false,
     detectingChatbot: false,
+    cuiSpeechTests: false,
   },
 
   getters,

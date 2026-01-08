@@ -130,19 +130,18 @@ const config = {
         
         new CopyPlugin({
             patterns: [
-                { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'scripts/qwPage.js' },
+              { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'scripts/qwPage.js' },
                 { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'scripts/util.js' },
                 { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'scripts/act.js' },
                 { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'scripts/cui.js' },
                 { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'scripts/wcag.js' },
                 { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'resources/common-words-pt.txt' },
-                
-                { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
-                { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
-                { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
-                { from: 'src/sidebar/sidebar.html', to: 'sidebar.html', transform: transformHtml },
-                { from: 'src/options/options.html', to: 'options.html', transform: transformHtml },
-                
+                { from: 'src/sidepanel/evaluate.js', to: 'sidepanel/evaluate.js' },
+                { from: 'src/sidepanel/detect.js', to: 'sidepanel/detect.js' },
+                { from: 'src/sidepanel/interact.js', to: 'sidepanel/interact.js' },
+                { from: 'src/sidepanel/sidepanel.html', to: 'sidepanel/sidepanel.html', transform: transformHtml },
+                { from: 'src/options/options.html', to: 'options/options.html', transform: transformHtml },
+                 { from: '**/*', to: 'resources/', context:'src/assets/' },
                 { 
                     from: 'src/icons', 
                     to: 'icons', 

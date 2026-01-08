@@ -52,6 +52,11 @@ import HighlightAll from './HighlightAll.vue';
 
 export default {
   name: 'Summary',
+  components: {
+      RunAgain,
+      Export,
+      HighlightAll,
+  },
   computed: {
     ...mapGetters({
       summary: 'getSummary',
@@ -65,11 +70,6 @@ export default {
       return {
         title: 'failed',
       };
-    },
-    components: {
-      RunAgain,
-      Export,
-      HighlightAll,
     },
   },
 };

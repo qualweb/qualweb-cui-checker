@@ -3,6 +3,7 @@ export const SETCHATBOTACT = 'SETCHATBOTACT';
 export const SETWCAG = 'SETWCAG';
 export const SETCHATBOTWCAG = 'SETCHATBOTWCAG';
 export const SETCSS = 'SETCSS';
+export const SETCUISPEECHTESTS = 'SETCUISPEECHTESTS';
 export const SETCUI = 'SETCUI';
 export const SETCHATBOTCUI = 'SETCHATBOTCUI';
 export const SETSUMMARY = 'SETSUMMARY';

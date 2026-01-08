@@ -1,5 +1,8 @@
-async function startEvaluation(tabId) {
-  return sendActionToBackground('START_EVALUATION', { tabId });
+async function startEvaluation(tabId,selectors) {
+  let settingsStorage = await getQualWebSettings();
+  console.log("Selectors in startEvaluation:", selectors);
+  
+  return sendActionToBackground('START_EVALUATION', { settings: settingsStorage.options, tabId: tabId, selectors: selectors });
 }
 
 async function evaluateACT(tabId) {

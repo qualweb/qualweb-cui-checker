@@ -33,7 +33,6 @@
 </template>
 
 <script>
-// TODO : ADD CANCEL BUTTON
 // <FilterByResult :items="['All outcomes','Passed','Failed','Warning','Inapplicable']" ></FilterByResult>
 import ColapsibleFilter from '../../components/ColapsibleFilter.vue';
 import Summary from '../../components/Summary.vue';
