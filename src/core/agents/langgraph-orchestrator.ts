@@ -2,6 +2,7 @@ import { MemorySaver } from '@langchain/langgraph/web';
 import { LLM_Settings } from '../../utils/types';
 import { workflow } from './workflow';
 import { ChatOpenAI } from '@langchain/openai';
+import { initCUISpeechRecognitionTests } from './state';
 
 export const Settings: LLM_Settings = {
   apiKey: null,
@@ -10,7 +11,7 @@ export const Settings: LLM_Settings = {
 };
 export let LLM: ChatOpenAI;
 
-export function initiateLangraphSettings(settings: LLM_Settings) {
+export function initiateLangraphSettings(settings: LLM_Settings,isSpeechTestsEnabled:boolean){
   Settings.apiKey = settings.apiKey;
   Settings.LLMService = settings.LLMService;
   Settings.locale = settings.locale;
@@ -23,6 +24,7 @@ export function initiateLangraphSettings(settings: LLM_Settings) {
       apiKey: settings.apiKey!,
     });
   }
+  initCUISpeechRecognitionTests(isSpeechTestsEnabled);
   return workflow.compile({
     checkpointer: new MemorySaver(),
   });

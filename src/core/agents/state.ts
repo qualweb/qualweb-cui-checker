@@ -1,19 +1,21 @@
-import { Annotation, MessagesAnnotation } from '@langchain/langgraph/web';
-import { BaseMessage } from '@langchain/core/messages';
-import {
-  EvaluationTest,
-  FinalOutput,
-  GraphStatus,
-  Objective,
-  objectivesDefault,
-} from './objectives';
+import { Annotation, MessagesAnnotation } from "./langgraph_lib"
+import { BaseMessage } from "@langchain/core/messages";
+import { StatusGraph,STATUS_GRAPH} from "./domain/types";
+import { TGraphInput } from "./domain/GraphInput/types";
+import { IQWGraphOutput } from "./domain/GraphOutput/types";
+import { generateQualWebTests,ObjectiveSerialized} from "./domain/ObjectiveBuilder";
+
+
+let QUALWEB_TESTS: Record<string, ObjectiveSerialized>;
+export function initCUISpeechRecognitionTests(useRecognitionTests: boolean = false) {
+  QUALWEB_TESTS = generateQualWebTests(useRecognitionTests);
+}
 
 export const GraphState = Annotation.Root({
   ...MessagesAnnotation.spec,
 
-  isFirstMessage: Annotation<boolean>({
+  graphInput: Annotation<TGraphInput>({
     reducer: (_prev, next) => next,
-    default: () => true,
   }),
   // Messages in the conversation history
   // This is a list of messages exchanged between the Agent and the Assistant
@@ -22,9 +24,9 @@ export const GraphState = Annotation.Root({
     default: () => [],
   }),
   // Map of objectives, where the key is the objective ID and the value is the Objective object
-  objectives: Annotation<Record<string, Objective>>({
+  objectives: Annotation<Record<string, ObjectiveSerialized>>({
     reducer: (prev, next) => ({ ...prev, ...next }),
-    default: () => objectivesDefault,
+    default: () => QUALWEB_TESTS,
   }),
   // Important context gathered during the conversation
   importantContext: Annotation<string[]>({
@@ -33,7 +35,7 @@ export const GraphState = Annotation.Root({
   }),
   // The current objective being pursued by the agent
   // This is the objective that the agent is currently working on
-  currentObjective: Annotation<Objective | null>({
+  currentObjective: Annotation<ObjectiveSerialized | null>({
     reducer: (_prev, next) => next,
     default: () => null,
   }),
@@ -50,27 +52,21 @@ export const GraphState = Annotation.Root({
     },
     default: () => [],
   }),
-  //Test Evaluation Objective for QW Browser test Node
-  currentEvaluationObjective: Annotation<EvaluationTest | null>({
-    reducer: (_prev, next) => next,
-    default: () => null,
-  }),
   // Strategy para o question formulator
   strategy: Annotation<string | null>({
     reducer: (_prev, next) => next,
     default: () => null,
   }),
-  objectiveAchieved: Annotation<string | null>({
+  graphOutput: Annotation<IQWGraphOutput>({
     reducer: (_prev, next) => next,
-    default: () => null,
+    default: () => ({
+      status: STATUS_GRAPH.NOT_STARTED,
+      actions: []
+    }),
   }),
-  finalOutput: Annotation<FinalOutput | null>({
+  status: Annotation<StatusGraph>({
     reducer: (_prev, next) => next,
-    default: () => null,
-  }),
-  status: Annotation<GraphStatus>({
-    reducer: (_prev, next) => next,
-    default: () => 'running',
+    default: () => STATUS_GRAPH.NOT_STARTED,
   }),
   isSkipObjectivePressed: Annotation<boolean>({
     reducer: (_prev, next) => next,

@@ -1,0 +1,17 @@
+{ 
+ 
+    "cui-check-speech-1": {
+        "title": "Recognize audion file with chatbot query",
+        "check": "QW-CUI-C11",
+        "test":      {
+            "conditions": {
+                "pass": "If the chatbot replies with a greeting message.",
+                "fail": "If the chatbot does not reply with a greeting message."
+            },
+            "audioFilename": "speech1.mp3",
+            "transcript": "Olá como está hoje?",
+            "expectedResponse": "Espera uma resposta de saudação do chatbot.",
+            "locale": "pt-PT"
+        }
+    }
+}  

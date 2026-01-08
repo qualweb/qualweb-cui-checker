@@ -1,19 +1,12 @@
-{
+{   
     "qw-cui-services-list": {
         "check": "QW-CUI-C8",
         "title": "Obtain Chatbot Help Commands/Services List",
         "objective": "Obtain from the chatbot a comprehensive list of the services, assistance topics, or types of queries it can handle",
         "requirements": "Text contains list of services or assistant topics or types of queries it can handle",
         "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        },
         "test": {
-            "code": "QW-CUI-C8",
-            "selector": "qw-cui-services-list",
-            "conditions": {
+                "conditions": {
                 "pass": "List of services or assistant is present.",
                 "fail": "List of services or assistant is missing."
             }
@@ -25,14 +18,7 @@
         "objective": "Obtain from the Assistant a response detailing its privacy terms and policies",
         "requirements": "The response must detail the Assistant's privacy terms and policies.",
         "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        },
         "test": {
-            "code": "QW-CUI-C9",
-            "selector": "qw-cui-privacy-terms",
             "conditions": {
                 "pass": "Terms include Collecting, Sharing, and Protection information.",
                 "warn": "Terms include only part of the required information.",
@@ -47,14 +33,7 @@
         "objective": "Obtain from the chatbot a response indicating whether it can connect or not the user to a human agent upon request.",
         "requirements": "- The response must clearly indicate if the chatbot can connect the user to a human agent.\n- Include details about how the connection works if possible (direct transfer, contact info, URL, etc.).\n- Response should be concise, unambiguous, and actionable.\n- If the chatbot cannot connect to a human, explicitly state that.",
         "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        },
         "test": {
-            "code": "QW-CUI-C10",
-            "selector": "qw-cui-human-assistance",
             "conditions": {
                 "pass": "System allows escalation to a human directly.",
                 "warn": "Only provides contacts or URLs for contacts instead of direct access.",
@@ -68,35 +47,20 @@
         "title": "Obtain Localized Date Format in Chatbot Responses",
         "objective": "Obtain a response from the Assistant containing a date in a clear and standard format.",
         "requirements": "The response must include a date in standard format or a clearly understandable format, without inventing events or scenarios.",
-        "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        }
+        "exceptions": ""
     },
     "qw-cui-unit": {
         "check": "QW-CUI-C7",
         "title": "Obtain Localized Units of Measurement in Chatbot Responses",
         "objective": "Obtain a response from the Assistant that includes a physical unit of measurement of mass (e.g., kg, g, lb, oz) or length/dimension (e.g., m, cm, mm, in, ft).",
         "requirements": "- The response must include a numeric amount followed by a valid physical unit of mass or dimension, either in abbreviation or full name (e.g., 10 kg, 5 grams, 2 lb, 30 cm, 2 meters, 10 inches, 5 quilogramas, 2 metros).\n- Do not invent scenarios or provide hypothetical contexts; just give the number with the unit in the specified format.",
-        "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        }
+        "exceptions": ""
     },
     "qw-cui-currency": {
         "check": "QW-CUI-C6",
         "title": "Obtain Localized Currency Format in Chatbot Responses",
         "objective": "Obtain a response from the Assistant containing a currency value in a standard format",
         "requirements": "- The response must include a numeric amount followed by a currency unit or currency name (e.g., €100.00, $50.00, 100 USD, 100 euros).\n- Do not invent scenarios or provide hypothetical contexts; just give the currency in the specified format.",
-        "exceptions": "",
-        "status": {
-            "completed": false,
-            "failed": false,
-            "counter": 0
-        }
+        "exceptions": ""
     }
 }
