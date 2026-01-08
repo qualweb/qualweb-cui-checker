@@ -1,7 +1,7 @@
-import { initContentProxy } from './contentProxy';
-import { initLifeCycleHandlers } from './lifeCycleHandlers';
-import { initPortHandler } from './port-handler';
-initLifeCycleHandlers();
-initContentProxy();
+import './handlers/handlers-lifecycle';
+import './handlers/handlers-proxy';
+import './handlers/routers/main-port.router';
 
-initPortHandler();
+
+
+
