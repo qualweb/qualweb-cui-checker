@@ -33,7 +33,7 @@ function filterResults(result: Report, chatbotElement: HTMLElement): Report {
               return element;
             }
           } catch (e) {
-            console.warn(`Invalid selector in result: ${element.pointer} , error: ${e}`);
+            console.log(`Invalid selector in result: ${element.pointer} , error: ${e}`);
             return false;
           }
         });
