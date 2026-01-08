@@ -130,3 +130,18 @@ export async function unsetGreen(element: HTMLElement): Promise<void> {
 
   await Promise.all(removePromises);
 }
+
+export async function unsetAllGreens(): Promise<void> {
+  await unsetGreen(document.body);
+  const iframes = document.querySelectorAll('iframe');
+  for (const iframe of iframes) {
+    try {
+      if (iframe.contentDocument) {
+        await unsetGreen(iframe.contentDocument.body);
+      }
+    } catch {
+      // Ignore cross-origin iframes
+    }
+  }
+}
+  

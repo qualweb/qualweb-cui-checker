@@ -1,7 +1,7 @@
-import { IframeNotAccessibleError } from '../detection/Errors';
-import { ChatbotInputElement } from '../interaction/message-sender';
+import { ChatbotInputElement } from '../../utils/types';
 import { containsExactTextXPath } from './XPathTools';
-
+import * as ErrorClass from "../../errors/content/errors.class.content";
+import { showMessage } from '../../utils/helpers';
 export function getUniqueSelector(element: Element): string | null {
   if (!element) return null;
   const path: string[] = [];
@@ -243,24 +243,21 @@ const nonAIInputKeywords = new Set([
   'validade',
   'nome',
 ]);
-export async function detectChatbotInputCrossOrigin(): Promise<ChatbotInputElement | null> {
+export  function detectChatbotInputCrossOrigin(): ChatbotInputElement| null {
   const inputs = [
     ...document.querySelectorAll(
       'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
     ),
   ].filter(isVisible);
-  console.log('inputs detected', inputs);
   const inputsFiltered = inputs.filter(isElementInViewport).filter((input) => !isNonAIInput(input));
-  console.log('inputs filtered', inputsFiltered);
+
   const result =
     inputsFiltered.length > 0 ? (priorityTextInput(inputsFiltered) as ChatbotInputElement) : null;
   if (result) {
-    console.log('Detected chatbot input element:', result);
     return result;
   }
   // Inputs "prováveis" dentro de iframes cross-origin
   const iframes = [...document.querySelectorAll('iframe')];
-  console.log('Found Iframes', iframes);
   let foundClosedIframe = false;
   const inputsFoundInIframes: Element[] = [];
   for (const iframe of iframes) {
@@ -269,11 +266,10 @@ export async function detectChatbotInputCrossOrigin(): Promise<ChatbotInputEleme
       documentIframe = iframe.contentDocument || iframe.contentWindow!.document;
       // check if iframe is accessible
       if (!documentIframe || !documentIframe.body) {
-        throw new Error('Iframe not accessible');
+        throw new ErrorClass.IframeNotAccessibleError('Iframe not accessible');
       }
     } catch {
       //TODO: Logic to send to devtools chrome extension
-      console.log('Cannot access iframe due to cross-origin restrictions:', iframe);
       foundClosedIframe = true;
       continue;
     }
@@ -283,7 +279,7 @@ export async function detectChatbotInputCrossOrigin(): Promise<ChatbotInputEleme
         'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
       ),
     ].filter(isVisible);
-    console.log('inputs detected', inputs);
+
     const inputsFiltered = inputs
       .filter(isElementInViewport)
       .filter((input) => !isNonAIInput(input));
@@ -291,12 +287,16 @@ export async function detectChatbotInputCrossOrigin(): Promise<ChatbotInputEleme
   }
   if (inputsFoundInIframes.length > 0) {
     const resultIframe = priorityTextInput(inputsFoundInIframes) as ChatbotInputElement;
-    console.log('Detected chatbot input element in iframe:', resultIframe);
+
     return resultIframe;
   } else {
     if (foundClosedIframe) {
-      console.log('Some iframes were not accessible due to cross-origin restrictions.');
-      throw new IframeNotAccessibleError(
+
+      showMessage(
+        'Some iframes could not be accessed due to cross-origin restrictions, which may limit the chatbot detection capabilities in this version.',
+        4000,
+      );
+      throw new ErrorClass.IframeNotAccessibleError(
         'Some iframes were not accessible due to cross-origin restrictions.',
       );
     }
@@ -320,35 +320,13 @@ export function isNonAIInput(el: Element): boolean {
 
   for (const word of words) {
     if (nonAIInputKeywords.has(word)) {
-      console.log(`Found keyword "${word}" in attributes`);
       return true;
     }
   }
 
   return false;
 }
-/** Function to check if an element is likely NOT an AI chatbot input
- *
- * @param el  Element to check
- * @returns  boolean  True if element is likely NOT an AI chatbot input
- */
-/*
- export function isNonAIInput(el:Element): boolean {
-  return Array.from(el.attributes).some(attr => {
-    const val = (attr as any).value;
-    return (
-      val &&
-      nonAIInputKeywords.some(keyword => {
-        const found = val.toLowerCase().split(/[\s.\-]+/).includes(keyword);
-        if (found) {
-          console.log(`Found keyword "${keyword}" in attribute: ${val}`);
-        }
-        return found;
-      })
-    );
-  });
-}
-*/
+
 /**
  * Gera um seletor CSS para agrupamento (classes, atributos).
  *
@@ -451,12 +429,9 @@ export function findAncestralNodeBeforeContaining(
 ): HTMLElement {
   let current = node;
   let parent = node.parentElement;
-  console.log('Antes iteração');
   while (parent) {
-    console.log('iteração');
     // se algum descendente do pai contém exatamente o texto, paramos
     if (containsExactTextXPath(parent, ignoreText)) {
-      console.log('o PARENT tem o texto  ', ignoreText, ' mas o current não tem', current);
       break;
     }
 
@@ -524,13 +499,7 @@ export function findButton(
       const distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
 
       if (distance <= MAX_DISTANCE) {
-        console.log(
-          'Found clickable element at depth',
-          depth,
-          'distance',
-          distance.toFixed(2),
-          current,
-        );
+
         return current;
       } else {
         console.log('Found clickable but too far:', distance.toFixed(2), 'px');
@@ -541,6 +510,5 @@ export function findButton(
     depth++;
   }
 
-  console.log('No clickable element found nearby');
   return null;
 }

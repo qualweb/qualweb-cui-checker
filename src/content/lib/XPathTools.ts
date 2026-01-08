@@ -30,8 +30,7 @@ export function containsExactTextXPath(container: HTMLElement, text: string): bo
   if (text === undefined || text === null || text === '')
     throw new Error('Text to find cannot be undefined or null or empty string');
   const escapedText = escapeXPathString(text);
-  console.log('Escaped text for XPath:', escapedText);
-  // XPath will search for text nodes that exactly match the provided text
+
   const xpath = `.//text()[normalize-space(.) = normalize-space(${escapedText})]`;
   try {
     const result = container.ownerDocument.evaluate(
