@@ -1,53 +1,49 @@
-import { ACTION } from './action-type';
+import {  PortCommunicationMessage, PortsOfCommunication } from '../messaging/message-types';
+import { ACTION_GRAPH } from './action-type';
+
 
 class PortCommunication {
-  private static _instance: PortCommunication;
-  private portSidepanel: chrome.runtime.Port | null = null;
-  private portContent: chrome.runtime.Port | null = null;
-  private mutex: boolean = false;
+  private portSidepanel?: chrome.runtime.Port;
+  private portContent?: chrome.runtime.Port;
 
-  private constructor() {}
 
-  public static getInstance(): PortCommunication {
-    if (!PortCommunication._instance) {
-      PortCommunication._instance = new PortCommunication();
-    }
-    return PortCommunication._instance;
+  public getPortSidepanel(): chrome.runtime.Port | undefined{
+    return this.portSidepanel;
   }
-  public isMutexLocked(): boolean {
-    return this.mutex;
+  public getPortContent(): chrome.runtime.Port | undefined {
+    return this.portContent;
   }
-  public lockMutex(): void {
-    this.mutex = true;
+
+  public getPorts(): PortsOfCommunication {
+    return {
+      SIDEBAR: this.portSidepanel,
+      CONTENT: this.portContent
+    };
   }
-  public unlockMutex(): void {
-    this.mutex = false;
-  }
-  public buildPortSidepanel(port: chrome.runtime.Port): this {
+
+  public setPortSidepanel(port: chrome.runtime.Port): this {
     this.portSidepanel = port;
     return this;
   }
-  public buildPortContent(port: chrome.runtime.Port): this {
+  public setPortContent(port: chrome.runtime.Port): this {
     this.portContent = port;
     return this;
   }
+  
+  public sendMessageToSidepanel(message: PortCommunicationMessage): void {
 
-  public sendMessageToSidepanel(message: any): void {
     if (this.portSidepanel) {
       this.portSidepanel.postMessage(message);
-    } else {
-      // TODO: Handle uninitialized port appropriately
-      console.log('Port to sidepanel is not initialized.');
-    }
+    } 
+
   }
 
-  public sendMessageToContent(message: any): void {
+  public sendMessageToContent(message: PortCommunicationMessage): void {
+
     if (this.portContent) {
       this.portContent.postMessage(message);
-    } else {
-      // TODO: Handle uninitialized port appropriately
-      console.log('Port to content is not initialized.');
-    }
+    } 
+   
   }
 
   public isCommunicationReady(): boolean {
@@ -55,21 +51,20 @@ class PortCommunication {
   }
 
   public endInteraction(): void {
-    this.sendMessageToSidepanel({ action: ACTION.END_INTERACTION });
-    this.sendMessageToContent({ action: ACTION.END_INTERACTION });
+    this.sendMessageToSidepanel({ action: ACTION_GRAPH.END_INTERACTION });
+    this.sendMessageToContent({ action: ACTION_GRAPH.END_INTERACTION });
     this.closePorts();
   }
 
   public closePorts(): void {
     if (this.portSidepanel) {
       this.portSidepanel.disconnect();
-      this.portSidepanel = null;
+      this.portSidepanel = undefined;
     }
     if (this.portContent) {
       this.portContent.disconnect();
-      this.portContent = null;
+      this.portContent = undefined;
     }
-    this.mutex = false;
   }
 }
 export default PortCommunication;
