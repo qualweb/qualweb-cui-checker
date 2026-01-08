@@ -1,40 +1,43 @@
-import { HANDLERS, IChromeRequest } from './actions/MapperActions';
+// flag to indicate that the content script has loaded -- NEEDS to load first to avoid multiple injections
+(window as any).__qwContentLoaded = true;
+
+import { processErrorEventCallbackContent } from '../errors/content/error.handler.content';
+import { ActionDoesNotExistError } from '../errors/content/errors.class.content';
+import { HANDLERS, IChromeRequest } from './handlers';
 
 if (!chrome.runtime.onMessage.hasListener(handleMessagesContentScript)) {
   chrome.runtime.onMessage.addListener(handleMessagesContentScript);
 }
+console.log('Content script message listener initialized.');
 
-function handleMessagesContentScript(
-  request: any,
-  sender: chrome.runtime.MessageSender,
-  sendResponse: (response?: any) => void,
-) {
-  let action = request.action;
+function handleMessagesContentScript(request, sender, sendResponse) {
+  try {
+    let action = request.action;
+    if (!action) throw new ActionDoesNotExistError('No action specified');
 
-  if (!action) {
-    // error handling
-    console.log('Unknown case:', action);
-    return;
-  }
-  let data: IChromeRequest = { request, sendResponse };
+    let data: IChromeRequest = { request, sendResponse };
 
-  if (HANDLERS[action]) {
-    const result: any = HANDLERS[action](data);
-    if (result instanceof Promise) {
-      result.then((response) => {
-        sendResponse(response);
-        return false;
-      });
+    if (HANDLERS[action]) {
+      const handlerFunction = HANDLERS[action](data);
 
-      return true;
+      if (handlerFunction instanceof Promise) {
+        handlerFunction
+          .then((response) => {
+            if (response) sendResponse(response);
+          })
+          .catch((error) => {
+            processErrorEventCallbackContent(error as Error, { sendResponse });
+          });
+
+        return true;
+      }
+      return false;
     }
-    return false;
-  } else {
-    //TODO: Handle unknown action appropriately
-    console.log('No handler found for action:', action);
+  } catch (error) {
+    processErrorEventCallbackContent(error as Error, { sendResponse });
+    return false; 
   }
 }
-
 // Function to send message to background
 export function sendMessageToBackground(action: string, text: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -46,6 +49,3 @@ export function sendMessageToBackground(action: string, text: string): Promise<v
     });
   });
 }
-
-// flag to indicate that the content script has loaded
-(window as any).__qwContentLoaded = true;
