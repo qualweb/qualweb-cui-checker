@@ -5,7 +5,7 @@ import mutations from './mutations';
 import * as actions from './actions';
 
 export const defaultState = {
-  firstRun: false,
+  firstRun: false ,
   mappedKey: '',
   options: {
     LLMService: '',
