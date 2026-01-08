@@ -8,5 +8,7 @@
   "INITIAL_INTERACTION_MESSAGE_EN":"Hello, how are you today?",
   "ICONS_FOLDER":"icons",
 
-  "SCRIPTS_FOLDER":"scripts"
+  "SCRIPTS_FOLDER":"scripts",
+  "SPEECH_AUDIO_FOLDER":"resources/audio/",
+  "MAX_NO_MESSAGE_FOUND_RETRIES": 2
 }

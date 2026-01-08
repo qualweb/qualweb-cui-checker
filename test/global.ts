@@ -65,17 +65,18 @@ interface ACTReport {
     inapplicable: number;
   };
 }
- const APP_CONFIG: {
-  VERSION: string;
-  DIST_FOLDER:string;
-  ICONS_FOLDER:string;
-  RESOURCES_FOLDER:string;
-  RESOURCES_WORDS_PT: string;
-  INITIAL_INTERACTION_MESSAGE_PT:string;
-  INITIAL_INTERACTION_MESSAGE_EN:string;
-  SCRIPTS_FOLDER:string;
+   const APP_CONFIG: {
+    VERSION: string;
+    DIST_FOLDER: string;
+    ICONS_FOLDER: string;
+    RESOURCES_FOLDER: string;
+    RESOURCES_WORDS_PT: string;
+    INITIAL_INTERACTION_MESSAGE_PT: string;
+    INITIAL_INTERACTION_MESSAGE_EN: string;
+    SCRIPTS_FOLDER: string;
+    SPEECH_AUDIO_FOLDER: string;
+    MAX_NO_MESSAGE_FOUND_RETRIES: number;
   };
-
 }
 
 import sinonChrome from 'sinon-chrome';
@@ -89,6 +90,7 @@ import sinonChrome from 'sinon-chrome';
   RESOURCES_WORDS_PT: 'resources/words_pt.json',
   INITIAL_INTERACTION_MESSAGE_PT: 'Olá! Como posso ajudar?',
   INITIAL_INTERACTION_MESSAGE_EN: 'Hello! How can I help you?',
+  MAX_NO_MESSAGE_FOUND_RETRIES: 2,
 };
 (global as any).chrome = sinonChrome;
 //mock window dom

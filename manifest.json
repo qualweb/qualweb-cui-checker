@@ -7,6 +7,19 @@
     "service_worker": "./background.bundle.js"
 
   },
+   "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [ "./scripts/qwPage.js",
+          "./scripts/util.js",
+          "./scripts/act.js",
+          "./scripts/cui.js",
+          "./content.bundle.js",
+          "./scripts/wcag.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
   "options_page": "./options/options.html",
       "icons": {
     "16": "icons/icon-16.png",
@@ -33,12 +46,15 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
 },
-"host_permissions": ["https://api.openai.com/*"],
+"host_permissions": ["https://api.openai.com/*",
+                     "https://api.smith.langchain.com/*"],
   "web_accessible_resources": [
     {
       "resources": [
       "resources/common-words-pt.txt",
-      "icons/icon_settings.svg"],
+      "icons/icon_settings.svg",
+      "resources/*"
+      ],
       "matches": ["http://*/*", "https://*/*"]
     }
   ]
