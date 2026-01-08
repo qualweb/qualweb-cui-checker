@@ -1,23 +1,39 @@
-import InterfaceChatbot from '../detection/InterfaceChatbot';
-import InteractionWorkflow from './InteractionWorkflow';
-import { inputMessage, inputVoiceMessage, sendMessage } from './message-sender';
+import { interruptSignalHandlerWithError } from '../../core/interrupter/signalUtil';
+import ChatbotActions from '../detection/ChatbotActions';
+import { InteractionWorkflowFactory } from '../factories/InteractionWorkflowFactory';
+import { ChatbotElementsFactory } from '../factories/ChatbotElementsFactory';
+import { registerActionHandlers } from './actions/ActionHandlers';
 
-export async function interactWithLLM(port: chrome.runtime.Port, voice: boolean): Promise<void> {
+export async function interactWithLLM(port: chrome.runtime.Port, voice: boolean,selectors: any,signal: AbortSignal): Promise<void> {
+  interruptSignalHandlerWithError(signal);
   // Obtain first messages of chatbot to build context
-  let documentOwner = InterfaceChatbot.getInstance().getOwnerDocument();
+  const instanceChatbotElements = ChatbotElementsFactory.getInstance();
+  instanceChatbotElements.setSelectors(selectors);
+  const chatbotActions = new ChatbotActions(instanceChatbotElements);
 
+
+    console.log('Chatbot elements not loaded yet, waiting to retry...');
+    if(!instanceChatbotElements.checkIfElementsExist()){
+    await chatbotActions.simulateInput('Hello',signal);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    instanceChatbotElements.setSelectors(selectors);
+    }
+
+
+  let documentOwner = instanceChatbotElements.getOwnerDocument();
+  
   let firstMessages: HTMLElement[] = Array.from<HTMLElement>(
-    documentOwner.querySelectorAll(InterfaceChatbot.getInstance().getSelectors().messagesSelector),
+    documentOwner.querySelectorAll(instanceChatbotElements.getSelectors().messagesSelector),
   ).slice(-2);
-
-  // due to pricing of LLM models. Consider clearing chat before interaction or limiting number of messages.
-  // Or fail gracefully and inform user that interaction should be done on a fresh chat.
-  const interaction: InteractionWorkflow = new InteractionWorkflow(
+  console.log('First messages for interaction context:', firstMessages);
+  await InteractionWorkflowFactory.init(
+    chatbotActions,
     firstMessages,
-    voice ? inputVoiceMessage : inputMessage,
-    sendMessage,
+    voice,
     port,
   );
-
-  await interaction.initInteraction();
+  
+  const interactionWorkflow = InteractionWorkflowFactory.getInstance();
+  registerActionHandlers();
+  interactionWorkflow.init();
 }
