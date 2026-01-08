@@ -1,6 +1,6 @@
-import AbstractElementManager from '../AbstractElementManager';
+import AbstractElementManager from './base/AbstractElementManager';
 
-class WindowElementManager extends AbstractElementManager<HTMLElement> {
+class MessagesManager extends AbstractElementManager<HTMLElement> {
   constructor(callBack?: (element: HTMLElement) => void) {
     super();
     this.callBack = callBack;
@@ -10,9 +10,11 @@ class WindowElementManager extends AbstractElementManager<HTMLElement> {
     if (this.containsElement(element)) {
       return false;
     }
+     console.log('Adding element to manager  :', element);
+
     this.addElement(element);
     return true;
   }
 }
 
-export default WindowElementManager;
+export default MessagesManager;

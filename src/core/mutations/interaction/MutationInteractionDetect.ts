@@ -1,21 +1,29 @@
-import { isChatBotMessage, isContainedInSelector, isNodeTypingInfo } from '../../interaction/utils';
-import AbstractMutationManager from '../AbstractMutationManager';
-import ElementFoundManager from '../AbstractElementManager';
-import TimeoutManager from '../TimeoutManager';
-import MessagesManager from '../ElementManager/MessagesManager';
-import InterfaceChatbot from '../../detection/InterfaceChatbot';
+import { isChatBotMessage, isContainedInSelector, isNodeTypingInfo } from '../../../content/lib/utils';
+import AbstractMutationManager from '../base/AbstractMutationManager';
+import TimeoutManager from '../../timeouts/TimeoutManager';
+import AbstractElementManager from '../../elements/trackers/base/AbstractElementManager';
+import ChatbotActions from '../../../content/detection/ChatbotActions';
+import * as ErrorClass from '../../../errors/content/errors.class.content';
 
 // class Responsible for managing mutation observer for messages
 class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
-  elementTracker: ElementFoundManager<HTMLElement>;
+  elementTracker: AbstractElementManager<HTMLElement>;
   isTypingSign: boolean = false;
   selectorMessage: string;
   lastMessageUser: string = '';
-
-  constructor() {
+  signal: AbortSignal;
+  chatbotActions:ChatbotActions;
+  constructor(chatbotActions:ChatbotActions,elementTracker:AbstractElementManager<HTMLElement>, signal: AbortSignal) {
     super();
-    this.elementTracker = new MessagesManager();
-    this.selectorMessage = InterfaceChatbot.getInstance().getMessagesSelector() || '';
+    this.chatbotActions = chatbotActions;
+    this.elementTracker = elementTracker;
+    this.signal = signal;
+    const selectorMessage = this.chatbotActions.getChabotElements().getMessagesSelector();
+
+    this.selectorMessage = selectorMessage;
+    this.setupListeners();
+  }
+  private setupListeners(): void {
     this.on('childList:added', this.handleAddedNodes.bind(this));
     this.on('childList:removed', this.handleRemovedNodes.bind(this));
     this.on('attributes:change', this.handleAttributeChange.bind(this));
@@ -24,16 +32,12 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
   setLastUserMessage(message: string): void {
     this.lastMessageUser = message;
   }
-
-  async init(): Promise<HTMLElement[]> {
-    // reset previous elements from manager
-    this.elementTracker.clear();
+ 
+  public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement[]>): void {
+    this.signal.throwIfAborted();
     this.observer = new MutationObserver(this.mutationCallback);
-    const observedNode: Node | null = InterfaceChatbot.getInstance().getWindowElement();
-    if (!observedNode) {
-      throw new Error('No observed node found');
-    }
-    this.observer.observe(observedNode, {
+
+   this.observer.observe(target, {
       subtree: true,
       characterData: true,
       characterDataOldValue: true,
@@ -41,23 +45,34 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
       attributes: true,
       attributeOldValue: true,
     });
-    this.timeoutManager = new TimeoutManager<void>(() => {
-      this.observer?.disconnect();
-      return Promise.resolve();
-    });
+
+    this.timeoutManager = timeoutManager;
+
+    this.timeoutManager.setup(() => this.disconnect());
+
+  }
+  async init(): Promise<HTMLElement[]> {
+    this.signal.throwIfAborted();
+    if (!this.timeoutManager) {
+      throw new ErrorClass.InstanceNotInitializedError("TimeoutManager not set up.");
+    }
+    // reset previous elements from manager  
+    try {
+    this.elementTracker.clear();
     this.timeoutManager.startTimeout();
 
-    try {
+    const completionPromise = this.waitForObserverDisconnect(this.signal);
       // Wait a bit to avoid capturing old messages
-      await this.waitForObserverDisconnect();
-      this.lastMessageUser = '';
-      if (this.elementTracker.getElements().size === 0) {
-        throw new Error('No element found');
+      const result = await completionPromise;
+      if (result.cancelled) {
+        throw new ErrorClass.CancellationError();
       }
+      this.lastMessageUser = '';
 
       return this.elementTracker.getElementsArray();
     } catch (error) {
-      throw new Error(`Observer failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.cleanup();
+      throw error;
     }
   }
 
@@ -84,11 +99,9 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
       if (removedNode.nodeType == Node.ELEMENT_NODE || removedNode.nodeType == Node.TEXT_NODE) {
         // was typing removed?
         if (isNodeTypingInfo(removedNode as HTMLElement)) {
-          console.log('Detected Removed Typing, starting timeout');
           this.timeoutManager!.startTimeout();
           this.isTypingSign = false;
         } else if (!this.isTypingSign) {
-          console.log('Detected Removed Message, starting timeout');
           this.timeoutManager!.restartTimeout();
         }
       }
@@ -124,14 +137,12 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
     // TODO: Check if is redundant
     if (isContainedInSelector(element, this.selectorMessage)) {
       if (!this.isTypingSign) {
-        console.log('Detected Mutation inside MessageSelector', mutation);
         this.timeoutManager!.restartTimeout();
       }
     }
   }
   handleTypingIfAdded(addedNode: HTMLElement) {
     if (isNodeTypingInfo(addedNode)) {
-      console.log('Detected Typing, stopping timeout');
       this.isTypingSign = true;
       this.timeoutManager!.stopTimeout();
     }
@@ -143,5 +154,14 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
     this.elementTracker.clear();
     this.observer!.disconnect();
   }
+  protected cleanup(): void {
+    try {
+      super.cleanup();
+      this.lastMessageUser = '';
+      this.elementTracker.clear();
+    } catch  {
+      // Ignore cleanup errors
+    }
+}
 }
 export default MutationInteractionDetect;

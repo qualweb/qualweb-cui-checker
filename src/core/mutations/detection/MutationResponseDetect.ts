@@ -1,50 +1,72 @@
-import { findAncestralNodeBeforeContaining } from '../../lib/DomTools';
-import AbstractMutationObserver from '../AbstractMutationManager';
-import ElementFoundManager from '../AbstractElementManager';
-import TimeoutManager from '../TimeoutManager';
-import MessagesManager from '../ElementManager/MessagesManager';
-import { findElementByExactTextContent } from '../../lib/XPathTools';
-
+import { findAncestralNodeBeforeContaining } from '../../../content/lib/DomTools';
+import AbstractMutationObserver from '../base/AbstractMutationManager';
+import ElementFoundManager from '../../elements/trackers/base/AbstractElementManager';
+import TimeoutManager from '../../timeouts/TimeoutManager';
+import MessagesManager from '../../elements/trackers/MessagesManager';
+import { findElementByExactTextContent } from '../../../content/lib/XPathTools';
+import { interruptSignalHandlerWithError } from '../../interrupter/signalUtil';
+import * as ErrorClass from '../../../errors/content/errors.class.content';
 // class Responsible for managing mutation observer for messages
 class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
   elementTracker: ElementFoundManager<HTMLElement>;
   initialText: string;
   ignoreInput: HTMLElement;
   userElement: HTMLElement;
+  signal: AbortSignal;
 
-  constructor(userElement: HTMLElement, ignoreInput: HTMLElement) {
+  constructor(userElement: HTMLElement, ignoreInput: HTMLElement,signal: AbortSignal) {
     super();
+    this.signal = signal;
     this.elementTracker = new MessagesManager();
     this.userElement = userElement;
     this.ignoreInput = ignoreInput;
     this.initialText = APP_CONFIG.INITIAL_INTERACTION_MESSAGE_PT;
-    this.on('childList:added', this.handleAddedNodes.bind(this));
-    this.on('characterData:change', this.handleCharacterDataChange.bind(this));
+    this.setupListeners();
   }
-  async init(target: Node): Promise<HTMLElement> {
-    this.observer = new MutationObserver(this.mutationCallback);
+    private setupListeners(): void {
+      this.on('childList:added', this.handleAddedNodes.bind(this));
+      this.on('characterData:change', this.handleCharacterDataChange.bind(this));
+    }
 
+   public setup(target: Node,timeoutManager: TimeoutManager<HTMLElement>): void {
+    this.signal.throwIfAborted();
+    this.observer = new MutationObserver(this.mutationCallback);
+    
+    // Configuração do observer isolada
     this.observer.observe(target, {
       childList: true,
       subtree: true,
       characterData: true,
     });
-    this.timeoutManager = new TimeoutManager<void>(() => {
-      this.observer?.disconnect();
-      return Promise.resolve();
-    }, 5000);
+
+    this.timeoutManager = timeoutManager;
+
+    this.timeoutManager.setup(() => this.disconnect());
+
+  }
+  async init(): Promise<HTMLElement> {
+    if (!this.timeoutManager) {
+      throw new   ErrorClass.InstanceNotInitializedError("TimeoutManager not set up.");
+    }
+      interruptSignalHandlerWithError(this.signal);
+    try {
+    this.elementTracker.clear();    
     this.timeoutManager.startTimeout();
 
-    try {
+      const completionPromise = this.waitForObserverDisconnect(this.signal);
+
       // Wait a bit to avoid capturing old messages
-      await this.waitForObserverDisconnect();
+      const result = await completionPromise;
+      if (result.cancelled) {
+        throw new ErrorClass.CancellationError();
+      }
       if (this.elementTracker.getElements().size === 0) {
-        throw new Error('No element found');
+        throw new   ErrorClass.ElementNotFoundError('No element found');
       }
 
       return Array.from(this.elementTracker.getElements())[0];
     } catch (error) {
-      throw new Error(`Observer failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 
@@ -75,13 +97,9 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
         AddedNodeDetection.textContent &&
         AddedNodeDetection.textContent.trim() != this.initialText
       ) {
-        // resolve com o nó adicionado
-        console.log('Detetou added Node ', AddedNodeDetection);
         let teste = findAncestralNodeBeforeContaining(AddedNodeDetection, this.initialText);
-        // failsafe
-        console.log('teste Ancestral before ignored element', this.userElement);
+        
         this.elementTracker.add(teste);
-        console.log('mutation addedNode ', AddedNodeDetection);
       }
     }
   }
@@ -92,7 +110,6 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
       mutation.target as HTMLElement,
       this.initialText,
     );
-    console.log('Text changed:', mutation.target.textContent);
     if (ancestralNode.textContent?.trim() != this.initialText) {
       this.elementTracker.add(ancestralNode);
     }
