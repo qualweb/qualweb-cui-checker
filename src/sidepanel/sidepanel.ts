@@ -2,10 +2,20 @@ import { createApp } from 'vue';
 import router from './router';
 import App from './App.vue';
 import store from './store';
+import { handleErrorSidepanel } from '../errors/error.handler.sidepanel';
 
 const app = createApp(App);
 app.use(router);
 app.use(store);
+app.config.errorHandler = (err, instance, info) => {
+  console.log("Global Vue Error:", err);
+
+  const  args = {
+    router: router,
+    error: err as Error,
+  }
+  handleErrorSidepanel(args);
+};
 app.mount('#app');
 
 //* Listen for URL update messages from content scripts */
@@ -29,11 +39,12 @@ function handlerSidepanelMessages(
     let hostname = getHostname(message.url);
 
     if (currentId === message.tabId && currentURL !== hostname) {
-      // if url has changed, close sidebar to avoid inconsistencies
+      // if url has changed, close sidepanel to avoid inconsistencies
       chrome.runtime.sendMessage({
         action: 'CLOSE_TAB_REQUEST',
         tabId: message.tabId,
       });
+      return false;
     } else {
       // if url has not changed, reinject scripts if needed
       chrome.runtime.sendMessage({
@@ -41,13 +52,15 @@ function handlerSidepanelMessages(
         tabId: message.tabId,
         url: currentURL,
       });
+      return false;
     }
   } else if (message.action === 'RESET_SIDEBAR') {
-    // reset sidebar state
+    // reset sidepanel state
     store.commit('SETSELECTORS', {});
     router.replace('/').then(() => {
-      console.log('Sidebar reset to initial route');
+      console.log('sidepanel reset to initial route');
     });
+    return false;
   }
 }
 //* Utility function to extract hostname from URL */
