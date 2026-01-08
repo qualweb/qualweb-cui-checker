@@ -1,9 +1,8 @@
 import { locale_en } from '../../locales/en';
 import { filterResults } from '../../utils/evaluationHelpers';
-import { ChatBotSelectors, Summary } from '../../utils/types';
-
-import { Report } from '../../utils/types';
-import InterfaceChatbot from '../detection/InterfaceChatbot';
+import { ChatBotSelectors, Summary,Report } from '../../utils/types';
+import InterfaceChatbot from '../detection/ChatbotElements';
+import * as ErrorClass from '../../errors/content/errors.class.content'; 
 
 interface QWCUI_Selectors {
   [key: string]: string;
@@ -14,27 +13,21 @@ interface QWCUI_Settings {
 }
 
 export class EvaluationRunner {
-  static instance: EvaluationRunner;
   private summary: Summary;
   private chatbotSummary: Summary;
   public rulesTested: RuleTest[] = [];
   private QWCUI_Selectors: QWCUI_Selectors = {};
-  private urlCommonWords: string;
+  private readonly urlCommonWords: string;
+  private readonly interfaceChatbot: InterfaceChatbot;
 
-  private constructor() {
-    this.urlCommonWords = chrome.runtime.getURL(
-      `${APP_CONFIG.RESOURCES_FOLDER}/${APP_CONFIG.RESOURCES_WORDS_PT}`,
-    );
+  public constructor(interfaceChatbot: InterfaceChatbot,urlCommonWords: string) {
+    this.interfaceChatbot = interfaceChatbot;
+    this.urlCommonWords = urlCommonWords;
+
     this.summary = this.createEmptySummary();
     this.chatbotSummary = this.createEmptySummary();
   }
 
-  public static getInstance(): EvaluationRunner {
-    if (!EvaluationRunner.instance) {
-      EvaluationRunner.instance = new EvaluationRunner();
-    }
-    return EvaluationRunner.instance;
-  }
 
   private createEmptySummary(): Summary {
     return {
@@ -48,7 +41,7 @@ export class EvaluationRunner {
 
   startEvaluation() {
     this.summary = this.createEmptySummary();
-    if (InterfaceChatbot.getInstance().getWindowElement()) {
+    if (this.interfaceChatbot.getWindowElement()) {
       this.chatbotSummary = this.createEmptySummary();
     }
     return [this.summary, this.chatbotSummary];
@@ -96,21 +89,33 @@ export class EvaluationRunner {
   }
   private executeEvalWCAG() {
     const sourceHtml = document.documentElement.outerHTML;
+    try{
     window.wcag = new WCAGTechniquesRunner({ translate: locale_en, fallback: locale_en });
     window.wcag.test({ sourceHtml });
-    return window.wcag.getReport();
+    const report = window.wcag.getReport();
+    return report;
+    } catch{
+      throw new ErrorClass.WCAGEvaluationError('Error executing WCAG Techniques evaluation.');
+    }
   }
 
   private executeEvalACT() {
+    try{
     const sourceHtml = document.documentElement.outerHTML;
+    console.log('Source HTML length for ACT evaluation:', sourceHtml.length);
     window.act = new ACTRulesRunner({ translate: locale_en, fallback: locale_en });
     window.act.test({ sourceHtml });
-    return window.act.getReport();
+    const report = window.act.getReport();
+    return report;
+    } catch{
+      throw new ErrorClass.ACTEvaluationError('Error executing ACT Rules evaluation.');
+    }
   }
 
   async startEvaluationCUI(qualweb_settings: QWCUI_Settings) {
+    try {
     const settingsQualweb: QWCUI_Settings = { locale: qualweb_settings.locale };
-    const selectors: ChatBotSelectors = InterfaceChatbot.getInstance().getSelectors();
+    const selectors: ChatBotSelectors = this.interfaceChatbot.getSelectors();
 
     this.QWCUI_Selectors['QW_CC_WINDOW'] = selectors.windowSelector;
     this.QWCUI_Selectors['QW_CC_DIALOG'] = selectors.dialogSelector;
@@ -124,7 +129,10 @@ export class EvaluationRunner {
     this.addValuesToSummary(cuiResult);
 
     return this.filterResults(cuiResult);
+  } catch {
+    throw new ErrorClass.CUIEvaluationError('Error executing CUI evaluation.');
   }
+}
 
   private addValuesToSummary(report: Report) {
     this.summary.passed += report.metadata.passed;
@@ -140,7 +148,7 @@ export class EvaluationRunner {
   }
   private filterResults(results: CUIChecksReport | ACTReport) {
     let result = results.assertions;
-    const windowElement = InterfaceChatbot.getInstance().getWindowElement();
+    const windowElement = this.interfaceChatbot.getWindowElement();
     let chatbotResult;
 
     if (windowElement) {
@@ -178,5 +186,12 @@ export class EvaluationRunner {
     console.log('geral', this.summary);
     console.log('chatbot', this.chatbotSummary);
     return [this.summary, this.chatbotSummary];
+  }
+  cleanUp() {
+
+    this.rulesTested = [];
+    this.QWCUI_Selectors = {};
+    this.summary = this.createEmptySummary();
+    this.chatbotSummary = this.createEmptySummary();
   }
 }

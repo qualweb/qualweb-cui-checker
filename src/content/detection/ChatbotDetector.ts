@@ -1,6 +1,6 @@
 import { showMessage } from '../../utils/helpers';
-import { ChatBotSelectors } from '../../utils/types';
-import { ChatbotInputElement } from '../interaction/message-sender';
+import { ChatBotSelectors,ChatbotInputElement} from '../../utils/types';
+import* as Error from "../../errors/content/errors.class.content";
 import {
   findLowestCommonAncestorDOM,
   findDeepestNodeWithoutSibling,
@@ -10,154 +10,214 @@ import {
   getIframeSelector,
 } from '../lib/DomTools';
 import { findMicrophoneButton } from '../lib/XPathTools';
-import { setGreen, unsetGreen } from '../lib/visualHelpers';
-import AbstractMutationObserver from '../Mutations/AbstractMutationManager';
-import MutationChatbotDetect from '../Mutations/Detection/MutationChatbotDetect';
-import MutationResponseDetect from '../Mutations/Detection/MutationResponseDetect';
-import InterfaceChatbot from './InterfaceChatbot';
+import AbstractMutationObserver from '../../core/mutations/base/AbstractMutationManager';
+import MutationChatbotDetect from '../../core/mutations/detection/MutationChatbotDetect';
+import MutationResponseDetect from '../../core/mutations/detection/MutationResponseDetect';
+import { interruptSignalHandlerWithError } from '../../core/interrupter/signalUtil';
+import InterfaceChatbot from './ChatbotElements';
+import ChatbotActions from './ChatbotActions';
+import MessagesManager from '../../core/elements/trackers/MessagesManager';
+import TimeoutManager from '../../core/timeouts/TimeoutManager';
+import { DialogNotFoundError, InputNotFoundError, WindowNotFoundError } from '../../errors/content/errors.class.content';
 
-interface ChatbotElementsDetected {
-  iframeSelector?: string;
-  windowElement: HTMLElement | null;
-  inputElement: ChatbotInputElement | null;
-  chatbotResponseElements: HTMLElement | null;
-  dialogElement: HTMLElement | null;
-  microphoneElement: HTMLElement | null;
-  documentOwner: Document;
-}
 
 /** Class represents the current chatbot detection process */
 class ChatbotDetector {
-  private static _instance: ChatbotDetector;
-  private currentElementVerification: HTMLElement[] | HTMLElement | null = null;
-  private currentMutationManager: AbstractMutationObserver<any> | null = null;
 
-  private constructor() {}
-  public static getInstance(): ChatbotDetector {
-    if (!ChatbotDetector._instance) {
-      ChatbotDetector._instance = new ChatbotDetector();
-    }
-    return ChatbotDetector._instance;
+  private currentMutationManager: AbstractMutationObserver<any> | null = null;
+  private readonly interfaceChatbot: InterfaceChatbot;
+  private abortController: AbortController = new AbortController();
+  constructor(interfaceChatbot: InterfaceChatbot) {
+    this.interfaceChatbot = interfaceChatbot;
   }
 
-  async detect(userMessage: string): Promise<ChatBotSelectors> {
-    const detectedElements = await this.initDetection(userMessage);
-    // get selectors from detected elements and load interface
-    const selectors = this.buildSelectors(detectedElements);
+  async detect(userMessage: string, signal: AbortSignal): Promise<ChatBotSelectors> {
+    const combinedSignal = AbortSignal.any([this.abortController.signal, signal]);
+   
+    interruptSignalHandlerWithError(combinedSignal);
 
-    InterfaceChatbot.getInstance().loadInterface(selectors);
+
+    const selectors = await this.initDetection(userMessage,signal);
+
+  
     return selectors;
   }
+  /**
+ * Aguarda até que o elemento alvo pare de sofrer mutações por um período 'idle'
+ */
+async waitUntilStable(
+  target: Node,
+  idleTime = 1000,
+  maxWait = 2000
+): Promise<void> {
+  return new Promise((resolve) => {
+    let idleTimeout: NodeJS.Timeout;
+    let mutationCount = 0;
+    let checkInterval: NodeJS.Timeout;
+    const maxTimeout = setTimeout(cleanup, maxWait);
 
-  async correct(selector: string, userMessage: string): Promise<string> {
-    const chatBotSelectorKeys = [
-      'inputSelector',
-      'messagesSelector',
-      'dialogSelector',
-      'microphoneSelector',
-      'windowSelector',
-    ];
-    if (!this.currentElementVerification) {
-      throw new Error('No current verification element found.');
+    const observer = new MutationObserver(() => {
+      mutationCount++;
+      console.log('Mutation detected, resetting idle timer');
+      clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(cleanup, idleTime);
+    });
+
+    function cleanup() {
+      observer.disconnect();
+      clearTimeout(idleTimeout);
+      clearTimeout(maxTimeout);
+      clearInterval(checkInterval);
+      resolve();
     }
-    if (!chatBotSelectorKeys.includes(selector)) {
-      throw new Error('Invalid selector key provided.');
-    }
-    const elements = Array.isArray(this.currentElementVerification)
-      ? this.currentElementVerification
-      : [this.currentElementVerification];
-    elements.forEach((el: HTMLElement) => unsetGreen(el));
 
-    const detectedElements = await this.initDetection(userMessage);
-    const selectorToElementMap: Record<string, HTMLElement | HTMLElement[] | null> = {
-      inputSelector: detectedElements.inputElement,
-      messagesSelector: detectedElements.chatbotResponseElements,
-      dialogSelector: detectedElements.dialogElement,
-      microphoneSelector: detectedElements.microphoneElement,
-      windowSelector: detectedElements.windowElement,
-    };
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+      attributes: true
+    });
 
-    const element = selectorToElementMap[selector];
-    let newSelector = getGroupSelectorRelative(element);
-    this.currentElementVerification = element;
-    InterfaceChatbot.getInstance().updateSelector(selector as keyof ChatBotSelectors, newSelector);
-    setGreen(element as HTMLElement);
+    // Verifica a cada 200ms se houve mutações
+    let lastMutationCount = 0;
+    checkInterval = setInterval(() => {
+      // Se o contador não mudou, significa que não há mutações ativas
+      if (mutationCount === lastMutationCount) {
+        // Se já passou tempo suficiente sem mutações, considera estável
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(cleanup, idleTime);
+      }
+      lastMutationCount = mutationCount;
+    }, 200);
 
-    return newSelector;
+    // Timer inicial: se não houver mutações neste período, considera loaded
+    idleTimeout = setTimeout(cleanup, idleTime);
+  });
+}
+  async initDetection(userMessage: string, signal: AbortSignal): Promise<ChatBotSelectors> {
+    const combinedSignal = AbortSignal.any([this.abortController.signal, signal]);
+    await this.waitUntilStable(document.body);
+    // Handle abort signal 
+    interruptSignalHandlerWithError(combinedSignal);
+
+    const inputElement = this.detectInputElement();
+
+    this.detectIframeElement(inputElement);
+    const messageSentElement = await this.detectMessagesSentElement(inputElement, userMessage, signal);
+    const windowElement = await this.detectWindowElement(inputElement, messageSentElement);
+
+    const dialogElement = this.detectDialogElement(windowElement, messageSentElement, inputElement);
+    //TODO: Problem with common Node element being outdated safer to pass only the selector
+
+    await this.detectAssistantResponseElements(messageSentElement, inputElement, dialogElement, combinedSignal);
+
+    this.detectMicrophoneElement(inputElement);
+
+    return this.interfaceChatbot.getSelectors();
   }
 
-  async initDetection(userMessage: string): Promise<ChatbotElementsDetected> {
-    const inputElement = await detectChatbotInputCrossOrigin();
+  private detectMicrophoneElement(inputElement: ChatbotInputElement) {
+    const microphoneElement = findMicrophoneButton(inputElement.ownerDocument.body);
+    if (microphoneElement) {
+      const microphoneSelector = getGroupSelectorRelative(microphoneElement);
+      this.interfaceChatbot.updateSelector('microphoneSelector', microphoneSelector || '');
+      console.log('Microphone selector for chatbot detection:', microphoneSelector);
+    }
+  }
+
+  private async detectAssistantResponseElements(messageSentElement: HTMLElement, inputElement: ChatbotInputElement, dialogElement: any, combinedSignal: AbortSignal) {
+    const responseElement = await this.detectChatbotResponse(
+      messageSentElement,
+      inputElement,
+      dialogElement,
+      combinedSignal
+    );
+    if(!responseElement) throw new Error.ChatbotNotDetectedError('No response element detected');
+    const messagesSelector = getGroupSelectorRelative(responseElement);
+    this.interfaceChatbot.updateSelector('messagesSelector', messagesSelector || '');
+    console.log('Messages selector for chatbot detection:', messagesSelector);
+  }
+
+  private detectDialogElement(windowElement: Element, messageSent: HTMLElement, inputElement: ChatbotInputElement) {
+    const targetWindow = findDeepestNodeWithoutSibling(windowElement, messageSent, inputElement);
+    const scrollableChat = findScrollable(targetWindow) || targetWindow;
+    if (!scrollableChat) {
+      throw new DialogNotFoundError('No dialog element found');
+    }
+    const dialogSelector = getGroupSelectorRelative(scrollableChat);
+    this.interfaceChatbot.updateSelector('dialogSelector', dialogSelector || '');
+    console.log('Dialog selector for chatbot detection:', dialogSelector);
+    return scrollableChat;
+  }
+
+  private async detectWindowElement(inputElement: ChatbotInputElement, messageSent: HTMLElement) {
+    let windowElement : Element | null = null;
+    const selectorMessage = getGroupSelectorRelative(messageSent);
+
+      
+    windowElement = findLowestCommonAncestorDOM(inputElement, messageSent);
+    if (windowElement === null) {
+      const message = document.querySelector<Element>(selectorMessage);
+      const inputSelector = getGroupSelectorRelative(inputElement);
+      const selectorInput = document.querySelector<Element>(inputSelector);
+      if (!message || !selectorInput) {
+        throw new WindowNotFoundError('Input or message element not found in DOM.');
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      windowElement = findLowestCommonAncestorDOM(selectorInput, message);
+    }
+   
+    if (windowElement === null) {
+      throw new WindowNotFoundError('No common ancestor found between input and user message.');
+    }
+    const windowSelector = getGroupSelectorRelative(windowElement);
+    this.interfaceChatbot.updateSelector('windowSelector', windowSelector || '');
+    console.log('Window selector for chatbot detection:', windowSelector);
+    return windowElement;
+  }
+
+  private async detectMessagesSentElement(inputElement: ChatbotInputElement, userMessage: string, signal: AbortSignal) {
+    const messageSent = await this.detectUserMessage(inputElement, userMessage, signal);
+    console.log('User message element detected:', messageSent);
+    return messageSent;
+  }
+
+  private detectIframeElement(inputElement: ChatbotInputElement) {
+    const iframeSelector = getIframeSelector(inputElement);
+    this.interfaceChatbot.updateSelector('iframeSelector', iframeSelector || '');
+     console.log('Iframe selector for chatbot detection:', iframeSelector);
+    return iframeSelector;
+  }
+
+  private detectInputElement() {
+    const inputElement = detectChatbotInputCrossOrigin();
+    console.log('Detected input element for chatbot detection:', inputElement);
     if (!inputElement) {
       showMessage('No input element found for chatbot detection.');
-      throw new Error('No input element found');
+      throw new InputNotFoundError('No input element found');
     }
     console.log('Input element for chatbot detection:', inputElement);
     // Strategy to obtain chatbot selectors
-    InterfaceChatbot.getInstance().setInputElement(inputElement);
-
-    const iframeSelector = getIframeSelector(inputElement);
-    console.log('Iframe selector for chatbot detection:', iframeSelector);
-
-    const messageSent = await this.detectUserMessage(inputElement, userMessage);
-    console.log('User message element detected:', messageSent);
-
-    const commonNode = findLowestCommonAncestorDOM(inputElement, messageSent);
-    console.log('Common ancestor node detected:', commonNode);
-    if (commonNode === null) {
-      throw new Error('No common ancestor found between input and user message.');
-    }
-    const targetWindow = findDeepestNodeWithoutSibling(commonNode, messageSent, inputElement);
-    const scrollableChat = findScrollable(targetWindow) || targetWindow;
-
-    const chatbotResponseElements = await this.detectChatbotResponse(
-      messageSent,
-      inputElement,
-      scrollableChat,
-    );
-
-    const microphoneElement = findMicrophoneButton(inputElement.ownerDocument.body);
-
-    const chatbotDetected: ChatbotElementsDetected = {
-      iframeSelector: iframeSelector || undefined,
-      windowElement: commonNode as HTMLElement,
-      inputElement: inputElement,
-      chatbotResponseElements: chatbotResponseElements,
-      dialogElement: scrollableChat as HTMLElement,
-      microphoneElement: microphoneElement as HTMLElement | null,
-      documentOwner: inputElement.ownerDocument,
-    };
-
-    return chatbotDetected;
+    // get Selector of input element
+    const inputSelector = getGroupSelectorRelative(inputElement);
+    this.interfaceChatbot.updateSelector('inputSelector', inputSelector || '');
+    return inputElement;
   }
-
-  private buildSelectors(detectedElements: ChatbotElementsDetected): ChatBotSelectors {
-    return {
-      iframeSelector: detectedElements.iframeSelector || undefined,
-      inputSelector: detectedElements.inputElement
-        ? getGroupSelectorRelative(detectedElements.inputElement) || ''
-        : '',
-      messagesSelector: getGroupSelectorRelative(detectedElements.chatbotResponseElements) || '',
-      dialogSelector: detectedElements.dialogElement
-        ? getGroupSelectorRelative(detectedElements.dialogElement) || ''
-        : '',
-      microphoneSelector: detectedElements.microphoneElement
-        ? getGroupSelectorRelative(detectedElements.microphoneElement) || undefined
-        : undefined,
-      windowSelector: detectedElements.windowElement
-        ? getGroupSelectorRelative(detectedElements.windowElement) || ''
-        : '',
-    };
-  }
-
+  
   private async detectUserMessage(
     inputElement: ChatbotInputElement,
     userMessage: string,
+    signal: AbortSignal,
   ): Promise<HTMLElement> {
-    this.currentMutationManager = new MutationChatbotDetect(inputElement, userMessage);
-    const messageSent = await this.currentMutationManager.init(inputElement.ownerDocument.body);
+    
+    interruptSignalHandlerWithError(signal);
+    const actions = new ChatbotActions(this.interfaceChatbot);
+    this.currentMutationManager = new MutationChatbotDetect(actions,new MessagesManager(), inputElement, userMessage,signal);
+    // TODO remove hardcoded timeout
+    this.currentMutationManager.setup(inputElement.ownerDocument.body,new TimeoutManager<HTMLElement>(5000));
+    const messageSent = await this.currentMutationManager.init();
+    this.currentMutationManager = null;
     if (!messageSent) {
-      throw new Error('Added message not found');
+      throw new Error.ChatbotNotDetectedError('Added message not found');
     }
     return messageSent;
   }
@@ -166,62 +226,31 @@ class ChatbotDetector {
     messageSent: HTMLElement,
     inputElement: ChatbotInputElement,
     scrollableChat: HTMLElement,
+    signal: AbortSignal,
   ): Promise<HTMLElement> {
-    this.currentMutationManager = new MutationResponseDetect(messageSent, inputElement);
-    const response = await this.currentMutationManager.init(scrollableChat);
+    const combinedSignal = AbortSignal.any([this.abortController.signal, signal]);
+   interruptSignalHandlerWithError(combinedSignal);
+
+    console.log('Detecting chatbot response...');
+    this.currentMutationManager = new MutationResponseDetect(messageSent, inputElement,combinedSignal);
+    // TODO remove hardcoded timeout
+    this.currentMutationManager.setup(scrollableChat,new TimeoutManager<HTMLElement>(5000));
+    const response = await this.currentMutationManager.init();
+    this.currentMutationManager = null;
+    console.log('Chatbot response detected:', response);
     if (response === undefined) {
-      throw new Error('No response found');
+      throw new Error.ChatbotNotDetectedError('No response found');
     }
     return response;
   }
 
-  startConfirmation(elementName: string): void {
-    const elementGetters: Record<string, () => HTMLElement | HTMLElement[] | null> = {
-      windowSelector: () => InterfaceChatbot.getInstance().getWindowElement(),
-      inputSelector: () => InterfaceChatbot.getInstance().getInputElement(),
-      dialogSelector: () => InterfaceChatbot.getInstance().getDialogElement(),
-      microphoneSelector: () => InterfaceChatbot.getInstance().getMicrophoneElement(),
-      messagesSelector: () =>
-        Array.from(
-          InterfaceChatbot.getInstance()
-            .getOwnerDocument()
-            .querySelectorAll<HTMLElement>(InterfaceChatbot.getInstance().getMessagesSelector()),
-        ),
-    };
-
-    const element = elementGetters[elementName]?.();
-    if (!element) return;
-
-    this.currentElementVerification = element;
-    const elements = Array.isArray(element) ? element : [element];
-    if (!elementName.includes('windowSelector')) {
-      elements.forEach((el) =>
-        setGreen(el, InterfaceChatbot.getInstance().getWindowElement() as HTMLElement),
-      );
-    } else {
-      setGreen(element as HTMLElement);
-    }
-  }
-
-  endConfirmation() {
-    if (!this.currentElementVerification) return;
-
-    const elements = Array.isArray(this.currentElementVerification)
-      ? this.currentElementVerification
-      : [this.currentElementVerification];
-    elements.forEach((el) => unsetGreen(el));
-    this.currentElementVerification = null;
-  }
-
-  reset(): void {
-    InterfaceChatbot.getInstance().clearObject();
-    this.currentElementVerification = null;
-  }
-
   cancelDetection(): void {
+    this.abortController.abort();
     this.currentMutationManager?.cancelMutationObserver();
-    this.reset();
+    this.abortController = new AbortController();
   }
+
 }
 
 export default ChatbotDetector;
+
