@@ -1,12 +1,13 @@
 import { expect } from 'chai';
 import { describe, it, beforeEach, afterEach } from 'mocha';
 import { JSDOM } from 'jsdom';
-import InterfaceChatbot from '../src/content/detection/InterfaceChatbot';
+import ChatbotElements from '../src/content/detection/ChatbotElements';
+import {ChatbotElementsFactory} from '../src/content/factories/ChatbotElementsFactory';
 import { ChatBotSelectors } from '../src/utils/types';
 
 describe('InterfaceChatbot', function() {
 
-    let chatbot: InterfaceChatbot;
+    let chatbot: ChatbotElements;
     let dom: JSDOM;
 
     beforeEach(function() {
@@ -65,25 +66,20 @@ describe('InterfaceChatbot', function() {
     });
 
     afterEach(() => {
+        ChatbotElementsFactory.destroy();
+ 
         chatbot = null as any;
-
+        
         delete (global as any).document;
         delete (global as any).window;
     });
 
     describe('Initiating Object', () => {
-        it('should initialize with default values', () => {
-            // act
-            chatbot = InterfaceChatbot.getInstance();
-            //assert
-            expect(chatbot.getWindowElement()).to.be.null;
-            expect(chatbot.getMessagesSelector()).to.equal('');
-            expect(chatbot.getDialogElement()).to.be.null;
-        });
 
         it('should initialize selectors with empty strings', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const selectors = chatbot.getSelectors();
 
             //assert
@@ -97,7 +93,8 @@ describe('InterfaceChatbot', function() {
     describe('Loading elements from chatbot Interface', () => {
         it('should set selectors and initiate elements', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -105,7 +102,7 @@ describe('InterfaceChatbot', function() {
                 windowSelector: '#window',
             };
 
-            chatbot.loadInterface(testSelectors);
+            chatbot.setSelectors(testSelectors);
 
             //assert
             expect(chatbot.getSelectors()).to.deep.equal(testSelectors);
@@ -114,32 +111,14 @@ describe('InterfaceChatbot', function() {
             expect(chatbot.getDialogElement()).to.not.be.null;
             expect(chatbot.getWindowElement()).to.not.be.null;
         });
-          it('iframe - should set selectors and initiate elements', () => {
-            // act
-            chatbot = InterfaceChatbot.getInstance();
-            const testSelectors: ChatBotSelectors = {
-                iframeSelector: '#myFrame',
-                inputSelector: '#input',
-                messagesSelector: '.messages',
-                dialogSelector: '#dialog',
-                windowSelector: '#window',
-            };
 
-            chatbot.loadInterface(testSelectors);
-
-            //assert
-            expect(chatbot.getSelectors()).to.deep.equal(testSelectors);
-            expect(chatbot.getInputElement()).to.not.be.null;
-            expect(chatbot.getMessagesSelector()).to.not.be.empty;
-            expect(chatbot.getDialogElement()).to.not.be.null;
-            expect(chatbot.getWindowElement()).to.not.be.null;
-        });
     });
 
     describe('isElementsLoaded', () => {
         it('should return true when all elements are loaded', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -147,14 +126,15 @@ describe('InterfaceChatbot', function() {
                 windowSelector: '#window'
             };
 
-            chatbot.loadInterface(testSelectors);
+            chatbot.setSelectors(testSelectors);
 
             //assert
-            expect(chatbot.isElementsLoaded()).to.be.true;
+            expect(chatbot.checkIfElementsExist()).to.be.true;
         });
              it('should return true when all elements are loaded with mic', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const testSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -163,16 +143,17 @@ describe('InterfaceChatbot', function() {
                 microphoneSelector: '#mic'
             };
 
-            chatbot.loadInterface(testSelectors);
+            chatbot.setSelectors(testSelectors);
             //assert
-            expect(chatbot.isElementsLoaded()).to.be.true;
+            expect(chatbot.checkIfElementsExist()).to.be.true;
         });
     });
 
     describe('getters and setters', () => {
         it('should get and set selectors', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const newSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -181,14 +162,15 @@ describe('InterfaceChatbot', function() {
                 microphoneSelector: '#mic'
             };
 
-            chatbot.loadInterface(newSelectors);
+            chatbot.setSelectors(newSelectors);
             
             //assert
             expect(chatbot.getSelectors()).to.deep.equal(newSelectors);
         });
          it('should get inputElement', () => {
             // act
-            chatbot = InterfaceChatbot.getInstance();
+            ChatbotElementsFactory.init();
+            chatbot = ChatbotElementsFactory.getInstance();
             const newSelectors: ChatBotSelectors = {
                 inputSelector: '#input',
                 messagesSelector: '.messages',
@@ -197,42 +179,11 @@ describe('InterfaceChatbot', function() {
                 microphoneSelector: '#mic'
             };
 
-            chatbot.loadInterface(newSelectors);
+            chatbot.setSelectors(newSelectors);
             
             //assert
             expect(chatbot.getInputElement()).to.be.not.null;
         });
 
-
-    });
-
-    describe('clearObject', () => {
-        it('should reset all properties to initial state', () => {
-
-            // act
-            chatbot = InterfaceChatbot.getInstance();
-            const testSelectors: ChatBotSelectors = {
-                  inputSelector: '#input',
-                messagesSelector: '.messages',
-                dialogSelector: '#dialog',
-                windowSelector: '#window',
-                microphoneSelector: '#mic'
-            };
-
-            chatbot.loadInterface(testSelectors);
-            chatbot.clearObject();
-            
-            //assert
-            expect(chatbot.getWindowElement()).to.be.null;
-            expect(chatbot.getInputElement()).to.be.null;
-            expect(chatbot.getMessagesSelector()).to.equal('');
-            expect(chatbot.getDialogElement()).to.be.null;
-            expect(chatbot.getSelectors()).to.deep.equal({
-                inputSelector: '',
-                messagesSelector: '',
-                dialogSelector: '',
-                windowSelector: ''
-            });
-        });
     });
 });
