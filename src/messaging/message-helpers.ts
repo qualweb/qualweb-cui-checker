@@ -55,10 +55,6 @@ export function tryScriptReinjectionAndRetryResponse(
              responseHandler.sendResponse(responseRetry);
           }
         });
-      } else {
-
-        throw new Error("Falha na reinjeção de scripts: Contexto inválido.");
-      
       }
     })
     .catch((error) => {
