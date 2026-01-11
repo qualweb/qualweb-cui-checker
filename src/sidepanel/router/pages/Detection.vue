@@ -27,7 +27,7 @@ import ActionPrompt from '../../components/ActionPrompt.vue';
 import Loading from '../../components/Loading.vue';
 import ButtonStyled from '../../components/ButtonStyled.vue';
 import { STATUS } from '../../../messaging/message-types';
-import { handleErrorResponseSidepanel, handleErrorSidepanel } from '../../../errors/error.handler.sidepanel';
+import { defaultErrorHandler, handleErrorSidepanel } from '../../../errors/error.handler.sidepanel';
 
 export default {
   name: 'detectingPageChatbot',
@@ -146,7 +146,7 @@ export default {
     async cancelManualSelection() {
       const result = await cancelManualSelectMic(this.resultSelectors, this.getTabId);
       if (!result || result.status === STATUS.ERROR) {
-       handleErrorResponseSidepanel({ error: result, router: this.$router });
+       defaultErrorHandler({ error: result, router: this.$router });
        return;
       }
       this.isUserManualSelecting = false;
@@ -191,7 +191,7 @@ export default {
         if (this.workflow[this.currentStep].nameElement != null) {
         const result = await endVerificationElement(this.resultSelectors,this.workflow[this.currentStep].nameElement, this.getTabId);
         if (!result || result.status === STATUS.ERROR) {
-          handleErrorResponseSidepanel({ error: result, router: this.$router });
+          defaultErrorHandler({ error: result, router: this.$router });
           return;
         }
         }
@@ -230,7 +230,7 @@ export default {
       this.isUserManualSelecting = true;
       const result = await manualSelectMic(this.resultSelectors, this.getTabId);
       if (!result || result.status === STATUS.ERROR) {
-       handleErrorResponseSidepanel({ error: result, router: this.$router });
+       defaultErrorHandler({ error: result, router: this.$router });
        return;
       }
       this.isUserManualSelecting = false;
@@ -267,7 +267,7 @@ export default {
         if (!response || response.status === STATUS.ERROR) {
             this.state = 'Error during verification of corrected element';
             new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
-            handleErrorResponseSidepanel({ error: response, router: this.$router });
+            defaultErrorHandler({ error: response, router: this.$router });
           });
 
         }
@@ -289,9 +289,14 @@ export default {
       const procedureResult = await startPageChatbotProcedure(this.getTabId);
       console.log('Chatbot detection result:', procedureResult);
       if (!procedureResult || procedureResult.status === STATUS.ERROR) {
-           await handleErrorResponseSidepanel({ error: procedureResult, router: this.$router });
+           await defaultErrorHandler({ error: procedureResult, router: this.$router });
             return;
         }
+      if(procedureResult.code === '"CANCELLED_DETECTION"'){
+          this.$router.go(-1);
+          return;
+      }
+        console.log('Detected selectors:', procedureResult);
       this.resultSelectors = procedureResult.data.selectors;
 
       this.state = 'Chatbot Detected';
@@ -303,7 +308,7 @@ export default {
         if (!verificationRequest || verificationRequest.status === STATUS.ERROR) {
             this.state = 'Error during verification';
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            await handleErrorResponseSidepanel({ error: verificationRequest, router: this.$router });
+            await defaultErrorHandler({ error: verificationRequest, router: this.$router });
             return;
         }
      
@@ -315,8 +320,11 @@ export default {
       this.updatePrompt();
     } catch (error) {
       this.state = 'Error during chatbot detection';
+      const errorArgs = { error: error, router: this.$router };
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      throw error;
+      console.log('Handling error in Detection.vue:', error);
+      handleErrorSidepanel(errorArgs);
+
     }
   },
 };
