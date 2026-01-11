@@ -1,20 +1,23 @@
 import * as types from './mutation-types';
+
 function maskApiKey(apiKey, leadingChars = 10, trailingChars = 4) {
-  if (!apiKey || apiKey.length < leadingChars + trailingChars) {
-    throw new Error('Invalid Key for Mapping');
+  if (!apiKey) return '';
+
+  
+  if (apiKey.length < leadingChars + trailingChars) {
+
+    return apiKey.length > 6 
+      ? apiKey.substring(0, 2) + '***' + apiKey.slice(-2)
+      : '***';
   }
 
   const start = apiKey.substring(0, leadingChars);
-
   const end = apiKey.substring(apiKey.length - trailingChars);
-
   const maskLength = apiKey.length - leadingChars - trailingChars;
-
   const mask = '*'.repeat(maskLength);
 
   return start + mask + end;
 }
-
 export const loadOptions = async function ({ commit }, modules) {
   const getStorage = (key) =>
     new Promise((resolve) => {
