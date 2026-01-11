@@ -38,7 +38,7 @@ async function sendActionToBackground(action, payload = {},) {
           return reject(chrome.runtime.lastError);
         }
         if (response?.status === 'error') {
-          return reject(new Error(response.message));
+          return reject(response);
         }
         resolve(response);
       });
