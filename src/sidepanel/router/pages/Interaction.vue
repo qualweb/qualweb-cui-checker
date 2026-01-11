@@ -3,13 +3,13 @@
     <h1>Interaction</h1>
     <Loading :message="state">
       <template v-slot:additional-info>
-        <p class="state">{{ isCanceled ? '' : rule }}</p>
-        <p class="state">{{ isCanceled ? '' : title }}</p>
+        <p class="state">{{ isCanceled || isSkipping ? '' : rule }}</p>
+        <p class="state">{{ isCanceled || isSkipping ? '' : title }}</p>
         <p class="state">{{ isCanceled ? 'Canceling...' : '' }}</p>
       </template>
       <template v-slot:buttons>
         <div class="button-container">
-          <ButtonStyled @click="skipObjective" :disabled="isCanceled" label="Skip Rule" />
+          <ButtonStyled @click="skipObjective" :disabled="isCanceled || isSkipping" label="Skip Rule" />
           <ButtonStyled
             :primary="false"
             @click="cancelInteraction"
@@ -28,8 +28,7 @@ import Loading from '../../components/Loading.vue';
 import ButtonStyled from '../../components/ButtonStyled.vue';
 import { STATUS } from '../../../messaging/message-types';
 import { ACTION_PORT } from '../../../background/action-type';
-import { APIError,  handleErrorResponseSidepanel, InteractionListenerFailedError, InteractionPortConnectionError } from '../../../errors/error.handler.sidepanel';
-import { send } from 'process';
+import { APIError,  defaultErrorHandler, InteractionListenerFailedError, InteractionPortConnectionError } from '../../../errors/error.handler.sidepanel';
 
 export default {
   name: 'Interaction',
@@ -55,14 +54,18 @@ export default {
     },
     async skipObjective() {
       this.state = 'Skipping objective...';
+      this.isSkipping = true;
       const result = await skipObjectiveInteraction(this.getTabId);
+      console.log('Result after skipping objective:', result);
+      this.isSkipping = false;
       if(result && result.status === STATUS.ERROR){
         const disconnect = () => {
           this._port.disconnect();
         };
-        handleErrorResponseSidepanel({ error: result, callback: disconnect, router: this.$router });
+        defaultErrorHandler({ error: result, callback: disconnect, router: this.$router });
       }
       this.state = 'Objective skipped.';
+     
     },
   },
   data() {
@@ -71,6 +74,7 @@ export default {
       rule: '',
       title: '',
       isCanceled: false,
+      isSkipping: false,
     };
   },
   async mounted() {
@@ -110,7 +114,7 @@ export default {
               
             };
    
-           handleErrorResponseSidepanel({ error: response, storeDispatchCallback: dispatchOnCriticalError, callback: disconnectTimeout, router: this.$router });
+           defaultErrorHandler({ error: response, storeDispatchCallback: dispatchOnCriticalError, callback: disconnectTimeout, router: this.$router });
         
         }
       }).catch(async (error) => {
@@ -131,11 +135,12 @@ export default {
 
       this.state = 'Error: ' + msg.message;
       
-      handleErrorResponseSidepanel({ error: msg, storeDispatchCallback: dispatchOnCriticalError, router: this.$router });
+      defaultErrorHandler({ error: msg, storeDispatchCallback: dispatchOnCriticalError, router: this.$router });
       this._port.disconnect();
       return;
     } else {
-      const { rule, title, status } = msg.data;
+      console.log('DEBUG - Message received after skip:', msg, "state of flags:", this.isSkipping, this.isCanceled," content of rule:", this.rule, " title:", this.title, " state:", this.state);
+      const { rule = '', title = '', status = '' } = msg.data || {};
       this.rule = rule;
       this.title = title;
       this.state = status;
