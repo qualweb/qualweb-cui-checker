@@ -13,7 +13,6 @@ export interface NodeState {
   result?: IQWGraphOutput;
 }
 export class GraphEventProcessor {
-  // Extrai a lógica que tinhas no handleChainStart/End
 public static parse(step: any): GraphAction | null {
     // if event is an interrupt
     if (step.event === 'interrupt' || INTERRUPT_NODE_NAMES.includes(step.name)) {
@@ -32,7 +31,6 @@ public static parse(step: any): GraphAction | null {
 
     // if event is end of a node
     if (step.event === 'on_chain_end') {
-      // Caso específico do Objective Assigner
       if (step.name === 'objective_assigner' && step.data?.output?.currentObjective) {
         const nodeStatus: NodeState = {
           node: step.name,

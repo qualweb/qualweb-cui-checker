@@ -11,6 +11,7 @@ import { LLM_Settings } from '../../utils/types';
 import { InteractionLock } from './InteractionLock';
 import {  ACTION_PORT } from '../../background/action-type';
 import { AgentOrchestratorFactory } from './AgentOrchestratorFactory';
+import { CancellationError } from '../../errors/background/errors.class.background';
 
 
 interface StreamEvent {
@@ -24,6 +25,7 @@ class InteractionManager {
   private readonly state: InteractionState;
   private graphExecution: any = null; 
   private settings: LLM_Settings | null = null;
+  private skipResolver?: () => void;
 
    constructor(ports: PortCommunication, state: InteractionState) {
     this.portCommunication = ports;
@@ -39,56 +41,116 @@ class InteractionManager {
     this.graphExecution = AgentOrchestratorFactory.create(this.settings,isSpeechTestsEnabled).getGraph();
   }
 
+  async streamEvents(input: TGraphInput, config: RunnableConfig): Promise<IQWGraphOutput> {
+    if (this.state.waitingOnStream) {
+       console.warn("[Graph] Stream already in progress. Aborting previous...");
+       this.state.controller?.abort(); 
+       this.state.waitingOnStream = false;
+    }
 
-async streamEvents(input: TGraphInput, config: RunnableConfig): Promise<IQWGraphOutput> {
-  try {
+    try {
+      this.validateAgentLoaded();
+      
+      const signal = this.state.createNewController();
+      this.state.waitingOnStream = true;
+
+      let stream = await this.initializeStream(input, config, signal);
+
+      let eventStream = await this.processStreamLoop(stream, config, signal);
+     
+      if (!eventStream) {
+        throw new Error('No event stream available.');
+      }
+      return eventStream.result;
+
+    } catch (error: any) {
+      return this.handleStreamError(error);
+    } finally {
+      this.state.stop();
+      this.state.fullReset();
+    }
+  }
+
+  private validateAgentLoaded(): void {
     if (!this.isAgentLoaded()) {
       throw new Error('Agent is not loaded. Call buildLanggraph() first.');
     }
+  }
 
-    const signal = this.state.createNewController();
-
+  private async initializeStream(input: TGraphInput, config: RunnableConfig, signal: AbortSignal): Promise<any> {
     const stringifyedInput = JSON.stringify(input);
-    this.state.waitingOnStream = true;
-    let stream = await this.graphExecution.streamEvents(
+
+    return this.graphExecution.streamEvents(
       { messages: [new HumanMessage(stringifyedInput)] },
       config,
       { signal }
     );
+  }
 
-    let eventStream: StreamEvent;
-    
-    while (this.state.running) {
+  private async processStreamLoop(stream: any, config: RunnableConfig, signal: AbortSignal): Promise<StreamEvent | null> {
+    let eventStream: StreamEvent | null = null;
+
+    while (this.state.running && !signal.aborted) {
       eventStream = await this.trackGraphExecution(stream);
 
+        throwIfSignalAborted(signal);
+
       if (eventStream.event === 'interrupt') {
-        if(this.state.skipInterrupt) {
-           await this.graphExecution.updateState(config, { isSkipObjectivePressed: true });
-            this.state.skipInterrupt = false;
-        }else{
-          await this.graphExecution.updateState(config, {}, eventStream.node);
-         }
-            console.log('Resuming graph execution after interrupt...');
-            stream = await this.graphExecution.streamEvents(null, config, { signal });
-            console.log('Graph Execution Resumed.');
+        stream = await this.handleInterrupt(config, eventStream, signal);
+        if (!stream) break;
       } else {
         break;
       }
     }
-    
-    return eventStream!.result;
+    throwIfSignalAborted(signal);
 
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      console.log('Interação cancelada pelo utilizador.');
-      return { status: 'cancelled' } as any;
-    }
-    throw mapLangGraphError(error);
-  } finally {
-    this.state.stop();
+    return eventStream;
+  }
+
+  private async handleInterrupt( config: RunnableConfig, eventStream: StreamEvent, signal: AbortSignal): Promise<any | null> {
+    if (!this.graphExecution) return null;
+    console.log("Updating graph state after interrupt...", eventStream);
+    await this.updateGraphState(config, eventStream);
+
+    if (signal.aborted || !this.graphExecution) return null;
+
+    console.log('Resuming graph execution after interrupt...');
+    const resumedStream = await this.graphExecution.streamEvents(null, config, { signal });
+    console.log('Graph Execution Resumed.');
+    
+    return resumedStream;
+  }
+
+ private async updateGraphState(config: RunnableConfig, eventStream: StreamEvent): Promise<void> {
+  const targetNode = eventStream.node;
+
+  if (this.state.skipInterrupt) {
+    console.log(`[InteractionManager] Skipping interrupt via node: ${targetNode}`);
+    
+    await this.graphExecution.updateState(
+      config, 
+      { isSkipObjectivePressed: true }, 
+      targetNode
+    );
+    
+    this.state.skipInterrupt = false;
+    if (this.skipResolver) {
+      this.skipResolver(); 
+      this.skipResolver = undefined;
+  }
+  } else {
+    console.log(`[InteractionManager] Resuming normal flow for node: ${targetNode}`);
+    await this.graphExecution.updateState(config, {}, targetNode);
   }
 }
 
+  private handleStreamError(error: any): IQWGraphOutput {
+    if (error.name === 'AbortError' || this.state.controller?.signal.aborted) {
+      console.log('Interação cancelada pelo utilizador.');
+      return { status: STATUS_GRAPH.CANCELLED, actions: [] };
+    }
+    throw mapLangGraphError(error);
+  }
 public isWaitingOnStream(): boolean {
     return this.state.waitingOnStream;
   }
@@ -118,6 +180,7 @@ public isWaitingOnStream(): boolean {
 
         } ;
         const streamEvent: StreamEvent = { node: action.payload.node, event: 'interrupt', result: graphOutput };
+        this.syncUI();
         return streamEvent;
       }
 
@@ -143,6 +206,7 @@ public isWaitingOnStream(): boolean {
 
   return { node: '', event: 'complete', result: graphOutput };
 }
+
 private syncUI() {
   this.portCommunication.sendMessageToSidepanel({
     action: ACTION_PORT.UPDATE_INTERACTION_STATE,
@@ -154,8 +218,11 @@ private syncUI() {
   });
 }
 
-  public skipObjectiveInterrupts() {
+  public skipObjectiveInterrupts():Promise<void> {
     this.state.skipInterrupt = true;
+    return new Promise<void>((resolve) => {
+      this.skipResolver = resolve;
+  });
   }
 
   public async cancelInteraction() {
@@ -190,3 +257,7 @@ private syncUI() {
 }
 
 export default InteractionManager;
+function throwIfSignalAborted(signal: AbortSignal) {
+  if (signal.aborted) throw new CancellationError();
+}
+

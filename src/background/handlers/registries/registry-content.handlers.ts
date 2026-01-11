@@ -27,23 +27,47 @@ export const INTERACTION_PORT_CONTENT_HANDLERS: Record<string, fnHandlerPortCont
     [ACTION_PORT.CANCEL_INTERACTION]: (_: IPortHandlersArgs) => {
       endInteractionAndCleanup();
     },
+[ACTION_PORT.SKIP_OBJECTIVE_INTERACTION]: ({ instanceInteractionManager, instancePortCommunication, msg }: IPortHandlersArgs) => {
+  
+  if (instanceInteractionManager.isWaitingOnStream()) {
+    // 1. Caso esteja em streaming, interrompe o grafo
+    instanceInteractionManager.skipObjectiveInterrupts()
+      .then(() => {
+        // Envia confirmação para o Content Script resolver a Promise do UI
+        instancePortCommunication.sendMessageToContent({
+          action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+          data: { status: 'success' }
+        });
+      })
+      .catch((error: any) => {
+        const communicationsPorts: PortsOfCommunication = {
+          CONTENT: instancePortCommunication.getPortContent(),
+          SIDEBAR: instancePortCommunication.getPortSidepanel(),
+        };
+        const normalizedError = error instanceof Error ? error : new UnknownError(String(error));
+        dispatchCallbackErrorHandler(normalizedError, communicationsPorts);
+      });
 
-    [ACTION_PORT.SKIP_OBJECTIVE_INTERACTION]: ({ instanceInteractionManager, instancePortCommunication, msg }: IPortHandlersArgs) => {
-      console.log('Skipping Objective interaction from content script');
-                
-      if(instanceInteractionManager.isWaitingOnStream()){
-        
-          instanceInteractionManager.skipObjectiveInterrupts();
-      
-      }else{
-      
-        const input: IGraphSkipObjectiveInput = {_type : 'GraphSkipObjectiveInput'};
+  } else {
+    // 2. Caso não esteja em streaming, envia o comando de Skip para o Langgraph
+    const input = { _type: 'GraphSkipObjectiveInput' };
+    
+    // Primeiro: Notifica o Content Script para desbloquear o estado de "isSkipping"
+    instancePortCommunication.sendMessageToContent({
+      action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+      data: { status: 'success' }
+    });
 
-        sendMessageToLanggraphAndRespond(instanceInteractionManager,
-                                         {data: input, config: msg.config}, 
-                                         instancePortCommunication);
-      }
-      },
+    // Segundo: Clona a mensagem original para garantir que o 'config' e outros metadados seguem viagem
+    const clonedMsg = { ...msg, data: input };
+
+    sendMessageToLanggraphAndRespond(
+      instanceInteractionManager,
+      clonedMsg,
+      instancePortCommunication
+    );
+  }
+},
        [ACTION_PORT.ERROR]: ({ instanceInteractionManager, instancePortCommunication, msg }: IPortHandlersArgs)=> {
         const message = msg.data;
         instancePortCommunication.sendMessageToSidepanel(message)
@@ -64,6 +88,7 @@ export const INTERACTION_PORT_CONTENT_HANDLERS: Record<string, fnHandlerPortCont
     .streamEvents(msg.data, msg.config)
     .then((finalOutput) => {
       console.log('Final output from interaction:', finalOutput);
+      
       if (finalOutput?.actions?.length) {
         instancePortCommunication.sendMessageToContent({
           action: ACTION_PORT.PROCESS_MESSAGE,

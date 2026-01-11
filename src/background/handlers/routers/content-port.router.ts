@@ -9,6 +9,8 @@ import { InteractionManagerFactory } from "../../factories/InteractionManagerFac
 import { PortCommunicationFactory } from "../../factories/PortCommunicationFactory";
 import { InstanceNotInitializedError, PortConnectionError } from "../../../errors/content/errors.class.content";
 
+const controller: AbortController = new AbortController();
+
 export function handleContentPort(port: chrome.runtime.Port) {
     const comms = PortCommunicationFactory.getInstance();
     if (!comms) {

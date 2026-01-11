@@ -1,3 +1,4 @@
+
 export const STATUS_TEST = {
     NOT_STARTED: "not_started",
     IN_PROGRESS: "in_progress",
@@ -6,6 +7,7 @@ export const STATUS_TEST = {
 } as const;
 
 export const STATUS_GRAPH = {
+  CANCELLED: "cancelled",
   NOT_STARTED: "not_started",
   IN_PROGRESS: "running",
   COMPLETED: "completed",

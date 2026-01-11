@@ -66,7 +66,7 @@ export async function actionLLMInteraction(data: IChromeRequest): Promise<void> 
 
   await interactWithLLM(port, voiceFlag, data.request.selectors, signal);
 
-  sendResponse(data,SUCCESS_MESSAGES_CONTENT.INTERACTION_STARTED);
+  sendResponse(data,SUCCESS_MESSAGES_CONTENT.SKIP_OBJECTIVE_INTERACTION);
   } catch (error) {
     ChatbotElementsFactory.destroy();
     InteractionWorkflowFactory.destroy();
@@ -77,13 +77,14 @@ export async function actionLLMInteraction(data: IChromeRequest): Promise<void> 
   
 }
 
-export async function skipCurrentObjectiveInteraction(): Promise<void> {
+export async function skipCurrentObjectiveInteraction(data: IChromeRequest): Promise<void> {
   try {
     if (!currentInteractionAbortController) {
       throw new ErrorClass.NoInteractionInProgressError('No ongoing interaction to skip objective from.');
     }
     const InteractionWorkflow = InteractionWorkflowFactory.getInstance();
     await InteractionWorkflow.skipCurrentObjective(); 
+    sendResponse(data,SUCCESS_MESSAGES_CONTENT.INTERACTION_STARTED);
   } catch (error) {
     if (currentInteractionAbortController) {
       currentInteractionAbortController.abort();

@@ -53,29 +53,27 @@ class ActionHandlerRegistry {
         this.pendingExecutions.set(executionPromise, executionController);
        try {
           await executionPromise;
-        } catch (error) {
-          if (executionController.signal.aborted && !args.signal.aborted) {
+       } catch (error: any) {
 
-            const isAbort = error instanceof CancellationError || 
-                      (error instanceof Error && error.name === 'AbortError');
-            if (isAbort) {
+        const isInternalAbort = executionController.signal.aborted;
+        const isExternalAbort = args.signal.aborted || this.cancelRequested;
+        const isCancellationError = error instanceof CancellationError || 
+                                    error?.name === 'AbortError' || 
+                                    error?.name === 'CancellationError';
 
-              console.log('[ActionHandler] Execution aborted gracefully (internal).');
+        if (isInternalAbort || isExternalAbort || isCancellationError) {
 
-              this.pendingExecutions.delete(executionPromise);
-              continue; 
-            }
-          }
-          
-          if (args.signal.aborted) {
-            throw error;
-          }
-          
-          throw error;
+          if (isExternalAbort) return; 
+          continue; 
+        }
+        
+        throw error;
+
         } finally {
           this.pendingExecutions.delete(executionPromise);
         }
-      }
+        }
+      
     } finally {
       this.cancelRequested = false;
       this.pendingExecutions.clear();
@@ -83,6 +81,9 @@ class ActionHandlerRegistry {
   
     }
   
+static async isPromisesExecuting():Promise<boolean>{
+    return this.pendingExecutions.size > 0;
+  }
 
  /**
    * Execute the handler for a given test type

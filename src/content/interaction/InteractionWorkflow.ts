@@ -35,7 +35,7 @@ class InteractionWorkflow {
   private abortController?: AbortController;
   private signal?: AbortSignal;
   private readonly chatbotActions: ChatbotActions;
-
+ private skipResolver?: () => void;
   public constructor(chatbotActions: ChatbotActions
    ){
     this.chatbotActions = chatbotActions;
@@ -72,8 +72,8 @@ public  init() {
             this.signal = this.abortController.signal;
     const messageHandler = async (msg: any) => {
       if (!this.isRunning) return;
-
       try {
+        console.log('[Workflow] Received message from background:', msg);
         switch (msg.action) {
           case ACTION_PORT.START_INTERACTION:
             this.abortController = new AbortController();
@@ -82,10 +82,21 @@ public  init() {
           case ACTION_PORT.CANCEL_INTERACTION:
             this.abortController?.abort();
             break;
+
+          case ACTION_PORT.SKIP_OBJECTIVE_INTERACTION:
+          console.log('Received skip objective message.');
+          if (this.skipResolver) {
+            console.log('Resolving skip objective promise in InteractionWorkflow.');
+              this.skipResolver(); 
+              this.skipResolver = undefined;
+          }
+          break;
           case ACTION_PORT.END_INTERACTION:
             this.terminate('Interaction ended by background');
             break;
           case ACTION_PORT.PROCESS_MESSAGE:
+            console.log('[Workflow] Processing message from background:', msg);
+            
             await this.processNextStep(msg.data as IQWGraphOutput, this.signal!);
             break;
         }
@@ -134,20 +145,55 @@ public  init() {
     ActionHandlerRegistry.cancelPendingExecutions();
 
   }
+public async skipCurrentObjective() {
+    const hasPendingActions = await ActionHandlerRegistry.isPromisesExecuting();
 
-  public async skipCurrentObjective() {
-    try {
-    await ActionHandlerRegistry.cancelPendingExecutions();
-    console.log('Skipping current objective in interaction workflow');
-    sendMessageToBackgroundPort(this.backgroundPort!, {
-      action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
-      data: undefined,
-      config: this.configContract,
-    });
-    } catch (error) {
-      console.error('Error while skipping current objective:', error);
+    if (hasPendingActions) {
+        console.log('[Workflow] Actions executing. Canceling and skipping without wait.');
+        await ActionHandlerRegistry.cancelPendingExecutions();
+        
+        sendMessageToBackgroundPort(this.backgroundPort!, {
+            action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+            data: {_type: "GraphSkipObjectiveInput" }, 
+            config: this.configContract,
+        });
+        return; 
+    } else {
+        console.log('[Workflow] Idle state. Sending skip and waiting for background confirmation.');
+        
+        return new Promise<void>((resolve) => {
+            this.skipResolver = resolve;
+            
+            sendMessageToBackgroundPort(this.backgroundPort!, {
+                action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+                data: {_type: "GraphSkipObjectiveInput" },
+                config: this.configContract,
+            });
+        });
     }
+}
+/*
+ public async skipCurrentObjective() {
+    this.isSkipping = true;
+    console.log('skipping, canceling pending executions');
+    if(await ActionHandlerRegistry.isPromisesExecuting()){
+    await ActionHandlerRegistry.cancelPendingExecutions();
+    console.log('Skipping sending skip objective interaction to background port');
+    return new Promise<void>((resolve) => {
+        this.skipResolver = resolve;
+        sendMessageToBackgroundPort(this.backgroundPort!, {
+            action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+            config: this.configContract,
+        });
+    });
+  } else {
+    sendMessageToBackgroundPort(this.backgroundPort!, {
+        action: ACTION_PORT.SKIP_OBJECTIVE_INTERACTION,
+        config: this.configContract,
+    });
+    return Promise.resolve();
   }
+}*/
   
   private handleCriticalError(error: Error) {
     processErrorEventPortContent(error, this.backgroundPort!);
