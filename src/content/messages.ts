@@ -1,0 +1,119 @@
+import { MessageResponse, STATUS } from '../messaging/message-types';
+
+export const SUCCESS_CODE_CONTENT = {
+  CHATBOT_DETECTED: 'CHATBOT_DETECTED',
+  ELEMENT_VERIFICATION_STARTED: 'ELEMENT_VERIFICATION_STARTED',
+  ELEMENT_VERIFICATION_ENDED: 'ELEMENT_VERIFICATION_ENDED',
+  CANCELLED_DETECTION: 'CANCELLED_DETECTION',
+  CORRECTED_ELEMENT: 'CORRECTED_ELEMENT',
+  CONTENT_RESET: 'CONTENT_RESET',
+  MICROPHONE_SELECTED: 'MICROPHONE_SELECTED',
+  CANCELLED_MANUAL_MIC_SELECTION: 'CANCELLED_MANUAL_MIC_SELECTION',
+  STORED_SELECTORS_SET: 'STORED_SELECTORS_SET',
+  VOICE_INTERACTION_STARTED: 'VOICE_INTERACTION_STARTED',
+  SKIP_OBJECTIVE_INTERACTION: 'SKIP_OBJECTIVE_INTERACTION',
+  INTERACTION_STARTED: 'INTERACTION_STARTED',
+  INTERACTION_ABORTED: 'INTERACTION_ABORTED',
+  EVALUATION_STARTED: 'EVALUATION_STARTED',
+  ACT_EVALUATED: 'ACT_EVALUATED',
+  WCAG_EVALUATED: 'WCAG_EVALUATED',
+  CUI_EVALUATED: 'CUI_EVALUATED',
+  EVALUATION_ENDED: 'EVALUATION_ENDED',
+  CANCELLED_INTERACTION: 'CANCELLED_INTERACTION',
+  SHOW_MESSAGE_SUCCESS_NOTIFICATION: 'SHOW_MESSAGE_SUCCESS_NOTIFICATION',
+  HIDE_MESSAGE_SUCCESS_NOTIFICATION: 'HIDE_MESSAGE_SUCCESS_NOTIFICATION',
+} as const;
+
+const success = (code: keyof typeof SUCCESS_CODE_CONTENT, message: string): MessageResponse => ({
+  status: STATUS.SUCCESS,
+  code,
+  message,
+});
+
+export const SUCCESS_MESSAGES_CONTENT: Record<keyof typeof SUCCESS_CODE_CONTENT, MessageResponse> =
+  {
+    SHOW_MESSAGE_SUCCESS_NOTIFICATION: success(
+      SUCCESS_CODE_CONTENT.SHOW_MESSAGE_SUCCESS_NOTIFICATION,
+      'Success notification shown.',
+    ),
+    HIDE_MESSAGE_SUCCESS_NOTIFICATION: success(
+      SUCCESS_CODE_CONTENT.HIDE_MESSAGE_SUCCESS_NOTIFICATION,
+      'Success notification hidden.',
+    ),
+    CHATBOT_DETECTED: success(
+      SUCCESS_CODE_CONTENT.CHATBOT_DETECTED,
+      'Chatbot detected on the page.',
+    ),
+    ELEMENT_VERIFICATION_STARTED: success(
+      SUCCESS_CODE_CONTENT.ELEMENT_VERIFICATION_STARTED,
+      'Chatbot element verification started.',
+    ),
+    ELEMENT_VERIFICATION_ENDED: success(
+      SUCCESS_CODE_CONTENT.ELEMENT_VERIFICATION_ENDED,
+      'Chatbot element verification ended successfully.',
+    ),
+    CANCELLED_DETECTION: success(
+      SUCCESS_CODE_CONTENT.CANCELLED_DETECTION,
+      'Chatbot detection process cancelled.',
+    ),
+    CORRECTED_ELEMENT: success(
+      SUCCESS_CODE_CONTENT.CORRECTED_ELEMENT,
+      'Chatbot element selection corrected successfully.',
+    ),
+    CONTENT_RESET: success(
+      SUCCESS_CODE_CONTENT.CONTENT_RESET,
+      'Content script data reset successfully.',
+    ),
+    MICROPHONE_SELECTED: success(
+      SUCCESS_CODE_CONTENT.MICROPHONE_SELECTED,
+      'Microphone selected successfully.',
+    ),
+    CANCELLED_MANUAL_MIC_SELECTION: success(
+      SUCCESS_CODE_CONTENT.CANCELLED_MANUAL_MIC_SELECTION,
+      'Manual microphone selection cancelled successfully.',
+    ),
+    STORED_SELECTORS_SET: success(
+      SUCCESS_CODE_CONTENT.STORED_SELECTORS_SET,
+      'Stored selectors set successfully.',
+    ),
+    VOICE_INTERACTION_STARTED: success(
+      SUCCESS_CODE_CONTENT.VOICE_INTERACTION_STARTED,
+      'Voice interaction started successfully.',
+    ),
+    INTERACTION_STARTED: success(
+      SUCCESS_CODE_CONTENT.INTERACTION_STARTED,
+      'LLM interaction started successfully.',
+    ),
+    SKIP_OBJECTIVE_INTERACTION: success(
+      SUCCESS_CODE_CONTENT.INTERACTION_STARTED,
+      'LLM interaction objective skipped successfully.',
+    ),
+    INTERACTION_ABORTED: success(
+      SUCCESS_CODE_CONTENT.INTERACTION_ABORTED,
+      'LLM interaction aborted successfully.',
+    ),
+    EVALUATION_STARTED: success(
+      SUCCESS_CODE_CONTENT.EVALUATION_STARTED,
+      'Evaluation started successfully.',
+    ),
+    ACT_EVALUATED: success(
+      SUCCESS_CODE_CONTENT.ACT_EVALUATED,
+      'ACT evaluation completed successfully.',
+    ),
+    WCAG_EVALUATED: success(
+      SUCCESS_CODE_CONTENT.WCAG_EVALUATED,
+      'WCAG evaluation completed successfully.',
+    ),
+    CUI_EVALUATED: success(
+      SUCCESS_CODE_CONTENT.CUI_EVALUATED,
+      'CUI evaluation completed successfully.',
+    ),
+    EVALUATION_ENDED: success(
+      SUCCESS_CODE_CONTENT.EVALUATION_ENDED,
+      'Evaluation ended successfully.',
+    ),
+    CANCELLED_INTERACTION: success(
+      SUCCESS_CODE_CONTENT.CANCELLED_INTERACTION,
+      'LLM interaction cancelled successfully.',
+    ),
+  };

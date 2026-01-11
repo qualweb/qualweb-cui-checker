@@ -96,11 +96,11 @@ const onSubmit = () => {
 };
 
 const onClickSave = () => {
+  store.commit('SETFIRSTRUN', false);
   chrome.storage.local.set({ qualweb_settings: store.state }, () => {
     console.log('Settings saved');
     startModal();
   });
-  store.commit('SETFIRSTRUN', false);
 };
 </script>
 

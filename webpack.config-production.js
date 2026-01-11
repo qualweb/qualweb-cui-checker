@@ -7,7 +7,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 const { version } = require('./package.json'); 
 const TerserPlugin = require('terser-webpack-plugin');
 const fs = require('node:fs');
-const definitions = JSON.parse(fs.readFileSync("./definitions-prod.json", "utf-8"));
+const definitions = JSON.parse(fs.readFileSync("./definitions.json", "utf-8"));
 
 // --- Configuration Object for Production ---
 const config = {
@@ -15,8 +15,9 @@ const config = {
     entry: {
         background: './src/background/background.ts',
         content: './src/content/content.ts',
-        sidebar: './src/sidebar/sidebar.ts',
+        sidepanel: './src/sidepanel/sidepanel.ts',
         options: './src/options/options.js',
+
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -35,8 +36,7 @@ const config = {
         extensions: ['.ts', '.js', '.vue'],
     },
     optimization :{
-        minimize: true,
-    minimizer: [
+        minimizer: [
         new TerserPlugin({
           exclude: /cui\.js$|act\.js$|wcag\.js$|qwPage\.js$|util\.js$/,
           terserOptions: {
@@ -131,19 +131,18 @@ const config = {
         
         new CopyPlugin({
             patterns: [
-                { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'scripts/qwPage.js' },
+              { from: './node_modules/@qualweb/qw-page/dist/qw-page.bundle.js', to: 'scripts/qwPage.js' },
                 { from: './node_modules/@qualweb/util/dist/__webpack/util.bundle.js', to: 'scripts/util.js' },
                 { from: './node_modules/@qualweb/act-rules/dist/__webpack/act.bundle.js', to: 'scripts/act.js' },
                 { from: './node_modules/@qualweb/cui-checks/dist/__webpack/cui.bundle.js', to: 'scripts/cui.js' },
                 { from: './node_modules/@qualweb/wcag-techniques/dist/__webpack/wcag.bundle.js', to: 'scripts/wcag.js' },
                 { from: './node_modules/@qualweb/cui-checks/dist/__webpack/common-words-pt.txt', to: 'resources/common-words-pt.txt' },
-                
-                { from: 'src/sidebar/evaluate.js', to: 'sidebar/evaluate.js' },
-                { from: 'src/sidebar/detect.js', to: 'sidebar/detect.js' },
-                { from: 'src/sidebar/interact.js', to: 'sidebar/interact.js' },
-                { from: 'prod/sidebar.html', to: 'sidebar/sidebar.html', transform: transformHtml },
-                { from: 'prod/options.html', to: 'options/options.html', transform: transformHtml },
-                
+                { from: 'src/sidepanel/evaluate.js', to: 'sidepanel/evaluate.js' },
+                { from: 'src/sidepanel/detect.js', to: 'sidepanel/detect.js' },
+                { from: 'src/sidepanel/interact.js', to: 'sidepanel/interact.js' },
+                { from: 'src/sidepanel/sidepanel.html', to: 'sidepanel/sidepanel.html', transform: transformHtml },
+                { from: 'src/options/options.html', to: 'options/options.html', transform: transformHtml },
+                 { from: '**/*', to: 'resources/', context:'src/assets/' },
                 { 
                     from: 'src/icons', 
                     to: 'icons', 
@@ -151,7 +150,7 @@ const config = {
                         ignore: ['**/icon.xcf'] 
                     } 
                 },
-                { from: './prod/manifest.json', to: 'manifest.json' }
+                { from: './manifest.json', to: 'manifest.json' }
             ]
         }),
     ],

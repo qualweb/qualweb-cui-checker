@@ -74,6 +74,8 @@ declare global {
     INITIAL_INTERACTION_MESSAGE_PT: string;
     INITIAL_INTERACTION_MESSAGE_EN: string;
     SCRIPTS_FOLDER: string;
+    SPEECH_AUDIO_FOLDER: string;
+    MAX_NO_MESSAGE_FOUND_RETRIES: number;
   };
 }
 export {};

@@ -1,0 +1,163 @@
+import * as types from './mutation-types';
+
+export const setSelectorsDetected = ({ commit }, payload) => {
+  commit(types.SETSELECTORSDETECTED, payload);
+};
+
+export const setCuiSpeechTests = ({ commit }, payload) => {
+  commit(types.SETCUISPEECHTESTS, payload);
+};
+
+export const setTabId = ({ commit }, payload) => {
+  commit(types.SETTABID, payload);
+};
+
+export const setSidepanelURL = ({ commit }, payload) => {
+  commit(types.SETSIDEPANELURL, payload);
+};
+
+export const setReport = async function ({ commit }, modules) {
+  let report = await evaluate(modules.act, modules.wcag, modules.css, modules.cui);
+
+  commit(types.SETACT, report.act);
+  commit(types.SETWCAG, report.wcag);
+  commit(types.SETCUI, report.cui);
+  commit(types.SETCSS, report.css);
+  commit(types.SETSUMMARY, report.summary);
+  commit(types.SETEVAL, modules);
+};
+
+export const setCurrentRule = ({ commit }, payload) => {
+  commit(types.SETCURRENTRULE, payload);
+};
+
+export const setCurrentRuleResults = ({ commit }, payload) => {
+  commit(types.SETCURRENTRULE, payload);
+};
+export const setHighlightActive = ({ commit }, payload) => {
+  commit(types.SETHIGHLIGHTACTIVE, payload);
+};
+
+export const setACT = ({ commit }, payload) => {
+  commit(types.SETACT, payload);
+};
+export const setChatbotACT = ({ commit }, payload) => {
+  commit(types.SETCHATBOTACT, payload);
+};
+export const setWCAG = ({ commit }, payload) => {
+  commit(types.SETWCAG, payload);
+};
+export const setChatbotWCAG = ({ commit }, payload) => {
+  commit(types.SETCHATBOTWCAG, payload);
+};
+export const setCUI = ({ commit }, payload) => {
+  commit(types.SETCUI, payload);
+};
+export const setChatbotCUI = ({ commit }, payload) => {
+  commit(types.SETCHATBOTCUI, payload);
+};
+export const setCSS = ({ commit }, payload) => {
+  commit(types.SETCSS, payload);
+};
+export const setSummary = ({ commit }, payload) => {
+  commit(types.SETSUMMARY, payload);
+};
+export const setChatbotSummary = ({ commit }, payload) => {
+  commit(types.SETCHATBOTSUMMARY, payload);
+};
+export const setEvaluated = ({ commit }, payload) => {
+  commit(types.SETEVAL, payload);
+};
+export const setFilter = ({ commit }, payload) => {
+  commit(types.SETFILTER, payload);
+};
+export const setStartingFilter = ({ commit }, modules) => {
+  commit(types.SETALLFILTER, {
+    passed: true,
+    failed: true,
+    warning: true,
+    inapplicable: false,
+    act: modules.act,
+    wcag: modules.wcag,
+    cui: modules.cui,
+  });
+};
+
+export const setResultFilter = ({ commit }, payload) => {
+  commit(types.SETRESULTFILTER, payload);
+};
+export const setStartingResultFilter = ({ commit }, payload) => {
+  commit(types.SETALLRESULTFILTER, payload);
+};
+
+export const setEvaluateChatbot = ({ commit }, payload) => {
+  commit(types.SETEVALUATECHATBOT, payload);
+};
+
+export const setDetectingChatbot = ({ commit }, payload) => {
+  commit(types.SETDETECTINGCHATBOT, payload);
+};
+
+export const setInteractionInitialized = ({ commit }, payload) => {
+  commit(types.SETINTERACTIONINITIALIZED, payload);
+};
+
+export const reset = ({ commit }) => {
+  commit(types.RESET);
+};
+
+export const loadSelectors = async function ({ commit }) {
+  let qualweb_selectors = await chrome.storage.local.get('qualweb-selectors');
+  if (qualweb_selectors === undefined) {
+    qualweb_selectors = {};
+  }
+  let url = await getUrl();
+  const parsedURL = new window.URL(url);
+  const domain = parsedURL.hostname;
+  console.log('domain', domain);
+  console.log('qualweb_selectors', qualweb_selectors);
+  if (qualweb_selectors[domain] !== undefined) {
+    commit(types.SETSELECTORS, qualweb_selectors[domain]);
+  } else {
+    commit(types.SETSELECTORS, {});
+  }
+};
+
+export const setSelectors = async function ({ commit }, payload) {
+  let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))[
+    'qualweb-selectors'
+  ];
+  if (qualweb_selectors === undefined) {
+    qualweb_selectors = {};
+  }
+  let url = await getUrl();
+  const parsedURL = new window.URL(url);
+  const domain = parsedURL.hostname;
+
+  qualweb_selectors[domain] = payload;
+  await chrome.storage.local.set({
+    'qualweb-selectors': qualweb_selectors,
+  });
+  commit(types.SETSELECTORS, payload);
+  commit(types.SETURL, url);
+};
+
+export const forgetChatbotSelectors = async function ({ commit }) {
+  let qualweb_selectors = (await chrome.storage.local.get('qualweb-selectors'))[
+    'qualweb-selectors'
+  ];
+  if (qualweb_selectors === undefined) {
+    qualweb_selectors = {};
+  }
+  let url = await getUrl();
+  const parsedURL = new window.URL(url);
+  const domain = parsedURL.hostname;
+
+  if (qualweb_selectors[domain] !== undefined) {
+    delete qualweb_selectors[domain];
+    await chrome.storage.local.set({
+      'qualweb-selectors': qualweb_selectors,
+    });
+  }
+  commit(types.SETSELECTORS, {});
+};

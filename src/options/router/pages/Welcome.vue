@@ -2,7 +2,16 @@
   <div class="bigContainer">
     <div class="container">
       <h1 class="title">QUALWEB CUI CHECK INSTALLED SUCCESSFULLY!</h1>
-      <img class="logo" :src="`/${iconFolder}/logoQW.png`" alt="Qualweb Logo" />
+      <div class="logo-container">
+        <img
+          class="logo"
+          :class="{ loaded: imageLoaded }"
+          :src="`/${iconFolder}/logoQW.png`"
+          alt="Qualweb Logo"
+          @load="onImageLoad"
+        />
+        <div v-if="!imageLoaded"></div>
+      </div>
       <p>Thank your for installing qualweb cui checker extension.</p>
       <p>To get started, please configure settings of app to start using it</p>
       <div class="button-container">
@@ -11,21 +20,26 @@
     </div>
   </div>
 </template>
+
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
 const store = useStore();
 const router = useRouter();
 
-const firstRun = computed(() => store.getters.getFirstRun);
 const iconFolder = APP_CONFIG.ICONS_FOLDER;
-onMounted(() => {
-  store.dispatch('loadOptions');
-});
-const onClickConfigure = () => {
-  store.commit('SETFIRSTRUN', false);
+const imageLoaded = ref(false);
+
+const onImageLoad = () => {
+  imageLoaded.value = true;
+};
+
+const onClickConfigure = async () => {
+  await store.commit('SETFIRSTRUN', false);
+
+  router.push('/settings');
 };
 </script>
 
@@ -37,11 +51,34 @@ body {
   min-height: 100vh;
   height: 100vh;
 }
-.logo {
+
+.logo-container {
+  position: relative;
   width: auto;
   height: 400px;
   margin-bottom: 20px;
 }
+
+.logo {
+  width: auto;
+  height: 400px;
+  opacity: 0;
+  transition: opacity 0.6s ease-in;
+}
+
+.logo.loaded {
+  opacity: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .position-icon {
   position: absolute;
   top: 12px;
@@ -52,6 +89,7 @@ body {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
 .bigContainer {
   display: flex;
   flex-direction: column;
@@ -64,6 +102,7 @@ body {
   display: flex;
   flex-direction: column;
 }
+
 .container {
   overflow: auto;
   display: flex;
@@ -78,6 +117,7 @@ body {
   font-weight: 900;
   margin-bottom: 1rem;
 }
+
 .button-container {
   display: flex;
   flex-direction: column;
@@ -85,6 +125,7 @@ body {
   width: 100%;
   max-width: 250px;
 }
+
 .evaluation-container {
   margin-top: 20px;
   display: flex;
@@ -93,6 +134,7 @@ body {
   width: 100%;
   max-width: 250px;
 }
+
 button {
   width: 100%;
   padding: 10px;
@@ -103,24 +145,29 @@ button {
   cursor: pointer;
   transition: background-color 0.3s;
 }
+
 button:hover {
   background-color: #ff6a00;
 }
+
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
+
 hr {
   width: 100%;
   border: none;
   border-top: 1px solid #ffffff;
   margin: 15px 0;
 }
+
 label {
   display: flex;
   align-items: center;
   gap: 5px;
 }
+
 @media only screen and (max-width: 700px) {
   .container-1 {
     display: flex;

@@ -98,4 +98,6 @@ interface Report {
   };
 }
 
-export { Summary, Rule, RuleMetadata, Report, Result, ElementTest };
+type ChatbotInputElement = HTMLInputElement | HTMLTextAreaElement | HTMLDivElement;
+
+export { Summary, Rule, RuleMetadata, Report, Result, ElementTest, ChatbotInputElement };

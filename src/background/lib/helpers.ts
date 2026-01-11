@@ -60,6 +60,7 @@ export async function injectScriptsIfAbsent(tabId: number): Promise<boolean> {
       console.log('Scripts injected successfully.');
       return true;
     }
+    console.log('Scripts already loaded, no injection needed.');
   } catch (error) {
     console.log('Error checking/injecting scripts:', error);
     return false;
