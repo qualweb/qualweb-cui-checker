@@ -82,14 +82,11 @@ export function markResponses(responses: HTMLElement[], counter: number): void {
   responses.forEach((el) => el.setAttribute('qw-cui-response', counter.toString()));
 }
 
-
-
 export function extractAssistantMessage(responses: HTMLElement[]): string {
-    return normalizeText(
-      responses
-        .map((element) => element.textContent)
-        .join('\n')
-        .trim(),
-    );
-  }
-  
+  return normalizeText(
+    responses
+      .map((element) => element.textContent)
+      .join('\n')
+      .trim(),
+  );
+}

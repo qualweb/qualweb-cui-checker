@@ -35,151 +35,146 @@ export const ERROR_CLASS_NAME_CONTENT = {
   ELEMENT_NOT_FOUND_ERROR: 'ElementNotFoundError',
 } as const;
 
-
-
-
-export  class MessageSelectorNotFoundError extends Error {
+export class MessageSelectorNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.MESSAGE_SELECTOR_NOT_FOUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.MESSAGE_SELECTOR_NOT_FOUND_ERROR;
   }
 }
 
 export class ElementNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.ELEMENT_NOT_FOUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.ELEMENT_NOT_FOUND_ERROR;
   }
 }
 
 export class FailedCommunicationWithBackgroundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.FAILED_COMMUNICATION_WITH_BACKGROUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.FAILED_COMMUNICATION_WITH_BACKGROUND_ERROR;
   }
 }
 export class PortInitialConfigurationError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.PORT_INITIAL_CONFIGURATION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.PORT_INITIAL_CONFIGURATION_ERROR;
   }
 }
 export class PortConnectionError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.PORT_CONNECTION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.PORT_CONNECTION_ERROR;
   }
 }
 export class SettingsNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.SETTINGS_NOT_FOUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.SETTINGS_NOT_FOUND_ERROR;
   }
 }
 
 export class ApiKeyNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.API_KEY_NOT_FOUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.API_KEY_NOT_FOUND_ERROR;
   }
 }
 
 export class LocaleNotFoundError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.LOCALE_NOT_FOUND_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.LOCALE_NOT_FOUND_ERROR;
   }
 }
 
 export class NoInteractionInProgressError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.NO_INTERACTION_IN_PROGRESS_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.NO_INTERACTION_IN_PROGRESS_ERROR;
   }
 }
 export class InstanceNotInitializedError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.INSTANCE_NOT_INITIALIZED_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.INSTANCE_NOT_INITIALIZED_ERROR;
   }
 }
 
 export class WCAGEvaluationError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.WCAG_EVALUATION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.WCAG_EVALUATION_ERROR;
   }
 }
 
 export class ACTEvaluationError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.ACT_EVALUATION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.ACT_EVALUATION_ERROR;
   }
 }
 
 export class CUIEvaluationError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.CUI_EVALUATION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.CUI_EVALUATION_ERROR;
   }
 }
 
 export class IframeNotAccessibleError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.IFRAME_NOT_ACCESSIBLE_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.IFRAME_NOT_ACCESSIBLE_ERROR;
   }
 }
 
 export class NoElementVerificationInProgressError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.NO_ELEMENT_VERIFICATION_IN_PROGRESS_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.NO_ELEMENT_VERIFICATION_IN_PROGRESS_ERROR;
   }
 }
 
 export class InvalidSelectorProvidedError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.INVALID_SELECTOR_PROVIDED_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.INVALID_SELECTOR_PROVIDED_ERROR;
   }
 }
 
 export class ElementManualSelectionInProgressError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.ELEMENT_MANUAL_SELECTION_IN_PROGRESS_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.ELEMENT_MANUAL_SELECTION_IN_PROGRESS_ERROR;
   }
 }
 
 export class ChatbotNotDetectedError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.CHATBOT_NOT_DETECTED_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.CHATBOT_NOT_DETECTED_ERROR;
   }
 }
 
 export class MessageInsertionError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.MESSAGE_INSERTION_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.MESSAGE_INSERTION_ERROR;
   }
 }
 
 export class ObserverFoundNoMessagesAfterRetryError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.OBSERVER_FOUND_NO_MESSAGES_AFTER_RETRY_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.OBSERVER_FOUND_NO_MESSAGES_AFTER_RETRY_ERROR;
   }
 }
-
-
 
 export class VoiceInputFailedError extends Error {
   constructor(message) {
     super(message);
-    this.name =  ERROR_CLASS_NAME_CONTENT.VOICE_INPUT_FAILED_ERROR;
+    this.name = ERROR_CLASS_NAME_CONTENT.VOICE_INPUT_FAILED_ERROR;
   }
 }
 

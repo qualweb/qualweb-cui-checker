@@ -13,4 +13,3 @@ export function hideMessageContentScript(data: IChromeRequest) {
   hideMessage();
   sendResponse(data, SUCCESS_MESSAGES_CONTENT.HIDE_MESSAGE_SUCCESS_NOTIFICATION);
 }
-

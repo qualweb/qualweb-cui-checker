@@ -1,8 +1,8 @@
-import { ISerializable } from "../../ISerializable";
+import { ISerializable } from '../../ISerializable';
 
 abstract class BaseAction implements ISerializable {
-    abstract _type: string;
+  abstract _type: string;
 
-    abstract toJSON(): object;
-} 
+  abstract toJSON(): object;
+}
 export default BaseAction;

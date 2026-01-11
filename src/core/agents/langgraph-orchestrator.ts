@@ -11,7 +11,7 @@ export const Settings: LLM_Settings = {
 };
 export let LLM: ChatOpenAI;
 
-export function initiateLangraphSettings(settings: LLM_Settings,isSpeechTestsEnabled:boolean){
+export function initiateLangraphSettings(settings: LLM_Settings, isSpeechTestsEnabled: boolean) {
   Settings.apiKey = settings.apiKey;
   Settings.LLMService = settings.LLMService;
   Settings.locale = settings.locale;

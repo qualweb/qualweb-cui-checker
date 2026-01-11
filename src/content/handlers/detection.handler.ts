@@ -1,6 +1,6 @@
 import { hideMessage, showMessage } from '../../utils/helpers';
 import { ChatBotSelectors } from '../../utils/types';
-import * as Error from "../../errors/content/errors.class.content";
+import * as Error from '../../errors/content/errors.class.content';
 import { SUCCESS_MESSAGES_CONTENT } from '../messages';
 import { IChromeRequest, sendResponse } from '.';
 import { ChatbotDetectorFactory } from '../factories/ChatbotDetectorFactory';
@@ -14,7 +14,6 @@ const languageTextMapper: Record<string, string> = {
 
 let currentAbortController: AbortController | null = null;
 
-
 export async function startPageChatbotProcedure(data: IChromeRequest): Promise<void> {
   console.log('Starting chatbot detection procedure');
   currentAbortController = new AbortController();
@@ -25,33 +24,28 @@ export async function startPageChatbotProcedure(data: IChromeRequest): Promise<v
 
     const locale = data.request.locale || 'en-US';
     const userMessage = languageTextMapper[locale] || languageTextMapper['en-US'];
-    const selectors: ChatBotSelectors = await ChatbotDetector.detect(userMessage,signal);
+    const selectors: ChatBotSelectors = await ChatbotDetector.detect(userMessage, signal);
 
     chatbotInterface.setSelectors(selectors);
     console.log('Chatbot detected with selectors:', selectors);
     console.log('Sending detected selectors back to background script');
-    sendResponse(data,  {
-        ...SUCCESS_MESSAGES_CONTENT.CHATBOT_DETECTED,
-        data: { selectors: selectors}
-      });
-    
-
+    sendResponse(data, {
+      ...SUCCESS_MESSAGES_CONTENT.CHATBOT_DETECTED,
+      data: { selectors: selectors },
+    });
   } catch (error) {
-    
     if (error instanceof Error.IframeNotAccessibleError) {
       showMessage(
         'Some iframes could not be accessed due to cross-origin restrictions, which limits the chatbot detection capabilities in this version.',
         2000,
       );
       return;
-    }else if (error instanceof Error.CancellationError) {
-       sendResponse(data, SUCCESS_MESSAGES_CONTENT.CANCELLED_DETECTION);
-       showMessage('Chatbot detection cancelled', 2000);
+    } else if (error instanceof Error.CancellationError) {
+      sendResponse(data, SUCCESS_MESSAGES_CONTENT.CANCELLED_DETECTION);
+      showMessage('Chatbot detection cancelled', 2000);
       return;
-
     }
-      throw error;
-
+    throw error;
   } finally {
     currentAbortController?.abort();
     currentAbortController = null;
@@ -60,100 +54,97 @@ export async function startPageChatbotProcedure(data: IChromeRequest): Promise<v
 }
 
 export function actionStartVerification(data: IChromeRequest) {
-  try{
-  const chatbotInterface = ChatbotElementsFactory.init();
-  if(!data.request.selectors) throw new Error.InvalidSelectorProvidedError('No selectors provided for starting verification');
-  chatbotInterface.setSelectors(data.request.selectors);
-  ChatbotDetectorFactory.init(chatbotInterface);
-  const chatbotDetector = ChatbotDetectorFactory.getInstance();
+  try {
+    const chatbotInterface = ChatbotElementsFactory.init();
+    if (!data.request.selectors)
+      throw new Error.InvalidSelectorProvidedError(
+        'No selectors provided for starting verification',
+      );
+    chatbotInterface.setSelectors(data.request.selectors);
+    ChatbotDetectorFactory.init(chatbotInterface);
+    const chatbotDetector = ChatbotDetectorFactory.getInstance();
 
-  console.log('Verifying element for:', data.request.element);
+    console.log('Verifying element for:', data.request.element);
 
-  ElementValidatorFactory.init(
-    chatbotDetector,
-    chatbotInterface
-  );
+    ElementValidatorFactory.init(chatbotDetector, chatbotInterface);
 
-  const instance = ElementValidatorFactory.getInstance();
+    const instance = ElementValidatorFactory.getInstance();
 
-  let selectorKey = data.request.element;
-  if(selectorKey === undefined || selectorKey === null || selectorKey.trim() === '') {
-    throw new Error.InvalidSelectorProvidedError('No selector key provided for starting verification');
-  }
-  
-  instance.startConfirmation(selectorKey);
+    let selectorKey = data.request.element;
+    if (selectorKey === undefined || selectorKey === null || selectorKey.trim() === '') {
+      throw new Error.InvalidSelectorProvidedError(
+        'No selector key provided for starting verification',
+      );
+    }
 
-  sendResponse(data, SUCCESS_MESSAGES_CONTENT.ELEMENT_VERIFICATION_STARTED);
+    instance.startConfirmation(selectorKey);
+
+    sendResponse(data, SUCCESS_MESSAGES_CONTENT.ELEMENT_VERIFICATION_STARTED);
   } catch (error) {
     console.log('Error during element verification start:', error);
     throw error;
-  }finally{
-     ElementValidatorFactory.destroy();
-     ChatbotDetectorFactory.destroy();
-     ChatbotElementsFactory.destroy();
+  } finally {
+    ElementValidatorFactory.destroy();
+    ChatbotDetectorFactory.destroy();
+    ChatbotElementsFactory.destroy();
   }
 }
 
 export function actionEndSuccessfulVerification(data: IChromeRequest) {
   console.log('Ending successful verification of element');
   try {
-   const chatbotInterface = ChatbotElementsFactory.init();
-   chatbotInterface.setSelectors(data.request.selectors);
-   ChatbotDetectorFactory.init(chatbotInterface);
-   const chatbotDetector = ChatbotDetectorFactory.getInstance();
-   console.log('Verifying element for:', data.request.element);
+    const chatbotInterface = ChatbotElementsFactory.init();
+    chatbotInterface.setSelectors(data.request.selectors);
+    ChatbotDetectorFactory.init(chatbotInterface);
+    const chatbotDetector = ChatbotDetectorFactory.getInstance();
+    console.log('Verifying element for:', data.request.element);
 
-   ElementValidatorFactory.init(
-    chatbotDetector,
-    chatbotInterface
-   );
+    ElementValidatorFactory.init(chatbotDetector, chatbotInterface);
 
-  const instance = ElementValidatorFactory.getInstance();
-  let selectorKey = data.request.element;
-  if(selectorKey === undefined || selectorKey === null || selectorKey.trim() === '') {
-    throw new Error.InvalidSelectorProvidedError('No selector key provided for ending verification');
-  }
+    const instance = ElementValidatorFactory.getInstance();
+    let selectorKey = data.request.element;
+    if (selectorKey === undefined || selectorKey === null || selectorKey.trim() === '') {
+      throw new Error.InvalidSelectorProvidedError(
+        'No selector key provided for ending verification',
+      );
+    }
 
     instance.endConfirmation(selectorKey);
     sendResponse(data, SUCCESS_MESSAGES_CONTENT.ELEMENT_VERIFICATION_ENDED);
   } catch (error) {
     console.log('Error during ending element verification:', error);
     throw error;
-  }finally{
-      ElementValidatorFactory.destroy();
-      ChatbotDetectorFactory.destroy();
-      ChatbotElementsFactory.destroy();
+  } finally {
+    ElementValidatorFactory.destroy();
+    ChatbotDetectorFactory.destroy();
+    ChatbotElementsFactory.destroy();
   }
 }
 
 export function cancelDetection(data: IChromeRequest) {
-  
-    currentAbortController?.abort();
+  currentAbortController?.abort();
 
-    sendResponse(data, SUCCESS_MESSAGES_CONTENT.CANCELLED_DETECTION);
+  sendResponse(data, SUCCESS_MESSAGES_CONTENT.CANCELLED_DETECTION);
 }
 export async function actionCorrectElementSelection(data: IChromeRequest): Promise<void> {
   currentAbortController = new AbortController();
   const { signal } = currentAbortController;
   console.log('Correcting element selection for:', data.request.element);
-  try { 
+  try {
     const chatbotInterface = ChatbotElementsFactory.init();
-   chatbotInterface.setSelectors(data.request.selectors);
-   const chatbotDetector = ChatbotDetectorFactory.init(chatbotInterface);
+    chatbotInterface.setSelectors(data.request.selectors);
+    const chatbotDetector = ChatbotDetectorFactory.init(chatbotInterface);
 
-   ElementValidatorFactory.init(
-    chatbotDetector,
-    chatbotInterface
-   );
+    ElementValidatorFactory.init(chatbotDetector, chatbotInterface);
 
-  const instance = ElementValidatorFactory.getInstance(); 
+    const instance = ElementValidatorFactory.getInstance();
 
-   console.log('Verifying element for:', data.request.element);
- 
+    console.log('Verifying element for:', data.request.element);
+
     const locale = data.request.locale || 'en-US';
-    if(!locale) throw new Error.LocaleNotFoundError('No locale provided for element correction');
+    if (!locale) throw new Error.LocaleNotFoundError('No locale provided for element correction');
     const userMessage = languageTextMapper[locale] || languageTextMapper['en-US'];
-    let response = await instance.correct(data.request.element, userMessage,signal);
+    let response = await instance.correct(data.request.element, userMessage, signal);
     sendResponse(data, {
       ...SUCCESS_MESSAGES_CONTENT.ELEMENT_VERIFICATION_ENDED,
       data: response,
@@ -161,7 +152,7 @@ export async function actionCorrectElementSelection(data: IChromeRequest): Promi
   } catch (error) {
     console.log('Error during correcting element selection:', error);
     throw error;
-  }finally {
+  } finally {
     ElementValidatorFactory.destroy();
     ChatbotDetectorFactory.destroy();
     ChatbotElementsFactory.destroy();
@@ -172,9 +163,9 @@ export async function actionCorrectElementSelection(data: IChromeRequest): Promi
 export function resetDataContentScript(data: IChromeRequest) {
   console.log('Resetting data in content script');
   try {
-  ChatbotDetectorFactory.destroy();
-  ChatbotElementsFactory.destroy();
-  ElementValidatorFactory.destroy();
+    ChatbotDetectorFactory.destroy();
+    ChatbotElementsFactory.destroy();
+    ElementValidatorFactory.destroy();
   } catch {
     // ignore errors during reset
   }
@@ -182,19 +173,15 @@ export function resetDataContentScript(data: IChromeRequest) {
 }
 
 export async function requestManualSelectionMic(data: IChromeRequest): Promise<void> {
-
   try {
     const chatbotInterface = ChatbotElementsFactory.init();
-   chatbotInterface.setSelectors(data.request.selectors);
-   const chatbotDetector = ChatbotDetectorFactory.init(chatbotInterface);
+    chatbotInterface.setSelectors(data.request.selectors);
+    const chatbotDetector = ChatbotDetectorFactory.init(chatbotInterface);
 
-   ElementValidatorFactory.init(
-    chatbotDetector,
-    chatbotInterface
-   );
+    ElementValidatorFactory.init(chatbotDetector, chatbotInterface);
 
-  const elementValidator = ElementValidatorFactory.getInstance();
-   const manualSelector = elementValidator.getElementManualSelector();
+    const elementValidator = ElementValidatorFactory.getInstance();
+    const manualSelector = elementValidator.getElementManualSelector();
     let response = await manualSelector.init();
 
     let updatedSelectors = ChatbotElementsFactory.getInstance().getSelectors();
@@ -203,12 +190,12 @@ export async function requestManualSelectionMic(data: IChromeRequest): Promise<v
     ChatbotElementsFactory.getInstance().setSelectors(updatedSelectors);
     sendResponse(data, {
       ...SUCCESS_MESSAGES_CONTENT.MICROPHONE_SELECTED,
-        data: updatedSelectors,
+      data: updatedSelectors,
     });
   } catch (error) {
     console.log('Error during manual microphone selection:', error);
     throw error;
-  }finally {
+  } finally {
     ElementValidatorFactory.destroy();
     ChatbotDetectorFactory.destroy();
     ChatbotElementsFactory.destroy();
@@ -218,29 +205,25 @@ export async function requestManualSelectionMic(data: IChromeRequest): Promise<v
 export async function cancelManualDetection(data: IChromeRequest): Promise<void> {
   try {
     const chatbotInterface = ChatbotElementsFactory.init();
-   chatbotInterface.setSelectors(data.request.selectors);
-   ChatbotDetectorFactory.init(chatbotInterface);
-   const chatbotDetector = ChatbotDetectorFactory.getInstance();
+    chatbotInterface.setSelectors(data.request.selectors);
+    ChatbotDetectorFactory.init(chatbotInterface);
+    const chatbotDetector = ChatbotDetectorFactory.getInstance();
 
-   ElementValidatorFactory.init(
-    chatbotDetector,
-    chatbotInterface
-   );
+    ElementValidatorFactory.init(chatbotDetector, chatbotInterface);
     const instance = ElementValidatorFactory.getInstance().getElementManualSelector();
 
-  instance.cancelSelection();
-  
-  sendResponse(data,SUCCESS_MESSAGES_CONTENT.CANCELLED_MANUAL_MIC_SELECTION);
+    instance.cancelSelection();
+
+    sendResponse(data, SUCCESS_MESSAGES_CONTENT.CANCELLED_MANUAL_MIC_SELECTION);
   } catch (error) {
     console.log('Error during cancelling manual microphone selection:', error);
     throw error;
-  }finally {
+  } finally {
     ElementValidatorFactory.destroy();
     ChatbotDetectorFactory.destroy();
     ChatbotElementsFactory.destroy();
   }
 }
-
 
 export function showMessageContentScript(data: IChromeRequest) {
   const message = data.request.message;
@@ -253,4 +236,3 @@ export function hideMessageContentScript(data: IChromeRequest) {
   hideMessage();
   sendResponse(data, SUCCESS_MESSAGES_CONTENT.HIDE_MESSAGE_SUCCESS_NOTIFICATION);
 }
-

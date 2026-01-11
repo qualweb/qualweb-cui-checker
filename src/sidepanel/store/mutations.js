@@ -111,5 +111,4 @@ export default {
   [types.SETINTERACTIONINITIALIZED](state, payload) {
     state.chatbotInteractionInitialized = payload;
   },
-
 };

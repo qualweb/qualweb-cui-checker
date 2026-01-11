@@ -35,7 +35,6 @@ export async function isContentScriptsLoaded(tabId: number): Promise<boolean> {
 }
 
 export async function injectScriptsIfAbsent(tabId: number): Promise<boolean> {
-  
   if (!tabId) {
     console.log('Tab ID not found for script injection.');
     return false;
@@ -67,5 +66,4 @@ export async function injectScriptsIfAbsent(tabId: number): Promise<boolean> {
     return false;
   }
   return false;
-
 }

@@ -8,12 +8,12 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 app.config.errorHandler = (err, instance, info) => {
-  console.log("Global Vue Error:", err);
+  console.log('Global Vue Error:', err);
 
-  const  args = {
+  const args = {
     router: router,
     error: err as Error,
-  }
+  };
   handleErrorSidepanel(args);
 };
 app.mount('#app');

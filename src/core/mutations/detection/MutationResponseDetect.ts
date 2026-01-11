@@ -14,7 +14,7 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
   userElement: HTMLElement;
   signal: AbortSignal;
 
-  constructor(userElement: HTMLElement, ignoreInput: HTMLElement,signal: AbortSignal) {
+  constructor(userElement: HTMLElement, ignoreInput: HTMLElement, signal: AbortSignal) {
     super();
     this.signal = signal;
     this.elementTracker = new MessagesManager();
@@ -23,15 +23,15 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
     this.initialText = APP_CONFIG.INITIAL_INTERACTION_MESSAGE_PT;
     this.setupListeners();
   }
-    private setupListeners(): void {
-      this.on('childList:added', this.handleAddedNodes.bind(this));
-      this.on('characterData:change', this.handleCharacterDataChange.bind(this));
-    }
+  private setupListeners(): void {
+    this.on('childList:added', this.handleAddedNodes.bind(this));
+    this.on('characterData:change', this.handleCharacterDataChange.bind(this));
+  }
 
-   public setup(target: Node,timeoutManager: TimeoutManager<HTMLElement>): void {
+  public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement>): void {
     this.signal.throwIfAborted();
     this.observer = new MutationObserver(this.mutationCallback);
-    
+
     // Configuração do observer isolada
     this.observer.observe(target, {
       childList: true,
@@ -42,16 +42,15 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
     this.timeoutManager = timeoutManager;
 
     this.timeoutManager.setup(() => this.disconnect());
-
   }
   async init(): Promise<HTMLElement> {
     if (!this.timeoutManager) {
-      throw new   ErrorClass.InstanceNotInitializedError("TimeoutManager not set up.");
+      throw new ErrorClass.InstanceNotInitializedError('TimeoutManager not set up.');
     }
-      interruptSignalHandlerWithError(this.signal);
+    interruptSignalHandlerWithError(this.signal);
     try {
-    this.elementTracker.clear();    
-    this.timeoutManager.startTimeout();
+      this.elementTracker.clear();
+      this.timeoutManager.startTimeout();
 
       const completionPromise = this.waitForObserverDisconnect(this.signal);
 
@@ -61,7 +60,7 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
         throw new ErrorClass.CancellationError();
       }
       if (this.elementTracker.getElements().size === 0) {
-        throw new   ErrorClass.ElementNotFoundError('No element found');
+        throw new ErrorClass.ElementNotFoundError('No element found');
       }
 
       return Array.from(this.elementTracker.getElements())[0];
@@ -98,7 +97,7 @@ class MutationResponseDetect extends AbstractMutationObserver<HTMLElement> {
         AddedNodeDetection.textContent.trim() != this.initialText
       ) {
         let teste = findAncestralNodeBeforeContaining(AddedNodeDetection, this.initialText);
-        
+
         this.elementTracker.add(teste);
       }
     }

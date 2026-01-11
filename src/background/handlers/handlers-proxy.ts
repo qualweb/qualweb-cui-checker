@@ -1,28 +1,30 @@
 import { HANDLER_ACTIONS } from '../../common/handlers-actions';
-import {  TabNotActiveError } from '../../errors/background/errors.class.background';
-import { sendMessageToTab,
-   tryScriptReinjectionAndRetryResponse } from '../../messaging/message-helpers';
+import { TabNotActiveError } from '../../errors/background/errors.class.background';
+import {
+  sendMessageToTab,
+  tryScriptReinjectionAndRetryResponse,
+} from '../../messaging/message-helpers';
 import { processErrorEventCallbackBackground } from '../../errors/background/error.handler.background';
-  
+
 export interface IChromeRequest {
   sendResponse: (response: any) => void;
   request: any;
 }
 
-  console.log('Background contentProxy initialized.');
+console.log('Background contentProxy initialized.');
 
-  if (!chrome.runtime.onMessage.hasListener(handleBackgroundActions)) {
-    chrome.runtime.onMessage.addListener(handleBackgroundActions);
-  }
+if (!chrome.runtime.onMessage.hasListener(handleBackgroundActions)) {
+  chrome.runtime.onMessage.addListener(handleBackgroundActions);
+}
 
 const HANDLER_BACKGROUND_ACTIONS = {
-   CLOSE_TAB_REQUEST: 'CLOSE_TAB_REQUEST',
+  CLOSE_TAB_REQUEST: 'CLOSE_TAB_REQUEST',
   REINJECT_SCRIPTS: 'REINJECT_SCRIPTS',
   SIDEPANEL_ALIVE_CHECK: 'SIDEPANEL_ALIVE_CHECK',
   URL_UPDATE_DETECTED: 'URL_UPDATE_DETECTED',
   SPEAK_TEST: 'speakText',
 } as const;
-  
+
 function handleMessagesBackground(
   request: any,
   sender: chrome.runtime.MessageSender,
@@ -37,42 +39,39 @@ function handleMessagesBackground(
       });
       return false;
     }
-  }else if (request.action === 'OPEN_TAB_REQUEST') {
-     chrome.sidePanel.setOptions({
-        tabId: request.data.tabId,
-        enabled: true,
-      });
-      return false;
-    
+  } else if (request.action === 'OPEN_TAB_REQUEST') {
+    chrome.sidePanel.setOptions({
+      tabId: request.data.tabId,
+      enabled: true,
+    });
+    return false;
   } else if (request.action === 'REINJECT_SCRIPTS') {
-    const tabId = request.tabId;  
+    const tabId = request.tabId;
     return false;
   } else if (request.action === 'SIDEPANEL_ALIVE_CHECK') {
     // Send response back to side panel
     sendResponse({ status: 'alive' });
   } else if (request.action === 'URL_UPDATE_DETECTED') {
     // Ignore messages originating from the background script itself
-    return false  ;
+    return false;
   } else if (request.action === 'speakText') {
-      let locale = request.locale || 'en-US';
-      chrome.tts.speak(request.text, {
-        lang: locale,
-        pitch: 0.5,
-        volume: 1,
+    let locale = request.locale || 'en-US';
+    chrome.tts.speak(request.text, {
+      lang: locale,
+      pitch: 0.5,
+      volume: 1,
 
-        onEvent: (event) => {
-          if (event.type == 'end') {
-            sendResponse('Speech complete');
-          }
-        },
-      });
+      onEvent: (event) => {
+        if (event.type == 'end') {
+          sendResponse('Speech complete');
+        }
+      },
+    });
 
-      return true;
-    }
+    return true;
+  }
   return false;
 }
-
-
 
 function handleBackgroundActions(
   request: any,
@@ -81,20 +80,14 @@ function handleBackgroundActions(
 ): boolean {
   const actionName = request.action;
 
-  if(HANDLER_BACKGROUND_ACTIONS[actionName as keyof typeof HANDLER_BACKGROUND_ACTIONS]){
-
-    return  handleMessagesBackground(request, sender, sendResponse);
-
-  }else if (HANDLER_ACTIONS[actionName as keyof typeof HANDLER_ACTIONS]) {
-    
+  if (HANDLER_BACKGROUND_ACTIONS[actionName as keyof typeof HANDLER_BACKGROUND_ACTIONS]) {
+    return handleMessagesBackground(request, sender, sendResponse);
+  } else if (HANDLER_ACTIONS[actionName as keyof typeof HANDLER_ACTIONS]) {
     return handleProxyActions(request, sender, sendResponse);
-  
-  }else {
-
+  } else {
     console.warn(`[Background Proxy] Action "${actionName}" não possui configuração registada.`);
     return false;
   }
-
 }
 
 function handleProxyActions(
@@ -104,8 +97,8 @@ function handleProxyActions(
 ): boolean {
   const actionName = request.action;
   const actionConfig = HANDLER_ACTIONS[actionName as keyof typeof HANDLER_ACTIONS];
-  
-    console.log(`[Background Proxy] Iniciando action: ${actionName}`);
+
+  console.log(`[Background Proxy] Iniciando action: ${actionName}`);
 
   if (!actionConfig) {
     console.warn(`[Background Proxy] Action "${actionName}" não possui configuração registada.`);
@@ -119,21 +112,15 @@ function handleProxyActions(
       throw new TabNotActiveError('Não foi possível identificar o ID da tab destino.');
     }
 
-    sendMessageToTab(
-      tabId,
-      request,
-      { sendResponse },
-      tryScriptReinjectionAndRetryResponse
-    );
+    sendMessageToTab(tabId, request, { sendResponse }, tryScriptReinjectionAndRetryResponse);
 
     console.log(`[Background Proxy] Action ${actionName} processada. Canal aberto`);
     return true;
-
   } catch (error) {
     console.error(`[Background Proxy] Erro síncrono em ${actionName}:`, error);
-    
+
     processErrorEventCallbackBackground(error as Error, { sendResponse });
-   
-    return false; 
+
+    return false;
   }
 }

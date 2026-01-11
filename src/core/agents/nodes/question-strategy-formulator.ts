@@ -1,14 +1,12 @@
-import { GraphState } from "../state";
-import { LLM } from "../langgraph-orchestrator";
-import { QuestionGenerationObjective } from "../domain/ObjectiveBuilder";
-
+import { GraphState } from '../state';
+import { LLM } from '../langgraph-orchestrator';
+import { QuestionGenerationObjective } from '../domain/ObjectiveBuilder';
 
 export const strategyFormulator = async (state: typeof GraphState.State) => {
-  const { currentObjectiveMessages, importantContext } =
-    state;
+  const { currentObjectiveMessages, importantContext } = state;
   const currentObjective = state.currentObjective as QuestionGenerationObjective;
 
-  LLM.model = "gpt-4o";
+  LLM.model = 'gpt-4o';
   LLM.temperature = 0;
   LLM.topP = 1;
   LLM.maxTokens = 100;
@@ -28,17 +26,17 @@ function generatePrompt(
   currentObjective: QuestionGenerationObjective | null,
 ) {
   return {
-    role: "system",
+    role: 'system',
     content: `Define a short strategy to achieve the Objective, considering that previous attempts failed.
 
-Knowledge Base: ${importantContext.join(", ")}
+Knowledge Base: ${importantContext.join(', ')}
 Objective: ${currentObjective?.objective}
 ${
   currentObjective?.requirements
     ? `Requirements:
 ${currentObjective.requirements}
 - Note: Requirements describe the type or characteristics of the answers that the questions you will generate should aim to elicit. They guide the focus of your strategy without providing the exact answers.\n`
-    : ""
+    : ''
 }
 Guidance of Types of Chatbots:
     - If the **rule-based** or  **intent-based**, focus on strategy for short questions focusing in keywords that can be answered with predefined responses.
@@ -54,7 +52,7 @@ Context:
 - ***If questions failed multiple times choose the most relevant domain/topic to achieve the Objective from Knowledge Base.***
 
 Instructions:
-- Focus on the Knowledge Base${currentObjective?.requirements ? " and the Requirements" : ""}.
+- Focus on the Knowledge Base${currentObjective?.requirements ? ' and the Requirements' : ''}.
 - Design the strategy so that generated questions align with the **Chatbot Type** and respect its limitations, ensuring the chatbot can accurately comprehend and respond.
 - Prefer questions about publicly available information and general entity topics.
 - Avoid questions requiring personal, contextual, or transactional data that the chatbot cannot handle.
@@ -64,5 +62,3 @@ Instructions:
 - Output only the strategy as plain text, maximum 2 lines (one line break allowed), no extra explanations.`,
   };
 }
-
-

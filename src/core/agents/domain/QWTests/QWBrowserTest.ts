@@ -1,8 +1,7 @@
-import QWStandardTest from "./QWStandardTest";
-import { TEST_TYPE, TestConditions } from "./types";
-import { ISerializable } from "../ISerializable";
-import BrowserTest, { TypeTestOutcome } from "./browser-tests/BrowserTest";
-
+import QWStandardTest from './QWStandardTest';
+import { TEST_TYPE, TestConditions } from './types';
+import { ISerializable } from '../ISerializable';
+import BrowserTest, { TypeTestOutcome } from './browser-tests/BrowserTest';
 
 class QWBrowserTest extends QWStandardTest implements ISerializable {
   readonly _type: string = TEST_TYPE.QW_BROWSER_TEST;
@@ -10,14 +9,14 @@ class QWBrowserTest extends QWStandardTest implements ISerializable {
   constructor(
     check: string,
     title: string,
-    selector:string,
+    selector: string,
     objective: string,
     requirements: string,
     exceptions: string,
     conditions: TestConditions,
     outcome?: TypeTestOutcome,
   ) {
-    super(check, title,selector, objective, requirements, exceptions);
+    super(check, title, selector, objective, requirements, exceptions);
     this.test = new BrowserTest(conditions, outcome);
   }
 
@@ -31,7 +30,7 @@ class QWBrowserTest extends QWStandardTest implements ISerializable {
       ...super.toJSON(),
       test: this.test.toJSON(),
     };
-    obj["_type"] = this._type;
+    obj['_type'] = this._type;
     return obj;
   }
 }

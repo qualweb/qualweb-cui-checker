@@ -1,13 +1,11 @@
-import {  PortCommunicationMessage, PortsOfCommunication } from '../messaging/message-types';
+import { PortCommunicationMessage, PortsOfCommunication } from '../messaging/message-types';
 import { ACTION_GRAPH } from './action-type';
-
 
 class PortCommunication {
   private portSidepanel?: chrome.runtime.Port;
   private portContent?: chrome.runtime.Port;
 
-
-  public getPortSidepanel(): chrome.runtime.Port | undefined{
+  public getPortSidepanel(): chrome.runtime.Port | undefined {
     return this.portSidepanel;
   }
   public getPortContent(): chrome.runtime.Port | undefined {
@@ -17,7 +15,7 @@ class PortCommunication {
   public getPorts(): PortsOfCommunication {
     return {
       SIDEBAR: this.portSidepanel,
-      CONTENT: this.portContent
+      CONTENT: this.portContent,
     };
   }
 
@@ -29,21 +27,17 @@ class PortCommunication {
     this.portContent = port;
     return this;
   }
-  
-  public sendMessageToSidepanel(message: PortCommunicationMessage): void {
 
+  public sendMessageToSidepanel(message: PortCommunicationMessage): void {
     if (this.portSidepanel) {
       this.portSidepanel.postMessage(message);
-    } 
-
+    }
   }
 
   public sendMessageToContent(message: PortCommunicationMessage): void {
-
     if (this.portContent) {
       this.portContent.postMessage(message);
-    } 
-   
+    }
   }
 
   public isCommunicationReady(): boolean {

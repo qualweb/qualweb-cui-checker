@@ -4,11 +4,11 @@ export class InteractionState {
   public currentRule: string = '';
   public currentTitle: string = '';
   public currentStatus: string = '';
-   public skipInterrupt: boolean = false;
+  public skipInterrupt: boolean = false;
   public waitingOnStream: boolean = false;
 
   public createNewController() {
-    if (this.controller) this.controller.abort(); 
+    if (this.controller) this.controller.abort();
     this.controller = new AbortController();
     this.running = true;
     return this.controller.signal;

@@ -6,7 +6,7 @@ export const setSelectorsDetected = ({ commit }, payload) => {
 
 export const setCuiSpeechTests = ({ commit }, payload) => {
   commit(types.SETCUISPEECHTESTS, payload);
-}
+};
 
 export const setTabId = ({ commit }, payload) => {
   commit(types.SETTABID, payload);

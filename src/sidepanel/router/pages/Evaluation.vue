@@ -38,7 +38,7 @@ export default {
       'setStartingFilter',
       'setEvaluateChatbot',
     ]),
-    ...mapGetters(['getEvaluated', 'getFirstRule', 'getResultFilter','getSelectors']),
+    ...mapGetters(['getEvaluated', 'getFirstRule', 'getResultFilter', 'getSelectors']),
     async cancelEvaluation() {
       this.cancel = true;
       this.reset();
@@ -61,69 +61,68 @@ export default {
       chatbotWcagResult,
       summary,
       chatbotSummary;
-      this.state = 'Initializing evaluation';
-      try {
-       const responseStart = await startEvaluation(this.getTabId, this.getSelectors());
-       if(!responseStart || responseStart.status !== 'success') {
-         
-         throw new Error('Failed to start evaluation');
-       }
-  
-    if (modules.act) {
-      this.state = 'Evaluating ACT module';
-      if (this.cancel) return;
-      const response = await evaluateACT(this.getTabId);
-      if(!response || response.status !== 'success') {
-        throw new Error('Failed to evaluate ACT module');
+    this.state = 'Initializing evaluation';
+    try {
+      const responseStart = await startEvaluation(this.getTabId, this.getSelectors());
+      if (!responseStart || responseStart.status !== 'success') {
+        throw new Error('Failed to start evaluation');
       }
-      [actResult, chatbotActResult] = response.data;
-      this.setACT(actResult);
-      chatbotActResult && this.setChatbotACT(chatbotActResult);
-    }
-    if (modules.wcag) {
-      this.state = 'Evaluating WCAG module';
-      if (this.cancel) return;
-      const response = await evaluateWCAG(this.getTabId);
-      if(!response || response.status !== 'success') {
-        throw new Error('Failed to evaluate WCAG module');
+
+      if (modules.act) {
+        this.state = 'Evaluating ACT module';
+        if (this.cancel) return;
+        const response = await evaluateACT(this.getTabId);
+        if (!response || response.status !== 'success') {
+          throw new Error('Failed to evaluate ACT module');
+        }
+        [actResult, chatbotActResult] = response.data;
+        this.setACT(actResult);
+        chatbotActResult && this.setChatbotACT(chatbotActResult);
       }
-      [wcagResult, chatbotWcagResult] = response.data;
-      this.setWCAG(wcagResult);
-      chatbotWcagResult && this.setChatbotWCAG(chatbotWcagResult);
-    }
-    if (modules.cui) {
-      this.state = 'Evaluating CUI module';
-      if (this.cancel) return;
-      const response = await evaluateCUI(this.getTabId);
-      if(!response || response.status !== 'success') {
-        throw new Error('Failed to evaluate CUI module');
+      if (modules.wcag) {
+        this.state = 'Evaluating WCAG module';
+        if (this.cancel) return;
+        const response = await evaluateWCAG(this.getTabId);
+        if (!response || response.status !== 'success') {
+          throw new Error('Failed to evaluate WCAG module');
+        }
+        [wcagResult, chatbotWcagResult] = response.data;
+        this.setWCAG(wcagResult);
+        chatbotWcagResult && this.setChatbotWCAG(chatbotWcagResult);
       }
-      [cuiResult, chatbotCuiResult] = response.data;
-      this.setCUI(cuiResult);
-      chatbotCuiResult && this.setChatbotCUI(chatbotCuiResult);
-    }
-    this.state = 'Ending evaluation';
-    if (this.cancel) return;
-    const response = await endEvaluation(this.getTabId);
-      if(!response || response.status !== 'success') {
+      if (modules.cui) {
+        this.state = 'Evaluating CUI module';
+        if (this.cancel) return;
+        const response = await evaluateCUI(this.getTabId);
+        if (!response || response.status !== 'success') {
+          throw new Error('Failed to evaluate CUI module');
+        }
+        [cuiResult, chatbotCuiResult] = response.data;
+        this.setCUI(cuiResult);
+        chatbotCuiResult && this.setChatbotCUI(chatbotCuiResult);
+      }
+      this.state = 'Ending evaluation';
+      if (this.cancel) return;
+      const response = await endEvaluation(this.getTabId);
+      if (!response || response.status !== 'success') {
         // TODO Throw Custom Error
         throw new Error('Failed to end evaluation');
       }
-   
-    [summary, chatbotSummary] = response.data;
-    this.setSummary(summary);
-    chatbotSummary && this.setChatbotSummary(chatbotSummary);
-    chatbotSummary && this.setEvaluateChatbot(true);
-    this.setStartingFilter(modules);
-    this.setCurrentRule(this.getFirstRule());
-    if (this.cancel) return;
-    this.$router.push('/evaluation'); } 
-    catch (error) {
-        console.error('Error during evaluation initialization:', error);
-        this.cancel = true;
-        this.reset();
-        throw new EvaluationError(error.message);
-        /*this.$router.push({
+
+      [summary, chatbotSummary] = response.data;
+      this.setSummary(summary);
+      chatbotSummary && this.setChatbotSummary(chatbotSummary);
+      chatbotSummary && this.setEvaluateChatbot(true);
+      this.setStartingFilter(modules);
+      this.setCurrentRule(this.getFirstRule());
+      if (this.cancel) return;
+      this.$router.push('/evaluation');
+    } catch (error) {
+      console.error('Error during evaluation initialization:', error);
+      this.cancel = true;
+      this.reset();
+      throw new EvaluationError(error.message);
+      /*this.$router.push({
             path: '/error',
             query: { error: error.message },
           });

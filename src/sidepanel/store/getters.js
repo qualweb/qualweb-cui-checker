@@ -252,5 +252,8 @@ export const getTabId = (state) => state.tabId;
 export const getSidepanelURL = (state) => state.sidepanelURL;
 export const getIsMicrophoneAvailable = (state) => {
   const selectors = state.storage.selectors;
-  return (selectors && selectors.microphoneSelector && selectors.microphoneSelector.trim() !== '') || false;
-}
+  return (
+    (selectors && selectors.microphoneSelector && selectors.microphoneSelector.trim() !== '') ||
+    false
+  );
+};

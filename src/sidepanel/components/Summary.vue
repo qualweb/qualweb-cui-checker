@@ -56,9 +56,9 @@ import HighlightAll from './HighlightAll.vue';
 export default {
   name: 'Summary',
   components: {
-      RunAgain,
-      Export,
-      HighlightAll,
+    RunAgain,
+    Export,
+    HighlightAll,
   },
   computed: {
     ...mapGetters({

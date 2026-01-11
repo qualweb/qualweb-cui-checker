@@ -1,32 +1,32 @@
-import BaseAction from "./BaseAction";
-import { ACTION_TYPE, IMarkElementAction } from "../types";
+import BaseAction from './BaseAction';
+import { ACTION_TYPE, IMarkElementAction } from '../types';
 
 class MarkElementAction extends BaseAction implements IMarkElementAction {
-    readonly _type = ACTION_TYPE.MARK_ELEMENT_ACTION;
-    selector: string;
-    check: string;
-    
-    constructor(check: string,selector: string) {
-        super();
-        this.selector = selector;
-        this.check = check;
-    }
+  readonly _type = ACTION_TYPE.MARK_ELEMENT_ACTION;
+  selector: string;
+  check: string;
 
-    getSelector(): string {
-        return this.selector;
-    }
+  constructor(check: string, selector: string) {
+    super();
+    this.selector = selector;
+    this.check = check;
+  }
 
-    getCheck(): string {
-        return this.check;
-    }
+  getSelector(): string {
+    return this.selector;
+  }
 
-    toJSON(): object {
-        return {
-            _type: this._type,
-            selector: this.selector,
-            check: this.check,
-        };
-    }
+  getCheck(): string {
+    return this.check;
+  }
+
+  toJSON(): object {
+    return {
+      _type: this._type,
+      selector: this.selector,
+      check: this.check,
+    };
+  }
 }
 
 export default MarkElementAction;

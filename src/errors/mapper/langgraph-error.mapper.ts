@@ -1,10 +1,10 @@
-import  {ErrorClass} from "..";
+import { ErrorClass } from '..';
 /** Maps LangGraph errors to custom error classes.
- *  
+ *
  * @param err  The error object from LangGraph.
  * @returns  A specific Error subclass based on the lc_error_code.
  */
-export function mapLangGraphError(err:Error & { lc_error_code?: string }): Error {
+export function mapLangGraphError(err: Error & { lc_error_code?: string }): Error {
   const message = err.message || 'LangGraph error';
 
   switch (err.lc_error_code) {

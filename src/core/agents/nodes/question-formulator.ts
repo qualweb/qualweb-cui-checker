@@ -1,18 +1,16 @@
-import { GraphState } from "../state";
-import { SystemMessage } from "@langchain/core/messages";
-import {  STATUS_GRAPH } from "../domain/types";
+import { GraphState } from '../state';
+import { SystemMessage } from '@langchain/core/messages';
+import { STATUS_GRAPH } from '../domain/types';
 import { LLM, Settings } from '../langgraph-orchestrator';
-import { QuestionGenerationObjective } from "../domain/ObjectiveBuilder";
-import { GraphOutputAction, IQWGraphOutput } from "../domain/GraphOutput/types";
-import QuestionAction from "../domain/GraphOutput/actions/QuestionAction";
+import { QuestionGenerationObjective } from '../domain/ObjectiveBuilder';
+import { GraphOutputAction, IQWGraphOutput } from '../domain/GraphOutput/types';
+import QuestionAction from '../domain/GraphOutput/actions/QuestionAction';
 
-export const callQuestionFormulator = async (
-  state: typeof GraphState.State,
-) => {
-  const {  strategy, importantContext,graphOutput } = state;
+export const callQuestionFormulator = async (state: typeof GraphState.State) => {
+  const { strategy, importantContext, graphOutput } = state;
   const currentObjective = state.currentObjective as QuestionGenerationObjective;
-  
-  LLM.model = "gpt-4o";
+
+  LLM.model = 'gpt-4o';
   LLM.temperature = 0.1;
   LLM.topP = 1;
   LLM.frequencyPenalty = 0.3;
@@ -20,11 +18,7 @@ export const callQuestionFormulator = async (
   LLM.maxTokens = 150;
   LLM.n = 1;
 
-  const systemMessage = preparePrompt(
-    strategy!,
-    currentObjective,
-    importantContext,
-  );
+  const systemMessage = preparePrompt(strategy!, currentObjective, importantContext);
 
   const result = await LLM.invoke([systemMessage]);
   //Revert options for LLM
@@ -33,10 +27,10 @@ export const callQuestionFormulator = async (
   LLM.presencePenalty = undefined;
   LLM.maxTokens = undefined;
   LLM.n = undefined;
-  
+
   const question_action = new QuestionAction(result.text.trim()).toJSON() as GraphOutputAction;
-  
-  const updateOutput:IQWGraphOutput = {
+
+  const updateOutput: IQWGraphOutput = {
     ...graphOutput,
     status: STATUS_GRAPH.IN_PROGRESS,
     actions: [...(graphOutput?.actions || []), question_action],
@@ -51,7 +45,7 @@ export const callQuestionFormulator = async (
 };
 
 function preparePrompt(
-  strategy: string ,
+  strategy: string,
   currentObjective: QuestionGenerationObjective,
   importantContext: string[],
 ) {
@@ -64,8 +58,8 @@ function preparePrompt(
 
 
     Objective: ${currentObjective.objective}
-      ${currentObjective.requirements ? `Requirements: "${currentObjective.requirements}"\n` : ""}
-    Knowledge Base: ${importantContext.join(", ")}
+      ${currentObjective.requirements ? `Requirements: "${currentObjective.requirements}"\n` : ''}
+    Knowledge Base: ${importantContext.join(', ')}
     
     Guidance of Types of Chatbots:
     - If the **rule-based** or  **intent-based**, focus on  short questions focusing in keywords that can be answered with predefined responses.
@@ -85,7 +79,7 @@ function preparePrompt(
     ${
       currentObjective?.requirements
         ? `- The Requirements indicate the type of answer your question should elicit.`
-        : ""
+        : ''
     }
 `);
 }

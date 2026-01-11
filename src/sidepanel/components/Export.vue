@@ -1,8 +1,7 @@
 <template>
-    <div>
+  <div>
     <a href="#" @click.prevent="exportFile"> <span class="icon">📄</span>JSON</a>
   </div>
-
 </template>
 
 <script>

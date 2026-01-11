@@ -17,7 +17,7 @@
           <ul>
             <li><PDFReport @buttonClicked="toggleDropdown"></PDFReport></li>
             <li><CSVReport @buttonClicked="toggleDropdown"></CSVReport></li>
-            <li><Export @buttonClicked="toggleDropdown" ></Export></li>
+            <li><Export @buttonClicked="toggleDropdown"></Export></li>
           </ul>
         </div>
       </div>

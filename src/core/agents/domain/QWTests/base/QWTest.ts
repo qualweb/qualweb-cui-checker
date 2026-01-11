@@ -1,7 +1,6 @@
-
-import { StatusTest } from "../../types";
-import { ISerializable } from "../../ISerializable";
-import { TEST_TYPE } from "../types";
+import { StatusTest } from '../../types';
+import { ISerializable } from '../../ISerializable';
+import { TEST_TYPE } from '../types';
 
 abstract class QWTest implements ISerializable {
   readonly _type: string = TEST_TYPE.QW_TEST;
@@ -9,17 +8,12 @@ abstract class QWTest implements ISerializable {
   private readonly title: string;
   private readonly selector: string;
   private counterExecution: number = 0;
-  private status: StatusTest = "not_started";
+  private status: StatusTest = 'not_started';
 
-  constructor(
-    check: string,
-    title: string,
-    selector:string,
-  ) {
+  constructor(check: string, title: string, selector: string) {
     this.check = check;
     this.title = title;
     this.selector = selector;
-
   }
   public getCheck(): string {
     return this.check;
@@ -54,7 +48,7 @@ abstract class QWTest implements ISerializable {
       title: this.title,
       selector: this.selector,
       status: this.status,
-      counterExecution: this.counterExecution
+      counterExecution: this.counterExecution,
     };
   }
 }

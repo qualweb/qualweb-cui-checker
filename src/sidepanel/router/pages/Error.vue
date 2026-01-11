@@ -40,8 +40,7 @@ const errorMessage = ref('');
 
 onMounted(() => {
   errorMessage.value = route.query.error || 'An unknown error occurred.';
-  sendActionShowNotification(store.state.tabId,errorMessage.value);
-
+  sendActionShowNotification(store.state.tabId, errorMessage.value);
 });
 
 const goHome = () => {

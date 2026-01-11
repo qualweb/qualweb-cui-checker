@@ -8,9 +8,13 @@ import * as ErrorClass from '../../../errors/content/errors.class.content';
 export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLElement[]> {
   elementTracker: ElementFoundManager<HTMLElement>;
   signal: AbortSignal;
-  chatbotActions:ChatbotActions;
+  chatbotActions: ChatbotActions;
 
-  constructor(chatbotActions:ChatbotActions,elementTracker: ElementFoundManager<HTMLElement>, signal: AbortSignal) {
+  constructor(
+    chatbotActions: ChatbotActions,
+    elementTracker: ElementFoundManager<HTMLElement>,
+    signal: AbortSignal,
+  ) {
     super();
     this.chatbotActions = chatbotActions;
     this.signal = signal;
@@ -24,7 +28,7 @@ export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLEleme
     this.on('childList:removed', this.handleRemovedNodes.bind(this));
   }
 
-   public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement[]>): void {
+  public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement[]>): void {
     this.signal.throwIfAborted();
     this.observer = new MutationObserver(this.mutationCallback);
     const microphoneNodes = this.chatbotActions.getChabotElements().getMicrophoneElement();
@@ -38,19 +42,18 @@ export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLEleme
 
     this.timeoutManager = timeoutManager;
     this.timeoutManager.setup(() => this.disconnect());
-
   }
 
   async init(): Promise<HTMLElement[]> {
     if (!this.timeoutManager) {
-      throw new Error("TimeoutManager not set up.");
+      throw new Error('TimeoutManager not set up.');
     }
     this.elementTracker.clear();
     this.timeoutManager.startTimeout();
 
-    this.signal.throwIfAborted(); 
+    this.signal.throwIfAborted();
     await sleep(1000);
-    this.signal.throwIfAborted(); 
+    this.signal.throwIfAborted();
 
     try {
       // Wait a bit to avoid capturing old messages
@@ -66,11 +69,11 @@ export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLEleme
       throw error;
     }
   }
-   protected cleanup(): void {
+  protected cleanup(): void {
     try {
       super.cleanup();
       this.elementTracker.clear();
-    } catch  {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -80,14 +83,7 @@ export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLEleme
     for (const addedNode of mutation.addedNodes) {
       // Only allow nodes of type Element
       if (addedNode.nodeType !== Node.ELEMENT_NODE) continue;
-     // if button added or clickable element added
-
-
-      
-
-   
-
-      
+      // if button added or clickable element added
     }
   }
 
@@ -96,18 +92,18 @@ export class MutationMicButtonsDetect extends AbstractMutationObserver<HTMLEleme
     for (const removedNode of mutation.removedNodes) {
       // Only allow nodes of type Element
       if (removedNode.nodeType !== Node.ELEMENT_NODE) continue;
-      const selectorMicrophone = this.chatbotActions.getChabotElements().getSelectors().microphoneSelector;
+      const selectorMicrophone = this.chatbotActions
+        .getChabotElements()
+        .getSelectors().microphoneSelector;
       if (!selectorMicrophone) continue;
       const microphoneElement = (removedNode as HTMLElement).matches(selectorMicrophone);
       if (microphoneElement) {
-      //  this.elementTracker.removeElement(removedNode as HTMLElement);
+        //  this.elementTracker.removeElement(removedNode as HTMLElement);
       }
       // Ignorar mutação se for dentro do elemento de input ou caso o removedNode contenha o ignoreInput
       // if button removed
     }
   }
-
-
 
   cancelMutationObserver(): void {
     this.timeoutManager?.stopTimeout();

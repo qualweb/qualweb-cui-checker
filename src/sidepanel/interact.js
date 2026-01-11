@@ -1,4 +1,4 @@
-async function startLLMInteraction(tabId,selectors,isSpeechTestsEnabled) {
+async function startLLMInteraction(tabId, selectors, isSpeechTestsEnabled) {
   let settingsStorage = await getQualWebSettings();
   console.log('Starting LLM Interaction with settings:', settingsStorage.options);
   return sendActionToBackground('START_LLM_INTERACTION', {
@@ -9,7 +9,7 @@ async function startLLMInteraction(tabId,selectors,isSpeechTestsEnabled) {
   });
 }
 
-async function startLLMSoundInteraction(tabId,selectors,isSpeechTestsEnabled) {
+async function startLLMSoundInteraction(tabId, selectors, isSpeechTestsEnabled) {
   let settingsStorage = await getQualWebSettings();
   return sendActionToBackground('START_LLM_SOUND_INTERACTION', {
     settings: settingsStorage.options,

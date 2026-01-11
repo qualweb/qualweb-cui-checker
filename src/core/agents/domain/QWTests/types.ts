@@ -1,6 +1,4 @@
-
-
-type TestOutcome = "passed" | "failed" | "warning" | "inapplicable";
+type TestOutcome = 'passed' | 'failed' | 'warning' | 'inapplicable';
 
 export interface TestConditions {
   // Description of when Test should be passed
@@ -21,7 +19,6 @@ interface QwBrowserTest {
 }
 
 interface SpeechBrowserTest extends QwBrowserTest {
-  
   // transcript of the audio input
   readonly transcript: string;
   // expected response or description of expected response
@@ -51,7 +48,7 @@ interface GenerateResponseObjective extends ObjectiveBase {
 }
 
 interface ObjectiveStatus {
-  status: "not_started" | "in_progress" | "completed" | "failed";
+  status: 'not_started' | 'in_progress' | 'completed' | 'failed';
   counter: number;
 }
 
@@ -66,13 +63,13 @@ export interface RecognitionObjective extends ObjectiveBase {
 }
 
 export const TEST_TYPE = {
-  QW_BROWSER_TEST: "QWBrowserTest",
-  QW_RECOGNITION_TEST: "QWRecognitionTest",
-  QW_STANDARD_TEST: "QWStandardTest",
-  QW_TEST: "QWTest",
+  QW_BROWSER_TEST: 'QWBrowserTest',
+  QW_RECOGNITION_TEST: 'QWRecognitionTest',
+  QW_STANDARD_TEST: 'QWStandardTest',
+  QW_TEST: 'QWTest',
 } as const;
 
 export const BROWSER_TEST_TYPE = {
-  BROWSER_TEST: "BrowserTest",
-  RECOGNITION_BROWSER_TEST: "RecognitionBrowserTest",
+  BROWSER_TEST: 'BrowserTest',
+  RECOGNITION_BROWSER_TEST: 'RecognitionBrowserTest',
 } as const;

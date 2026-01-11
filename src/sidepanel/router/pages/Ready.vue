@@ -49,7 +49,7 @@
           bgColor="#e15500"
           checkColor="#ffffff"
         />
-          <Checkbox
+        <Checkbox
           v-if="cuiValue && isMicrophoneAvailable"
           idValue="speechTestsCheckbox"
           :label="'CUI Speech Tests'"
@@ -129,8 +129,6 @@ const setEvaluated = async (idValue, value) => {
   });
 };
 
-
-
 const onSettingsClick = () => {
   chrome.runtime.openOptionsPage();
 };
@@ -178,7 +176,7 @@ const updateEvaluated = async (idValue, event) => {
 
 const updateEvaluatedCui = async (idValue, event) => {
   generateResponsesActive.value = !event.checked;
-  if(!generateResponsesActive.value){
+  if (!generateResponsesActive.value) {
     await store.dispatch('setCuiSpeechTests', false);
     speechTestsValue.value = false;
   }

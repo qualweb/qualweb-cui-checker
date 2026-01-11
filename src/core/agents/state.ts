@@ -1,10 +1,9 @@
-import { Annotation, MessagesAnnotation } from "./langgraph_lib"
-import { BaseMessage } from "@langchain/core/messages";
-import { StatusGraph,STATUS_GRAPH} from "./domain/types";
-import { TGraphInput } from "./domain/GraphInput/types";
-import { IQWGraphOutput } from "./domain/GraphOutput/types";
-import { generateQualWebTests,ObjectiveSerialized} from "./domain/ObjectiveBuilder";
-
+import { Annotation, MessagesAnnotation } from './langgraph_lib';
+import { BaseMessage } from '@langchain/core/messages';
+import { StatusGraph, STATUS_GRAPH } from './domain/types';
+import { TGraphInput } from './domain/GraphInput/types';
+import { IQWGraphOutput } from './domain/GraphOutput/types';
+import { generateQualWebTests, ObjectiveSerialized } from './domain/ObjectiveBuilder';
 
 let QUALWEB_TESTS: Record<string, ObjectiveSerialized>;
 export function initCUISpeechRecognitionTests(useRecognitionTests: boolean = false) {
@@ -61,7 +60,7 @@ export const GraphState = Annotation.Root({
     reducer: (_prev, next) => next,
     default: () => ({
       status: STATUS_GRAPH.NOT_STARTED,
-      actions: []
+      actions: [],
     }),
   }),
   status: Annotation<StatusGraph>({

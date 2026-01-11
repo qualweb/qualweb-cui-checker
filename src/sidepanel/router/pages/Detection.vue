@@ -10,7 +10,7 @@
   </div>
 
   <div class="container" v-else>
-    <Loading v-if="!currentAction" ></Loading>
+    <Loading v-if="!currentAction"></Loading>
     <component v-if="!isUserManualSelecting" :is="currentAction" :prompt="currentPrompt" />
     <div class="container" v-if="isUserManualSelecting">
       <h1>Please click on microphone button</h1>
@@ -146,8 +146,8 @@ export default {
     async cancelManualSelection() {
       const result = await cancelManualSelectMic(this.resultSelectors, this.getTabId);
       if (!result || result.status === STATUS.ERROR) {
-       defaultErrorHandler({ error: result, router: this.$router });
-       return;
+        defaultErrorHandler({ error: result, router: this.$router });
+        return;
       }
       this.isUserManualSelecting = false;
     },
@@ -163,9 +163,17 @@ export default {
         // end verification old step
         if (this.workflow[this.currentStep].nameElement != null) {
           try {
-            await endVerificationElement(this.resultSelectors,this.workflow[this.currentStep].nameElement, this.getTabId);
+            await endVerificationElement(
+              this.resultSelectors,
+              this.workflow[this.currentStep].nameElement,
+              this.getTabId,
+            );
           } catch (error) {
-            console.log('Error ending verification for element:', this.workflow[this.currentStep].nameElement, error);
+            console.log(
+              'Error ending verification for element:',
+              this.workflow[this.currentStep].nameElement,
+              error,
+            );
             this.$router.push('/');
             return;
           }
@@ -178,7 +186,7 @@ export default {
             this.workflow[this.currentStep].nameElement,
             this.getTabId,
           );
-          
+
           if (result.status === STATUS.ERROR) {
             this.$router.push('/');
             return;
@@ -189,11 +197,15 @@ export default {
         this.currentAction = 'ActionPrompt';
       } else {
         if (this.workflow[this.currentStep].nameElement != null) {
-        const result = await endVerificationElement(this.resultSelectors,this.workflow[this.currentStep].nameElement, this.getTabId);
-        if (!result || result.status === STATUS.ERROR) {
-          defaultErrorHandler({ error: result, router: this.$router });
-          return;
-        }
+          const result = await endVerificationElement(
+            this.resultSelectors,
+            this.workflow[this.currentStep].nameElement,
+            this.getTabId,
+          );
+          if (!result || result.status === STATUS.ERROR) {
+            defaultErrorHandler({ error: result, router: this.$router });
+            return;
+          }
         }
         await new Promise((resolve) => setTimeout(resolve, 500));
         console.log('Finishing workflow');
@@ -230,8 +242,8 @@ export default {
       this.isUserManualSelecting = true;
       const result = await manualSelectMic(this.resultSelectors, this.getTabId);
       if (!result || result.status === STATUS.ERROR) {
-       defaultErrorHandler({ error: result, router: this.$router });
-       return;
+        defaultErrorHandler({ error: result, router: this.$router });
+        return;
       }
       this.isUserManualSelecting = false;
       console.log('Result', result);
@@ -239,7 +251,7 @@ export default {
         this.resultSelectors = result.data;
 
         this.addQuestionIsMicrophoneCorrect();
-        
+
         await this.nextQuestion();
       } else {
         await this.reloadQuestion();
@@ -255,28 +267,29 @@ export default {
     requestCorrectionElementLLM(nameElement) {
       this.state = 'Requesting Correction';
       this.setDetectingChatbot(true);
-      startCorrectionChatbot(this.resultSelectors, nameElement, this.getTabId).then(async (result) => {
-        console.log('Correction result for', nameElement, result);
-        this.resultSelectors[nameElement] = result.data;
-        this.setDetectingChatbot(false);
-        const response =  await startVerificationElement(
+      startCorrectionChatbot(this.resultSelectors, nameElement, this.getTabId)
+        .then(async (result) => {
+          console.log('Correction result for', nameElement, result);
+          this.resultSelectors[nameElement] = result.data;
+          this.setDetectingChatbot(false);
+          const response = await startVerificationElement(
             this.resultSelectors,
             this.workflow[this.currentStep].nameElement,
             this.getTabId,
           );
-        if (!response || response.status === STATUS.ERROR) {
+          if (!response || response.status === STATUS.ERROR) {
             this.state = 'Error during verification of corrected element';
             new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
-            defaultErrorHandler({ error: response, router: this.$router });
-          });
-
-        }
-      }).catch(async (error) => {
-        this.state = 'Error during correction';
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        this.setDetectingChatbot(false);
-        handleErrorSidepanel({ error: error, router: this.$router });
-      });
+              defaultErrorHandler({ error: response, router: this.$router });
+            });
+          }
+        })
+        .catch(async (error) => {
+          this.state = 'Error during correction';
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          this.setDetectingChatbot(false);
+          handleErrorSidepanel({ error: error, router: this.$router });
+        });
     },
   },
   async mounted() {
@@ -289,29 +302,33 @@ export default {
       const procedureResult = await startPageChatbotProcedure(this.getTabId);
       console.log('Chatbot detection result:', procedureResult);
       if (!procedureResult || procedureResult.status === STATUS.ERROR) {
-           await defaultErrorHandler({ error: procedureResult, router: this.$router });
-            return;
-        }
-      if(procedureResult.code === '"CANCELLED_DETECTION"'){
-          this.$router.go(-1);
-          return;
+        await defaultErrorHandler({ error: procedureResult, router: this.$router });
+        return;
       }
-        console.log('Detected selectors:', procedureResult);
+      if (procedureResult.code === '"CANCELLED_DETECTION"') {
+        this.$router.go(-1);
+        return;
+      }
+      console.log('Detected selectors:', procedureResult);
       this.resultSelectors = procedureResult.data.selectors;
 
       this.state = 'Chatbot Detected';
       await new Promise((resolve) => setTimeout(resolve, 1000));
       this.setDetectingChatbot(false);
       this.state = 'Verifying Chatbot Elements';
-       await new Promise((resolve) => setTimeout(resolve, 1000));
-         const verificationRequest = await startVerificationElement(this.resultSelectors,this.workflow[this.currentStep].nameElement, this.getTabId);
-        if (!verificationRequest || verificationRequest.status === STATUS.ERROR) {
-            this.state = 'Error during verification';
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            await defaultErrorHandler({ error: verificationRequest, router: this.$router });
-            return;
-        }
-     
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const verificationRequest = await startVerificationElement(
+        this.resultSelectors,
+        this.workflow[this.currentStep].nameElement,
+        this.getTabId,
+      );
+      if (!verificationRequest || verificationRequest.status === STATUS.ERROR) {
+        this.state = 'Error during verification';
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await defaultErrorHandler({ error: verificationRequest, router: this.$router });
+        return;
+      }
+
       this.currentAction = 'ActionPrompt';
       if (!this.resultSelectors.microphoneSelector) {
         this.removeQuestionMicrophone();
@@ -324,7 +341,6 @@ export default {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log('Handling error in Detection.vue:', error);
       handleErrorSidepanel(errorArgs);
-
     }
   },
 };

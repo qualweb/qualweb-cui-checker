@@ -1,3 +1,3 @@
-export  *  from "./GraphInitialInput";
-export  *  from "./GraphBaseInput";
-export  *  from "./types";
+export * from './GraphInitialInput';
+export * from './GraphBaseInput';
+export * from './types';

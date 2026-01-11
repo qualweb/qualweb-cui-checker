@@ -3,14 +3,14 @@
     <div class="container">
       <h1 class="title">QUALWEB CUI CHECK INSTALLED SUCCESSFULLY!</h1>
       <div class="logo-container">
-        <img 
-          class="logo" 
-          :class="{ 'loaded': imageLoaded }"
-          :src="`/${iconFolder}/logoQW.png`" 
+        <img
+          class="logo"
+          :class="{ loaded: imageLoaded }"
+          :src="`/${iconFolder}/logoQW.png`"
           alt="Qualweb Logo"
           @load="onImageLoad"
         />
-        <div v-if="!imageLoaded" ></div>
+        <div v-if="!imageLoaded"></div>
       </div>
       <p>Thank your for installing qualweb cui checker extension.</p>
       <p>To get started, please configure settings of app to start using it</p>
@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import {  ref } from 'vue';
+import { ref } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
@@ -32,13 +32,12 @@ const router = useRouter();
 const iconFolder = APP_CONFIG.ICONS_FOLDER;
 const imageLoaded = ref(false);
 
-
 const onImageLoad = () => {
   imageLoaded.value = true;
 };
 
 const onClickConfigure = async () => {
-  await store.commit('SETFIRSTRUN', false); 
+  await store.commit('SETFIRSTRUN', false);
 
   router.push('/settings');
 };
@@ -70,8 +69,6 @@ body {
 .logo.loaded {
   opacity: 1;
 }
-
-
 
 @keyframes shimmer {
   0% {

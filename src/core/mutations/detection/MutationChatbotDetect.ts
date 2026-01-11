@@ -11,9 +11,15 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
   initialText: string;
   ignoreInput: HTMLElement;
   signal: AbortSignal;
-  chatbotActions:ChatbotActions;
+  chatbotActions: ChatbotActions;
 
-  constructor(chatbotActions:ChatbotActions,elementTracker: ElementFoundManager<HTMLElement>, ignoreInput: HTMLElement, initialText: string,signal: AbortSignal) {
+  constructor(
+    chatbotActions: ChatbotActions,
+    elementTracker: ElementFoundManager<HTMLElement>,
+    ignoreInput: HTMLElement,
+    initialText: string,
+    signal: AbortSignal,
+  ) {
     super();
     this.chatbotActions = chatbotActions;
     this.signal = signal;
@@ -28,10 +34,10 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
     this.on('characterData:change', this.handleCharacterDataChange.bind(this));
   }
 
-   public setup(target: Node,timeoutManager: TimeoutManager<HTMLElement>): void {
+  public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement>): void {
     this.signal.throwIfAborted();
     this.observer = new MutationObserver(this.mutationCallback);
-    
+
     // Configuração do observer isolada
     this.observer.observe(target, {
       childList: true,
@@ -41,46 +47,44 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
 
     this.timeoutManager = timeoutManager;
     this.timeoutManager.setup(() => this.disconnect());
-
   }
 
   async init(): Promise<HTMLElement> {
     if (!this.timeoutManager) {
-      throw new  ErrorClass.InstanceNotInitializedError("TimeoutManager not set up.");
+      throw new ErrorClass.InstanceNotInitializedError('TimeoutManager not set up.');
     }
-  try {
-    this.elementTracker.clear();
-    this.timeoutManager.startTimeout();
-    this.signal.throwIfAborted();
+    try {
+      this.elementTracker.clear();
+      this.timeoutManager.startTimeout();
+      this.signal.throwIfAborted();
 
-    await sleep(1000);
-    this.signal.throwIfAborted();
+      await sleep(1000);
+      this.signal.throwIfAborted();
 
-    const completionPromise = this.waitForObserverDisconnect(this.signal);
+      const completionPromise = this.waitForObserverDisconnect(this.signal);
 
-    await this.chatbotActions.simulateInput(this.initialText, this.signal);
+      await this.chatbotActions.simulateInput(this.initialText, this.signal);
 
-    const result = await completionPromise;
-    if (result.cancelled) {
-      throw new ErrorClass.CancellationError();
+      const result = await completionPromise;
+      if (result.cancelled) {
+        throw new ErrorClass.CancellationError();
+      }
+      const elements = this.elementTracker.getElements();
+      if (elements.size === 0) {
+        throw new ErrorClass.ElementNotFoundError('No element found');
+      }
+
+      return Array.from(elements)[0];
+    } catch (error) {
+      this.cleanup();
+      throw error;
     }
-    const elements = this.elementTracker.getElements();
-    if (elements.size === 0) {
-      throw new ErrorClass.ElementNotFoundError('No element found');
-    }
-
-    return Array.from(elements)[0];
-  } catch (error) {
-    this.cleanup();
-    throw error;
   }
-
-  }
-   protected cleanup(): void {
+  protected cleanup(): void {
     try {
       super.cleanup();
       this.elementTracker.clear();
-    } catch  {
+    } catch {
       // Ignore cleanup errors
     }
   }
@@ -88,7 +92,6 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
   handleAddedNodes(mutation: MutationRecord): void {
     // added Nodes
     for (const addedNode of mutation.addedNodes) {
-
       if (addedNode.nodeType !== Node.ELEMENT_NODE) continue;
 
       if (
@@ -102,7 +105,6 @@ class MutationChatbotDetect extends AbstractMutationObserver<HTMLElement> {
       const result = findElementByExactTextContent(addedNode as HTMLElement, this.initialText);
 
       if (result && (addedNode as HTMLElement).tagName != 'BUTTON') {
-
         this.elementTracker.add(addedNode as HTMLElement);
         this.timeoutManager?.stopTimeout();
         this.disconnect();

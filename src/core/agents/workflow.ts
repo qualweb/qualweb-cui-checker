@@ -1,14 +1,14 @@
-import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { ALL_TOOLS_LIST } from "./tools";
-import { StateGraph, START, END } from "./langgraph_lib";
-import { GraphState } from "./state";
+import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { ALL_TOOLS_LIST } from './tools';
+import { StateGraph, START, END } from './langgraph_lib';
+import { GraphState } from './state';
 import {
   chooseNextStepAfterTool,
   chooseNextStepGatherInfo,
   decideNextStepAfterObjectiveAssigner,
   getStepAfterAchiever,
   routing,
-} from "./routing";
+} from './routing';
 
 import {
   agentReviewer,
@@ -21,17 +21,16 @@ import {
   prepareOutputMessage,
   QwBrowserTest,
   strategyFormulator,
-} from "./nodes";
-import {  QwSpeechRecognitionTestNode } from "./nodes/qw-browser-recognition-test";
-import { LanggraphNode as Node } from "./nodes/NodeNames";
-import { initialNode } from "./nodes/initial_node";
-
+} from './nodes';
+import { QwSpeechRecognitionTestNode } from './nodes/qw-browser-recognition-test';
+import { LanggraphNode as Node } from './nodes/NodeNames';
+import { initialNode } from './nodes/initial_node';
 
 const toolNode = new ToolNode(ALL_TOOLS_LIST);
 export const workflow = new StateGraph(GraphState)
   .addNode(Node.DOMAIN_OBTAINER, domain_obtainer)
   .addNode(Node.QW_BROWSER_TEST, QwBrowserTest)
-  .addNode(Node.QW_BROWSER_RECOGNITION_TEST, QwSpeechRecognitionTestNode )
+  .addNode(Node.QW_BROWSER_RECOGNITION_TEST, QwSpeechRecognitionTestNode)
   .addNode(Node.OBJECTIVE_ACHIEVER, objectiveAchiever)
   .addNode(Node.OBJECTIVE_ASSIGNER, getNextObjective)
   .addNode(Node.AGENT_REVIEWER, agentReviewer)
@@ -42,7 +41,7 @@ export const workflow = new StateGraph(GraphState)
   .addNode(Node.ASK_ASSISTANT_CONTEXT, askAssistantForMoreInfo)
   .addNode(Node.TOOLS, toolNode)
   .addNode(Node.OUTPUT_PREPARER, prepareOutputMessage)
- /* .addNode(Node.INITIAL_ROUTER, async () => {
+  /* .addNode(Node.INITIAL_ROUTER, async () => {
     return { graphOutput: null };
   })*/
   .addNode(Node.INITIAL_ROUTER, initialNode)
@@ -56,16 +55,15 @@ export const workflow = new StateGraph(GraphState)
   .addConditionalEdges(Node.OBJECTIVE_ACHIEVER, getStepAfterAchiever, [
     Node.OBJECTIVE_ASSIGNER,
     Node.QW_BROWSER_TEST,
-    Node.QW_BROWSER_RECOGNITION_TEST
+    Node.QW_BROWSER_RECOGNITION_TEST,
   ])
   .addEdge(Node.DOMAIN_OBTAINER, Node.OBJECTIVE_ASSIGNER)
   .addEdge(Node.QW_BROWSER_TEST, Node.OBJECTIVE_ASSIGNER)
   .addEdge(Node.QW_BROWSER_RECOGNITION_TEST, Node.OBJECTIVE_ASSIGNER)
-  .addConditionalEdges(
-    Node.OBJECTIVE_ASSIGNER,
-    decideNextStepAfterObjectiveAssigner,
-    [Node.STRATEGY_FORMULATOR, Node.OUTPUT_PREPARER],
-  )
+  .addConditionalEdges(Node.OBJECTIVE_ASSIGNER, decideNextStepAfterObjectiveAssigner, [
+    Node.STRATEGY_FORMULATOR,
+    Node.OUTPUT_PREPARER,
+  ])
   .addConditionalEdges(Node.AGENT_REVIEWER, chooseNextStepGatherInfo, [
     Node.TOOLS,
     Node.STRATEGY_FORMULATOR,
@@ -84,10 +82,7 @@ export const workflow = new StateGraph(GraphState)
       }
       return Node.QUESTION_FORMULATOR;
     },
-    [
-      Node.QUESTION_FORMULATOR, 
-      Node.INITIAL_ROUTER
-    ],
+    [Node.QUESTION_FORMULATOR, Node.INITIAL_ROUTER],
   )
   .addEdge(Node.QUESTION_FORMULATOR, Node.HUMAN_SKIP_INTERRUPT_QUESTION)
   .addConditionalEdges(
@@ -98,9 +93,6 @@ export const workflow = new StateGraph(GraphState)
       }
       return Node.OUTPUT_PREPARER;
     },
-    [
-      Node.INITIAL_ROUTER, 
-      Node.OUTPUT_PREPARER
-    ],
+    [Node.INITIAL_ROUTER, Node.OUTPUT_PREPARER],
   )
   .addEdge(Node.OUTPUT_PREPARER, END);

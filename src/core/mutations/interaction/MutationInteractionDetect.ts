@@ -1,4 +1,8 @@
-import { isChatBotMessage, isContainedInSelector, isNodeTypingInfo } from '../../../content/lib/utils';
+import {
+  isChatBotMessage,
+  isContainedInSelector,
+  isNodeTypingInfo,
+} from '../../../content/lib/utils';
 import AbstractMutationManager from '../base/AbstractMutationManager';
 import TimeoutManager from '../../timeouts/TimeoutManager';
 import AbstractElementManager from '../../elements/trackers/base/AbstractElementManager';
@@ -12,8 +16,12 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
   selectorMessage: string;
   lastMessageUser: string = '';
   signal: AbortSignal;
-  chatbotActions:ChatbotActions;
-  constructor(chatbotActions:ChatbotActions,elementTracker:AbstractElementManager<HTMLElement>, signal: AbortSignal) {
+  chatbotActions: ChatbotActions;
+  constructor(
+    chatbotActions: ChatbotActions,
+    elementTracker: AbstractElementManager<HTMLElement>,
+    signal: AbortSignal,
+  ) {
     super();
     this.chatbotActions = chatbotActions;
     this.elementTracker = elementTracker;
@@ -32,12 +40,12 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
   setLastUserMessage(message: string): void {
     this.lastMessageUser = message;
   }
- 
+
   public setup(target: Node, timeoutManager: TimeoutManager<HTMLElement[]>): void {
     this.signal.throwIfAborted();
     this.observer = new MutationObserver(this.mutationCallback);
 
-   this.observer.observe(target, {
+    this.observer.observe(target, {
       subtree: true,
       characterData: true,
       characterDataOldValue: true,
@@ -49,19 +57,18 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
     this.timeoutManager = timeoutManager;
 
     this.timeoutManager.setup(() => this.disconnect());
-
   }
   async init(): Promise<HTMLElement[]> {
     this.signal.throwIfAborted();
     if (!this.timeoutManager) {
-      throw new ErrorClass.InstanceNotInitializedError("TimeoutManager not set up.");
+      throw new ErrorClass.InstanceNotInitializedError('TimeoutManager not set up.');
     }
-    // reset previous elements from manager  
+    // reset previous elements from manager
     try {
-    this.elementTracker.clear();
-    this.timeoutManager.startTimeout();
+      this.elementTracker.clear();
+      this.timeoutManager.startTimeout();
 
-    const completionPromise = this.waitForObserverDisconnect(this.signal);
+      const completionPromise = this.waitForObserverDisconnect(this.signal);
       // Wait a bit to avoid capturing old messages
       const result = await completionPromise;
       if (result.cancelled) {
@@ -159,9 +166,9 @@ class MutationInteractionDetect extends AbstractMutationManager<HTMLElement[]> {
       super.cleanup();
       this.lastMessageUser = '';
       this.elementTracker.clear();
-    } catch  {
+    } catch {
       // Ignore cleanup errors
     }
-}
+  }
 }
 export default MutationInteractionDetect;

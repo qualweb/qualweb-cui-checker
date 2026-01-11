@@ -1,11 +1,11 @@
-import { BROWSER_TEST_TYPE, TestConditions } from "../types";
-import { ISerializable } from "../../ISerializable";
+import { BROWSER_TEST_TYPE, TestConditions } from '../types';
+import { ISerializable } from '../../ISerializable';
 
 export const TEST_OUTCOME = {
-  PASSED: "passed",
-  FAILED: "failed",
-  WARNING: "warning",
-  INAPPLICABLE: "inapplicable",
+  PASSED: 'passed',
+  FAILED: 'failed',
+  WARNING: 'warning',
+  INAPPLICABLE: 'inapplicable',
 } as const;
 
 export type TypeTestOutcome = (typeof TEST_OUTCOME)[keyof typeof TEST_OUTCOME];
@@ -54,18 +54,16 @@ class BrowserTest implements ISerializable {
     if (this.conditions.inapplicable) {
       descriptions.push(`Inapplicable: ${this.conditions.inapplicable}`);
     }
-    return descriptions.join(";\n");
+    return descriptions.join(';\n');
   }
 
   public toJSON(): object {
-    
     return {
       _type: this._type,
       conditions: this.conditions,
       outcome: this.outcome,
       chatbotResponse: this.chatbotResponse,
     };
-    
   }
 }
 

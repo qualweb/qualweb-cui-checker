@@ -10,7 +10,7 @@ import { DetailedMutationEvent, MUTATION_PROCESSOR_REGISTRY, MutationHandler } f
 abstract class AbstractMutationObserver<P> {
   protected timeoutManager: TimeoutManager<void | P> | null = null;
   protected observer: MutationObserver | null = null;
-  
+
   // Handlers para os eventos de mutação
   private readonly handlers: Map<DetailedMutationEvent, MutationHandler[]> = new Map();
 
@@ -69,7 +69,7 @@ abstract class AbstractMutationObserver<P> {
   /**
    * Aguarda que o observer seja desligado ou o sinal de abort seja emitido.
    * Não altera métodos nativos (No Monkey Patching).
-   *//*
+   */ /*
   protected waitForObserverDisconnect(signal?: AbortSignal): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       // 1. Verificação imediata
@@ -93,32 +93,32 @@ abstract class AbstractMutationObserver<P> {
     });
   }
     */
-   protected waitForObserverDisconnect(signal?: AbortSignal): Promise<{ cancelled: boolean }> {
-  return new Promise((resolve) => {
-    // Se já estiver cancelado, resolvemos com a flag
-    if (signal?.aborted) return resolve({ cancelled: true });
+  protected waitForObserverDisconnect(signal?: AbortSignal): Promise<{ cancelled: boolean }> {
+    return new Promise((resolve) => {
+      // Se já estiver cancelado, resolvemos com a flag
+      if (signal?.aborted) return resolve({ cancelled: true });
 
-    const onAbort = () => {
-      this.cleanup();
-      resolve({ cancelled: true }); // RESOLVE em vez de Reject
-    };
+      const onAbort = () => {
+        this.cleanup();
+        resolve({ cancelled: true }); // RESOLVE em vez de Reject
+      };
 
-    signal?.addEventListener('abort', onAbort, { once: true });
+      signal?.addEventListener('abort', onAbort, { once: true });
 
-    this.resolveWaitingPromise = () => {
-      signal?.removeEventListener('abort', onAbort);
-      this.internalCleanup();
-      resolve({ cancelled: false });
-    };
-  });
-}
+      this.resolveWaitingPromise = () => {
+        signal?.removeEventListener('abort', onAbort);
+        this.internalCleanup();
+        resolve({ cancelled: false });
+      };
+    });
+  }
 
   /**
    * Desliga o observer de forma limpa e resolve a Promise pendente.
    */
   public disconnect(): void {
     this.internalCleanup();
-    
+
     if (this.resolveWaitingPromise) {
       this.resolveWaitingPromise();
       this.resetPromiseControls();
@@ -130,7 +130,7 @@ abstract class AbstractMutationObserver<P> {
    */
   private internalCleanup(): void {
     this.isDisconnecting = true;
-    
+
     if (this.observer) {
       this.observer.disconnect();
     }

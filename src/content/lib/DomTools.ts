@@ -1,6 +1,6 @@
 import { ChatbotInputElement } from '../../utils/types';
 import { containsExactTextXPath } from './XPathTools';
-import * as ErrorClass from "../../errors/content/errors.class.content";
+import * as ErrorClass from '../../errors/content/errors.class.content';
 import { showMessage } from '../../utils/helpers';
 export function getUniqueSelector(element: Element): string | null {
   if (!element) return null;
@@ -243,7 +243,7 @@ const nonAIInputKeywords = new Set([
   'validade',
   'nome',
 ]);
-export  function detectChatbotInputCrossOrigin(): ChatbotInputElement| null {
+export function detectChatbotInputCrossOrigin(): ChatbotInputElement | null {
   const inputs = [
     ...document.querySelectorAll(
       'input[type="text"], input:not([type]), textarea, div[contenteditable="true"]',
@@ -291,7 +291,6 @@ export  function detectChatbotInputCrossOrigin(): ChatbotInputElement| null {
     return resultIframe;
   } else {
     if (foundClosedIframe) {
-
       showMessage(
         'Some iframes could not be accessed due to cross-origin restrictions, which may limit the chatbot detection capabilities in this version.',
         4000,
@@ -499,7 +498,6 @@ export function findButton(
       const distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
 
       if (distance <= MAX_DISTANCE) {
-
         return current;
       } else {
         console.log('Found clickable but too far:', distance.toFixed(2), 'px');

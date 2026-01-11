@@ -1,20 +1,26 @@
+import QWBrowserTest from './QWBrowserTest';
+import QWRecognitionTest from './QWRecognitionTest';
+import QWStandardTest from './QWStandardTest';
+import { TypeTestOutcome } from './browser-tests/BrowserTest';
 
-import QWBrowserTest from "./QWBrowserTest";
-import QWRecognitionTest from "./QWRecognitionTest";
-import QWStandardTest from "./QWStandardTest";
-import { TypeTestOutcome } from "./browser-tests/BrowserTest";
-
-import QWTest from "./base/QWTest";
-import { IStatusObjective, ObjectiveSerialized, ObjectType, QWBrowserTestRAW, QWRecognitionTestRAW, RawQWStandardTestData } from "../ObjectiveBuilder";
-import { StatusTest } from "../types";
-import { TEST_TYPE } from "./types";
+import QWTest from './base/QWTest';
+import {
+  IStatusObjective,
+  ObjectiveSerialized,
+  ObjectType,
+  QWBrowserTestRAW,
+  QWRecognitionTestRAW,
+  RawQWStandardTestData,
+} from '../ObjectiveBuilder';
+import { StatusTest } from '../types';
+import { TEST_TYPE } from './types';
 
 export type QWTestType = QWStandardTest | QWRecognitionTest | QWBrowserTest;
 
 type DeserializerFn = (data: ObjectiveSerialized) => QWTestType;
 
 class TestRegistry {
-  private static  readonly deserializers = new Map<string, DeserializerFn>();
+  private static readonly deserializers = new Map<string, DeserializerFn>();
 
   /**
    * Register a deserializer for a test type
@@ -28,17 +34,16 @@ class TestRegistry {
    */
   static deserialize(data: ObjectiveSerialized): QWTestType {
     const deserializer = this.deserializers.get(data._type);
-    
+
     if (!deserializer) {
       throw new Error(
         `No deserializer registered for type: ${data._type}. ` +
-        `Available types: ${Array.from(this.deserializers.keys()).join(', ')}`
+          `Available types: ${Array.from(this.deserializers.keys()).join(', ')}`,
       );
     }
-    
+
     const instance = deserializer(data);
-    
-    
+
     return instance;
   }
 
@@ -49,7 +54,6 @@ class TestRegistry {
     const data = JSON.parse(json);
     return this.deserialize(data);
   }
-
 
   /**
    * Get all registered types
@@ -69,9 +73,9 @@ class TestRegistry {
 export default TestRegistry;
 
 // Register default deserializers
-TestRegistry.register( TEST_TYPE.QW_STANDARD_TEST, (data: ObjectiveSerialized) => {
+TestRegistry.register(TEST_TYPE.QW_STANDARD_TEST, (data: ObjectiveSerialized) => {
   const typedData = data as RawQWStandardTestData & ObjectType & IStatusObjective;
-   const instance = new QWStandardTest(
+  const instance = new QWStandardTest(
     typedData.check,
     typedData.title,
     typedData.selector,
@@ -79,7 +83,7 @@ TestRegistry.register( TEST_TYPE.QW_STANDARD_TEST, (data: ObjectiveSerialized) =
     typedData.requirements,
     typedData.exceptions,
   );
-    if (typedData.status) {
+  if (typedData.status) {
     instance.setStatus(typedData.status as unknown as StatusTest);
   }
   if (typedData.counterExecution !== undefined) {
@@ -88,7 +92,7 @@ TestRegistry.register( TEST_TYPE.QW_STANDARD_TEST, (data: ObjectiveSerialized) =
   return instance;
 });
 
-TestRegistry.register( TEST_TYPE.QW_BROWSER_TEST, (data: ObjectiveSerialized) => {
+TestRegistry.register(TEST_TYPE.QW_BROWSER_TEST, (data: ObjectiveSerialized) => {
   const typedData = data as QWBrowserTestRAW & ObjectType & IStatusObjective;
   const instance = new QWBrowserTest(
     typedData.check,
@@ -98,7 +102,7 @@ TestRegistry.register( TEST_TYPE.QW_BROWSER_TEST, (data: ObjectiveSerialized) =>
     typedData.requirements,
     typedData.exceptions,
     typedData.test.conditions,
-    typedData.test.outcome ? typedData.test.outcome as unknown as TypeTestOutcome : undefined
+    typedData.test.outcome ? (typedData.test.outcome as unknown as TypeTestOutcome) : undefined,
   );
   if (typedData.test.chatbotResponse) {
     instance.getTest().setChatbotResponse(typedData.test.chatbotResponse);
@@ -112,10 +116,10 @@ TestRegistry.register( TEST_TYPE.QW_BROWSER_TEST, (data: ObjectiveSerialized) =>
   if (typedData.counterExecution !== undefined) {
     instance.setCounterExecution(typedData.counterExecution);
   }
-    return instance;
+  return instance;
 });
 
-TestRegistry.register( TEST_TYPE.QW_RECOGNITION_TEST, (data: ObjectiveSerialized) => {
+TestRegistry.register(TEST_TYPE.QW_RECOGNITION_TEST, (data: ObjectiveSerialized) => {
   const typedData = data as QWRecognitionTestRAW & ObjectType & IStatusObjective;
 
   const instance = new QWRecognitionTest(
@@ -127,9 +131,8 @@ TestRegistry.register( TEST_TYPE.QW_RECOGNITION_TEST, (data: ObjectiveSerialized
     typedData.test.expectedResponse,
     typedData.test.locale,
     typedData.test.audioFilename,
-    
   );
-  if(typedData.test.chatbotResponse) {
+  if (typedData.test.chatbotResponse) {
     instance.getTest().setChatbotResponse(typedData.test.chatbotResponse);
   }
   if (typedData.test.outcome) {

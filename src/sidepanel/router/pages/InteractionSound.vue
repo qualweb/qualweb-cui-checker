@@ -30,7 +30,7 @@ export default {
   name: 'Interaction',
   components: { Loading, ButtonStyled },
   computed: {
-    ...mapGetters(['getTabId','getSelectors','isCuiSpeechTestsEnabled']),
+    ...mapGetters(['getTabId', 'getSelectors', 'isCuiSpeechTestsEnabled']),
   },
   methods: {
     ...mapActions([]),
@@ -69,7 +69,7 @@ export default {
     // Make bi-directional connection to tab
     // async request to start sound interaction
     const isSpeechTestsEnabled = this.isCuiSpeechTestsEnabled();
-    startLLMSoundInteraction(this.getTabId, this.getSelectors,isSpeechTestsEnabled);
+    startLLMSoundInteraction(this.getTabId, this.getSelectors, isSpeechTestsEnabled);
     // set up message listener meanwhile
     this._port.onMessage.addListener((msg) => {
       if (msg.action === 'end_interaction') {

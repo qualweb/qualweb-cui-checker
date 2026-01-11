@@ -34,7 +34,6 @@ onMounted(async () => {
     return;
   }
 
-
   let selectors = await chrome.storage.local.get('qualweb-selectors');
 
   const selectorsForHostname = selectors['qualweb-selectors']?.[url.value] || null;

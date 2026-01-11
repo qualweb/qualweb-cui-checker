@@ -3,12 +3,8 @@ import * as types from './mutation-types';
 function maskApiKey(apiKey, leadingChars = 10, trailingChars = 4) {
   if (!apiKey) return '';
 
-  
   if (apiKey.length < leadingChars + trailingChars) {
-
-    return apiKey.length > 6 
-      ? apiKey.substring(0, 2) + '***' + apiKey.slice(-2)
-      : '***';
+    return apiKey.length > 6 ? apiKey.substring(0, 2) + '***' + apiKey.slice(-2) : '***';
   }
 
   const start = apiKey.substring(0, leadingChars);

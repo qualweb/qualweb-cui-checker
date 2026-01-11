@@ -10,7 +10,7 @@ class MessagesManager extends AbstractElementManager<HTMLElement> {
     if (this.containsElement(element)) {
       return false;
     }
-     console.log('Adding element to manager  :', element);
+    console.log('Adding element to manager  :', element);
 
     this.addElement(element);
     return true;

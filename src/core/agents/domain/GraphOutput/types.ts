@@ -1,20 +1,19 @@
-import { TypeTestOutcome } from "../QWTests/browser-tests/BrowserTest";
-import { StatusGraph } from "../types";
-
+import { TypeTestOutcome } from '../QWTests/browser-tests/BrowserTest';
+import { StatusGraph } from '../types';
 
 export interface IQWGraphOutput {
   status: StatusGraph;
   actions: GraphOutputAction[];
 }
 export const ACTION_TYPE = {
-  PLAY_SOUND_ACTION: "PlaySoundAction",
-  QUESTION_ACTION: "QuestionAction",
-  MARK_ELEMENT_ACTION: "MarkElementAction",
-  SET_BROWSER_TEST_OUTCOME_ACTION: "SetBrowserTestOutcomeAction",
+  PLAY_SOUND_ACTION: 'PlaySoundAction',
+  QUESTION_ACTION: 'QuestionAction',
+  MARK_ELEMENT_ACTION: 'MarkElementAction',
+  SET_BROWSER_TEST_OUTCOME_ACTION: 'SetBrowserTestOutcomeAction',
 } as const;
 
 export interface IPlaySoundAction {
-  _type: typeof ACTION_TYPE.PLAY_SOUND_ACTION
+  _type: typeof ACTION_TYPE.PLAY_SOUND_ACTION;
   audioFilename: string;
 }
 
@@ -35,7 +34,6 @@ export interface ISetBrowserTestOutcomeAction {
   selector: string;
   outcome: TypeTestOutcome;
 }
-
 
 export type GraphOutputAction =
   | IPlaySoundAction

@@ -1,7 +1,6 @@
-import { BROWSER_TEST_TYPE, TestConditions } from "../types";
-import BrowserTest, { TypeTestOutcome } from "./BrowserTest";
-import { ISerializable } from "../../ISerializable";
-
+import { BROWSER_TEST_TYPE, TestConditions } from '../types';
+import BrowserTest, { TypeTestOutcome } from './BrowserTest';
+import { ISerializable } from '../../ISerializable';
 
 class RecognitionBrowserTest extends BrowserTest implements ISerializable {
   readonly _type: string = BROWSER_TEST_TYPE.RECOGNITION_BROWSER_TEST;
@@ -42,14 +41,14 @@ class RecognitionBrowserTest extends BrowserTest implements ISerializable {
   }
 
   public toJSON(): object {
-       const obj: any = {
+    const obj: any = {
       ...super.toJSON(),
       transcript: this.transcript,
       expectedResponse: this.expectedResponse,
       locale: this.locale,
       audioFilename: this.audioFilename,
     };
-        obj["_type"] = this._type;
+    obj['_type'] = this._type;
     return obj;
   }
 }

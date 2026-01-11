@@ -1,11 +1,11 @@
 class InterruptHandler {
   private static readonly abortControllers: Set<AbortController> = new Set();
 
-  static  registerAbortController(controller: AbortController): void {
+  static registerAbortController(controller: AbortController): void {
     InterruptHandler.abortControllers.add(controller);
   }
 
-  static  unregisterAbortController(controller: AbortController): void {
+  static unregisterAbortController(controller: AbortController): void {
     InterruptHandler.abortControllers.delete(controller);
   }
   static interruptController(controller: AbortController): void {
@@ -19,7 +19,5 @@ class InterruptHandler {
     InterruptHandler.abortControllers.clear();
   }
 }
-
-
 
 export default InterruptHandler;

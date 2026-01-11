@@ -35,7 +35,7 @@ function handleMessagesContentScript(request, sender, sendResponse) {
     }
   } catch (error) {
     processErrorEventCallbackContent(error as Error, { sendResponse });
-    return false; 
+    return false;
   }
 }
 // Function to send message to background

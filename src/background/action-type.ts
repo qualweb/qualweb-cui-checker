@@ -1,4 +1,3 @@
-
 export const ACTION_GRAPH = {
   START_VOICE_INPUT: 'start_voice_input',
   STOP_VOICE_INPUT: 'stop_voice_input',
@@ -14,7 +13,7 @@ export const PORT_NAME = {
   SIDEBAR: 'sidebar-port',
 };
 
-export const ACTION_PORT  = {
+export const ACTION_PORT = {
   ERROR: 'error',
   READY: 'ready',
   START_INTERACTION: 'start_interaction',
@@ -23,5 +22,4 @@ export const ACTION_PORT  = {
   PROCESS_MESSAGE: 'process_message',
   SKIP_OBJECTIVE_INTERACTION: 'skip_objective_interaction',
   UPDATE_INTERACTION_STATE: 'update_interaction_state',
-
-}
+};

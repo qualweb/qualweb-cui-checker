@@ -1,22 +1,21 @@
-import { InstanceNotInitializedError } from "../../errors/content/errors.class.content";
+import { InstanceNotInitializedError } from '../../errors/content/errors.class.content';
 
 class TimeoutManager<T> {
   private timeout?: NodeJS.Timeout;
   private maxTime: number;
-  private  callBack?: () => Promise<T>| T;
+  private callBack?: () => Promise<T> | T;
 
-  constructor( maxTime: number) {
+  constructor(maxTime: number) {
     this.maxTime = maxTime;
-    this.callBack= undefined;
+    this.callBack = undefined;
   }
   setup(disconnect: () => T) {
     this.callBack = disconnect;
   }
-  
 
   startTimeout() {
-    if(!this.callBack){
-      throw new InstanceNotInitializedError("Callback not set up.");
+    if (!this.callBack) {
+      throw new InstanceNotInitializedError('Callback not set up.');
     }
     this.timeout = setTimeout(this.callBack, this.maxTime);
   }
@@ -31,8 +30,8 @@ class TimeoutManager<T> {
   }
 
   async executeCallback(): Promise<T> {
-    if(!this.callBack){
-      throw new InstanceNotInitializedError("Callback not set up.");
+    if (!this.callBack) {
+      throw new InstanceNotInitializedError('Callback not set up.');
     }
     this.stopTimeout();
     return this.callBack();

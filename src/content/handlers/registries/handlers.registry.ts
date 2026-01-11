@@ -1,11 +1,8 @@
-
 import * as DetectionHandler from '../detection.handler';
 import * as InteractionHandler from '../interaction.handler';
 import * as EvaluationHandler from '../evaluation.handler';
 import { MessageResponse } from '../../../messaging/message-types';
 import { HANDLER_ACTIONS } from '../../../common/handlers-actions';
-
-
 
 export interface IChromeRequest {
   sendResponse: (response: any) => void;
@@ -15,7 +12,8 @@ export interface IChromeRequest {
 const INTERACTION_HANDLERS: Record<string, (data: IChromeRequest) => void | Promise<any>> = {
   [HANDLER_ACTIONS.START_LLM_INTERACTION.name]: InteractionHandler.actionLLMInteraction,
   [HANDLER_ACTIONS.START_LLM_SOUND_INTERACTION.name]: InteractionHandler.actionStartVoiceInput,
-  [HANDLER_ACTIONS.SKIP_OBJECTIVE_INTERACTION.name]: InteractionHandler.skipCurrentObjectiveInteraction,
+  [HANDLER_ACTIONS.SKIP_OBJECTIVE_INTERACTION.name]:
+    InteractionHandler.skipCurrentObjectiveInteraction,
   [HANDLER_ACTIONS.CANCEL_INTERACTION.name]: InteractionHandler.cancelInteraction,
 };
 
@@ -23,7 +21,8 @@ const INTERACTION_HANDLERS: Record<string, (data: IChromeRequest) => void | Prom
 const DETECTION_HANDLERS: Record<string, (data: IChromeRequest) => void | Promise<any>> = {
   [HANDLER_ACTIONS.PAGE_CHATBOT_PROCEDURE.name]: DetectionHandler.startPageChatbotProcedure,
   [HANDLER_ACTIONS.START_VERIFICATION.name]: DetectionHandler.actionStartVerification,
-  [HANDLER_ACTIONS.END_SUCCESSFUL_VERIFICATION.name]: DetectionHandler.actionEndSuccessfulVerification,
+  [HANDLER_ACTIONS.END_SUCCESSFUL_VERIFICATION.name]:
+    DetectionHandler.actionEndSuccessfulVerification,
   [HANDLER_ACTIONS.CORRECT_ELEMENT_SELECTION.name]: DetectionHandler.actionCorrectElementSelection,
   [HANDLER_ACTIONS.RESET_DATA.name]: DetectionHandler.resetDataContentScript,
   [HANDLER_ACTIONS.CANCEL_DETECTION.name]: DetectionHandler.cancelDetection,
