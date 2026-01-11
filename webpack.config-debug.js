@@ -15,8 +15,9 @@ const config = {
     entry: {
         background: './src/background/background.ts',
         content: './src/content/content.ts',
-        sidebar: './src/sidebar/sidebar.ts',
+        sidepanel: './src/sidepanel/sidepanel.ts',
         options: './src/options/options.js',
+
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
