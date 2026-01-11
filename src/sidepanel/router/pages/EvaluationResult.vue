@@ -17,6 +17,7 @@
           <ul>
             <li><PDFReport @buttonClicked="toggleDropdown"></PDFReport></li>
             <li><CSVReport @buttonClicked="toggleDropdown"></CSVReport></li>
+            <li><Export @buttonClicked="toggleDropdown" ></Export></li>
           </ul>
         </div>
       </div>
@@ -42,10 +43,12 @@ import PDFReport from '../../components/PDFReport.vue';
 import CSVReport from '../../components/CSVReport.vue';
 import { mapActions } from 'vuex';
 import TopBar from '../../components/TopBar.vue';
+import Export from '../../components/Export.vue';
 
 export default {
   components: {
     PDFReport,
+    Export,
     CSVReport,
     ColapsibleFilter,
     Summary,
@@ -183,7 +186,7 @@ export default {
   z-index: 10;
   background-color: #303030;
   border: 1px solid #ccc;
-  min-width: 8rem;
+  min-width: 8.5rem;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }

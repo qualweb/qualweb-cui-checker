@@ -139,7 +139,6 @@ export default {
       this._port.disconnect();
       return;
     } else {
-      console.log('DEBUG - Message received after skip:', msg, "state of flags:", this.isSkipping, this.isCanceled," content of rule:", this.rule, " title:", this.title, " state:", this.state);
       const { rule = '', title = '', status = '' } = msg.data || {};
       this.rule = rule;
       this.title = title;

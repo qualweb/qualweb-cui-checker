@@ -2,9 +2,12 @@
   <div class="bigContainerSummary">
     <div class="titleButtons">
       <div class="buttons">
+        <!-- 
         <RunAgain class="runAgain"></RunAgain>
+
         <Export class="export"></Export>
-        <HighlightAll class="export"></HighlightAll>
+   
+        <HighlightAll class="export"></HighlightAll>e -->
       </div>
       <div class="text">
         <h1 class="title">{{ currentSummary.title }}</h1>

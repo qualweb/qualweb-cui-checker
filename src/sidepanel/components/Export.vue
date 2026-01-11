@@ -1,7 +1,8 @@
 <template>
-  <button class="btn" aria-label="Export report">
-    <i @click="exportFile()" class="material-icons">get_app</i>
-  </button>
+    <div>
+    <a href="#" @click.prevent="exportFile"> <span class="icon">📄</span>JSON</a>
+  </div>
+
 </template>
 
 <script>
@@ -9,6 +10,7 @@ import { saveAs } from 'file-saver';
 import { mapGetters } from 'vuex';
 export default {
   name: 'Export',
+  emits: ['buttonClicked'],
   methods: {
     ...mapGetters(['getAllData']),
     exportFile() {
@@ -18,22 +20,26 @@ export default {
         type: 'application/json;charset=utf-8',
       });
       saveAs(blob, 'evaluation.json');
+      this.$emit('buttonClicked');
     },
   },
 };
 </script>
 
 <style scoped>
-.export {
-  vertical-align: top;
-  display: inline-flex;
-  font-size: 1.5rem;
+.dropdown-menu a {
+  color: #ccc;
+  padding: 10px 15px;
+  text-decoration: none;
+  display: block;
+  font-size: 0.95em;
 }
-.btn {
-  background-color: #303030;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 100px;
+
+.dropdown-menu a:hover {
+  background-color: #575757;
+}
+
+.dropdown-menu .icon {
+  margin-right: 8px;
 }
 </style>
